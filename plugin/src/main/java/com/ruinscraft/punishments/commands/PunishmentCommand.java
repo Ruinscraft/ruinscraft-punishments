@@ -2,7 +2,6 @@ package com.ruinscraft.punishments.commands;
 
 import com.ruinscraft.punishments.Punishment;
 import com.ruinscraft.punishments.PunishmentType;
-import com.ruinscraft.punishments.dispatcher.PunishmentDispatcher;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -75,8 +74,13 @@ public class PunishmentCommand implements CommandExecutor {
             punisher = ((Player) sender).getUniqueId();
         }
 
-        Punishment punishment = new Punishment(punisher, offender, duration, reason);
-        PunishmentDispatcher.dispatch(type, punishment);
+        Punishment.builder()
+                .punisher(punisher)
+                .offender(offender)
+                .duration(duration)
+                .reason(reason)
+                .build()
+                .dispatch(type);
 
         return true;
     }

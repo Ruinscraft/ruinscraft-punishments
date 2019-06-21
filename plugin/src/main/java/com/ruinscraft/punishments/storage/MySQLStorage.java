@@ -1,6 +1,8 @@
 package com.ruinscraft.punishments.storage;
 
 import com.ruinscraft.punishments.Punishment;
+import com.ruinscraft.punishments.PunishmentEntry;
+import com.ruinscraft.punishments.PunishmentType;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,7 +19,7 @@ public class MySQLStorage implements SQLStorage {
     private final String username;
     private final char[] password;
 
-    private Connection connection; // do not use, use #getConnection()
+    private Connection connection; // do not use directly, use #getConnection()
 
     public MySQLStorage(String host, int port, String database, String username, char[] password) {
         this.host = host;
@@ -46,19 +48,25 @@ public class MySQLStorage implements SQLStorage {
         return connection;
     }
 
-    @Override
-    public Callable<Void> insert(Punishment punishment) {
-        return () -> null;
-    }
 
     @Override
-    public Callable<List<Punishment>> query(String offender) {
-        return () -> null;
+    public Callable<Void> insert(PunishmentEntry entry) {
+        return null;
     }
 
     @Override
     public Callable<Void> delete(int punishmentId) {
-        return () -> null;
+        return null;
+    }
+
+    @Override
+    public Callable<List<PunishmentEntry>> query(String offender) {
+        return null;
+    }
+
+    @Override
+    public Callable<List<Punishment>> queryByType(String offender, PunishmentType type) {
+        return null;
     }
 
 }

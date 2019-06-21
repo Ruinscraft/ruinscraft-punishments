@@ -1,5 +1,7 @@
 package com.ruinscraft.punishments;
 
+import com.ruinscraft.punishments.dispatcher.PunishmentDispatcher;
+
 import java.util.UUID;
 
 public class Punishment {
@@ -10,7 +12,7 @@ public class Punishment {
     private long duration;
     private String reason;
 
-    public Punishment(UUID punisher, String offender, long duration, String reason) {
+    private Punishment(UUID punisher, String offender, long duration, String reason) {
         this.punisher = punisher;
         this.offender = offender;
         this.duration = duration;
@@ -36,5 +38,43 @@ public class Punishment {
     public String getReason() {
         return reason;
     }
-    
+
+    public void dispatch(PunishmentType type) {
+        PunishmentDispatcher.dispatch(PunishmentEntry.of(this, type));
+    }
+
+    public static PunishmentBuilder builder() {
+        return new PunishmentBuilder();
+    }
+
+    public static class PunishmentBuilder {
+        private Punishment canidate;
+
+        private PunishmentBuilder() {}
+
+        public PunishmentBuilder punisher(UUID punisher) {
+            canidate.punisher = punisher;
+            return this;
+        }
+
+        public PunishmentBuilder offender(String offender) {
+            canidate.offender = offender;
+            return this;
+        }
+
+        public PunishmentBuilder duration(long duration) {
+            canidate.duration = duration;
+            return this;
+        }
+
+        public PunishmentBuilder reason(String reason) {
+            canidate.reason = reason;
+            return this;
+        }
+
+        public Punishment build() {
+            return canidate;
+        }
+    }
+
 }

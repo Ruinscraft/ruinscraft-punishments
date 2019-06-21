@@ -1,6 +1,6 @@
 package com.ruinscraft.punishments.dispatcher;
 
-import com.ruinscraft.punishments.Punishment;
+import com.ruinscraft.punishments.PunishmentEntry;
 import com.ruinscraft.punishments.PunishmentType;
 
 import java.util.HashMap;
@@ -16,9 +16,10 @@ public class PunishmentDispatcher {
     }
 
 
-    public static void dispatch(PunishmentType type, Punishment punishment) {
+    public static void dispatch(PunishmentEntry entry) {
         // bcast to chat here, etc TODO:
-        _registry_.get(type).handle(punishment);
+        // redis message to all servers
+        _registry_.get(entry.type).handle(entry.punishment);
     }
 
 }

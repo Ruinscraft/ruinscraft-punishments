@@ -1,14 +1,14 @@
 package com.ruinscraft.punishments;
 
 import com.ruinscraft.punishments.commands.PunishmentCommand;
-import com.ruinscraft.punishments.storage.PunishmentStorage;
+import com.ruinscraft.punishments.storage.Storage;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PunishmentsPlugin extends JavaPlugin {
 
-    private PunishmentStorage storage;
+    private Storage storage;
 
-    public PunishmentStorage getStorage() {
+    public Storage getStorage() {
         return storage;
     }
 
