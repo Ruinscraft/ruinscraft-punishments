@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class PunishmentCommand implements CommandExecutor {
+public class NewPunishmentCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
