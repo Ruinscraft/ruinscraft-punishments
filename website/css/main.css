@@ -1,0 +1,51 @@
+@font-face {
+    font-family: selawk;
+    src: url(/fonts/selawk.ttf);
+}
+
+body {
+    font-family: 'selawk', sans-serif;
+    color: silver;
+    font-size: 1.0rem;
+    background: black;
+    background-repeat: no-repeat;
+    margin: 0px;
+    text-align: center;
+}
+
+.content {
+    min-height: 100vh;
+    max-width: 1500px;
+    margin: auto;
+    padding-bottom: 100px;
+}
+
+#username-search {
+    border: none;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.recent {
+    margin: 0px;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+    flex-flow: row wrap;
+    position: relative;
+    background: silver;
+    color: black;
+    min-height: 20rem;
+}
+
+#recent-warns {
+    order: 1;
+}
+
+#recent-mutes {
+    order: 2;
+}
+
+#recent-bans {
+    order: 3;
+}

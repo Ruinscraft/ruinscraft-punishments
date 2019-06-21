@@ -1,12 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
+
+<?php include('includes/head.php') ?>
+
 <body>
-    
+    <?php include('includes/nav.php') ?>
+
+    <div class="content">
+        <h1>Ruinscraft Punishments</h1>
+        <div class="search">
+            <input id="username-search" type="text" placeholder="Enter a username">
+        </div>
+
+        <hr>
+
+        <div class="recent">
+            <div id="recent-warns">
+                <?php include('includes/recent.php') ?>
+            </div>
+            <div id="recent-mutes">
+                <?php include('includes/recent.php') ?>
+            </div>
+            <div id="recent-bans">
+                <?php include('includes/recent.php') ?>
+            </div>
+        </div>
+
+    </div>
+
+    <?php include('includes/footer.php') ?>
 </body>
+
 </html>
