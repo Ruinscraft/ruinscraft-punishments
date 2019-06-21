@@ -1,5 +1,6 @@
 package com.ruinscraft.punishments;
 
+import com.ruinscraft.punishments.commands.PunishmentCommand;
 import com.ruinscraft.punishments.storage.PunishmentStorage;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,6 +15,14 @@ public class PunishmentsPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         singleton = this;
+
+        PunishmentCommand commandExecutor = new PunishmentCommand();
+
+        getCommand("warn").setExecutor(commandExecutor);
+        getCommand("mute").setExecutor(commandExecutor);
+        getCommand("tempmute").setExecutor(commandExecutor);
+        getCommand("ban").setExecutor(commandExecutor);
+        getCommand("tempban").setExecutor(commandExecutor);
     }
 
     @Override

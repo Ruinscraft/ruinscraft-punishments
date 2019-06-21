@@ -47,7 +47,7 @@ public class PunishmentCommand implements CommandExecutor {
     }
 
     private boolean showHelp(CommandSender sender, String label, boolean temporary) {
-        String help = "/" + label + " <player/ip> " + (temporary ? "" : "<duration>") + " <reason>";
+        String help = "/" + label + " <player> " + (temporary ? "" : "<duration>") + " <reason>";
         sender.sendMessage(help);
         return true;
     }
