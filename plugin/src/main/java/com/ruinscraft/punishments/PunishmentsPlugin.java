@@ -1,9 +1,6 @@
 package com.ruinscraft.punishments;
 
-import com.ruinscraft.punishments.commands.DeletePunishmentCommand;
-import com.ruinscraft.punishments.commands.NewPunishmentCommand;
-import com.ruinscraft.punishments.commands.QueryPunishmentCommand;
-import com.ruinscraft.punishments.commands.UndoPunishmentCommand;
+import com.ruinscraft.punishments.commands.*;
 import com.ruinscraft.punishments.messaging.MessageManager;
 import com.ruinscraft.punishments.storage.Storage;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -39,16 +36,18 @@ public class PunishmentsPlugin extends JavaPlugin {
         getCommand("ban").setExecutor(newPunishmentCommand);
         getCommand("tempban").setExecutor(newPunishmentCommand);
 
-        // undo punishment commands (unmute, unban)
-        UndoPunishmentCommand undoPunishmentCommand = new UndoPunishmentCommand();
-        getCommand("unmute").setExecutor(undoPunishmentCommand);
-        getCommand("unban").setExecutor(undoPunishmentCommand);
+        // pardon punishment commands (unmute, unban)
+        PardonPunishmentCommand pardonPunishmentCommand = new PardonPunishmentCommand();
+        getCommand("unmute").setExecutor(pardonPunishmentCommand);
+        getCommand("unban").setExecutor(pardonPunishmentCommand);
 
-        // delete punishment commands (by id, removes from the records)
+        // undo punishment command
+        UndoPunishmentCommand undoPunishmentCommand = new UndoPunishmentCommand();
+        getCommand("pundo").setExecutor(undoPunishmentCommand);
+
+        // delete punishment command (by id, removes from the records)
         DeletePunishmentCommand deletePunishmentCommand = new DeletePunishmentCommand();
-        getCommand("delwarn").setExecutor(deletePunishmentCommand);
-        getCommand("delmute").setExecutor(deletePunishmentCommand);
-        getCommand("delban").setExecutor(deletePunishmentCommand);
+        getCommand("pdel").setExecutor(deletePunishmentCommand);
 
         // query punishment commands
         QueryPunishmentCommand queryPunishmentCommand = new QueryPunishmentCommand();

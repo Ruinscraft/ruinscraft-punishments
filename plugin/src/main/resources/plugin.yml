@@ -28,8 +28,11 @@ commands:
   unban:
     description: Unban a player
     permission: punishments.command.unban
+  pundo:
+    description: Undo your past punishment action
+    permission: punishments.command.pundo
   pdel:
-    description: Delete a punishment from a player's history
+    description: Delete a punishment from a player's history (or all of them)
     permission: punishments.command.pdel
   pinfo:
     description: View a player's punishment history

@@ -1,4 +1,4 @@
-package com.ruinscraft.punishments.behavior;
+package com.ruinscraft.punishments.behaviors;
 
 import com.ruinscraft.punishments.Punishment;
 

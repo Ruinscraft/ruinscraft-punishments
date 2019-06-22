@@ -1,18 +1,11 @@
 package com.ruinscraft.punishments.messaging;
 
-import com.ruinscraft.punishments.PunishmentsPlugin;
+public interface MessageConsumer {
 
-public class MessageConsumer {
-
-    private PunishmentsPlugin plugin;
-
-    public void consume(Message message) {
-
+    default void consume(Message message) {
         if (message == null) {
             return;
         }
-
     }
-
 
 }

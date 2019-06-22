@@ -9,6 +9,12 @@ public class DeletePunishmentCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         switch (args.length) {
+            case 2:
+                if (args[0].toLowerCase().equals("all")) {
+                    return deleteAllPunishments(args[1]);
+                } else {
+                    return showHelp();
+                }
             case 1:
                 final int punishmentId;
 
@@ -31,6 +37,10 @@ public class DeletePunishmentCommand implements CommandExecutor {
     }
 
     private boolean deletePunishment(int punishmentId) {
+        return true;
+    }
+
+    private boolean deleteAllPunishments(String offenderUsername) {
         return true;
     }
 

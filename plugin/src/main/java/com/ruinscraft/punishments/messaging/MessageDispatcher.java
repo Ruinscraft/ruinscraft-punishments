@@ -1,11 +1,7 @@
 package com.ruinscraft.punishments.messaging;
 
-public class MessageDispatcher {
+public interface MessageDispatcher {
 
-    public void dispatch(Message message) {
-
-
-
-    }
+    void dispatch(Message message);
 
 }
