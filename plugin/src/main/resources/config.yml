@@ -1,0 +1,19 @@
+storage:
+  mysql:
+    use: true
+    host: localhost
+    port: 3306
+    database: punishments
+    username: root
+    password: password
+
+messaging:
+  redis:
+    use: true
+    host: localhost
+    port: 6379
+  bungeecord: # another option but likely won't be implemented
+    use: false
+
+enable-ban-evade-warnings: true
+ban-appeal-link: www.ruinscraft.com

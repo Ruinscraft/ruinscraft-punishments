@@ -1,0 +1,36 @@
+name: ${name}
+version: ${project.version}
+main: ${mainClass}
+author: [royalkingkb]
+website: https://github.com/Ruinscraft/ruinscraft-punishments
+load: STARTUP
+api-version: 1.13
+
+commands:
+  warn:
+    description: Warn a player
+    permission: punishments.command.warn
+  mute:
+    description: Permanently mute a player
+    permission: punishments.command.mute
+  tempmute:
+    description: Temporarily mute a player
+    permission: punishments.command.tempmute
+  ban:
+    description: Permanently ban a player
+    permission: punishments.command.ban
+  tempban:
+    description: Temporarily ban a player
+    permission: punishments.command.tempban
+  unmute:
+    description: Unmute a player
+    permission: punishments.command.unmute
+  unban:
+    description: Unban a player
+    permission: punishments.command.unban
+  pdel:
+    description: Delete a punishment from a player's record
+    permission: punishments.command.pdel
+  pinfo:
+    description: View a player's punishment history
+    permission: punishments.command.pinfo

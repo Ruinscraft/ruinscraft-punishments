@@ -19,6 +19,12 @@ public class PunishmentsPlugin extends JavaPlugin {
     public void onEnable() {
         singleton = this;
 
+        if (getServer().getPluginManager().getPlugin("BanManager") != null) {
+            getLogger().warning("BanManager is loaded on this server. Please remove it.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
         // new punishment commands
         NewPunishmentCommand newPunishmentCommand = new NewPunishmentCommand();
         getCommand("warn").setExecutor(newPunishmentCommand);

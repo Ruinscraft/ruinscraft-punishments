@@ -32,13 +32,13 @@ public class NewPunishmentCommand implements CommandExecutor {
                 if (temporary) {
                     return showHelp(sender, label, true);
                 } else {
-                    return handlePunishment(sender, args, type, false);
+                    return createPunishment(sender, args, type, false);
                 }
             case 3:
                 if (!temporary) {
                     return showHelp(sender, label, false);
                 } else {
-                    return handlePunishment(sender, args, type, true);
+                    return createPunishment(sender, args, type, true);
                 }
             default:
                 return showHelp(sender, label, temporary);
@@ -51,7 +51,7 @@ public class NewPunishmentCommand implements CommandExecutor {
         return true;
     }
 
-    private boolean handlePunishment(CommandSender sender, String args[], PunishmentType type, boolean temporary) {
+    private boolean createPunishment(CommandSender sender, String args[], PunishmentType type, boolean temporary) {
         String offender = args[0];
         long duration = -1L;
         final String reason;
