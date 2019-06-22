@@ -29,7 +29,7 @@ commands:
     description: Unban a player
     permission: punishments.command.unban
   pdel:
-    description: Delete a punishment from a player's record
+    description: Delete a punishment from a player's history
     permission: punishments.command.pdel
   pinfo:
     description: View a player's punishment history
