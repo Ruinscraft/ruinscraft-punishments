@@ -1,7 +1,9 @@
 package com.ruinscraft.punishments;
 
-import com.ruinscraft.punishments.dispatcher.PunishmentDispatcher;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class Punishment {
@@ -12,12 +14,8 @@ public class Punishment {
     private long duration;
     private String reason;
 
-    private Punishment(UUID punisher, String offender, long duration, String reason) {
-        this.punisher = punisher;
-        this.offender = offender;
-        this.duration = duration;
-        this.reason = reason;
-    }
+    private Punishment() {
+    } // used with builder
 
     public int getPunishmentId() {
         return punishmentId;
@@ -39,8 +37,18 @@ public class Punishment {
         return reason;
     }
 
-    public void dispatch(PunishmentType type) {
-        PunishmentDispatcher.dispatch(PunishmentEntry.of(this, type));
+    public Optional<Player> getOffenderPlayer() {
+        final UUID offenderUUID;
+        try {
+            offenderUUID = UUID.fromString(offender);
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+        return Optional.of(Bukkit.getPlayer(offenderUUID));
+    }
+
+    public PunishmentEntry entry(PunishmentType type) {
+        return PunishmentEntry.of(this, type);
     }
 
     public static PunishmentBuilder builder() {
@@ -50,7 +58,9 @@ public class Punishment {
     public static class PunishmentBuilder {
         private Punishment canidate;
 
-        private PunishmentBuilder() {}
+        private PunishmentBuilder() {
+            canidate = new Punishment();
+        }
 
         public PunishmentBuilder punisher(UUID punisher) {
             canidate.punisher = punisher;

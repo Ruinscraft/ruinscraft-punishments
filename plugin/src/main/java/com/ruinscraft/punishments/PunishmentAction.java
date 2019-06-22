@@ -1,5 +1,12 @@
 package com.ruinscraft.punishments;
 
 public enum PunishmentAction {
-    CREATE, UNDO, DELETE
+    CREATE, UNDO, DELETE;
+
+    public void sync() {
+
+
+
+    }
+
 }

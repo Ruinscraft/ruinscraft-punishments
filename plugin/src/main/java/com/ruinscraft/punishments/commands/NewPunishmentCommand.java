@@ -1,6 +1,7 @@
 package com.ruinscraft.punishments.commands;
 
 import com.ruinscraft.punishments.Punishment;
+import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentType;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -68,7 +69,7 @@ public class NewPunishmentCommand implements CommandExecutor {
             reason = args[1];
         }
 
-        UUID punisher = new UUID(0,0);
+        UUID punisher = new UUID(0, 0);
 
         if (sender instanceof Player) {
             punisher = ((Player) sender).getUniqueId();
@@ -80,7 +81,8 @@ public class NewPunishmentCommand implements CommandExecutor {
                 .duration(duration)
                 .reason(reason)
                 .build()
-                .dispatch(type);
+                .entry(type)
+                .action(PunishmentAction.CREATE);
 
         return true;
     }

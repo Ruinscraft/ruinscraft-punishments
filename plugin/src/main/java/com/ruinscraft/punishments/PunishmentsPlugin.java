@@ -4,15 +4,21 @@ import com.ruinscraft.punishments.commands.DeletePunishmentCommand;
 import com.ruinscraft.punishments.commands.NewPunishmentCommand;
 import com.ruinscraft.punishments.commands.QueryPunishmentCommand;
 import com.ruinscraft.punishments.commands.UndoPunishmentCommand;
+import com.ruinscraft.punishments.messaging.MessageManager;
 import com.ruinscraft.punishments.storage.Storage;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PunishmentsPlugin extends JavaPlugin {
 
     private Storage storage;
+    private MessageManager messageManager;
 
     public Storage getStorage() {
         return storage;
+    }
+
+    public MessageManager getMessageManager() {
+        return messageManager;
     }
 
     @Override
