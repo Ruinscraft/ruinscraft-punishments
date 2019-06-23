@@ -20,6 +20,11 @@ public class Punishment {
     private Punishment() {
     } // used with builder
 
+    @Deprecated // only for internal use
+    public void setPunishmentId(int punishmentId) {
+        this.punishmentId = punishmentId;
+    }
+
     public int getPunishmentId() {
         return punishmentId;
     }

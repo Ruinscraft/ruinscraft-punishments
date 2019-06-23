@@ -10,14 +10,14 @@ import java.util.concurrent.Callable;
 
 public interface Storage {
 
-    default void callAction(PunishmentEntry entry, PunishmentAction action) {
+    default void callAction(PunishmentEntry entry, PunishmentAction action) throws Exception {
         switch (action) {
             case CREATE:
-                insert(entry);
+                insert(entry).call();
                 return;
             case UNDO:
             case DELETE:
-                delete(entry.punishment.getPunishmentId());
+                delete(entry.punishment.getPunishmentId()).call();
                 return;
         }
     }
@@ -29,5 +29,8 @@ public interface Storage {
     Callable<List<PunishmentEntry>> query(String offender);
 
     Callable<List<Punishment>> queryByType(String offender, PunishmentType type);
+
+    default void close() {
+    }
 
 }

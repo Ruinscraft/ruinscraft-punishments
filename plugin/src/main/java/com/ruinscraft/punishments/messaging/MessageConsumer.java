@@ -1,9 +1,14 @@
 package com.ruinscraft.punishments.messaging;
 
+import com.ruinscraft.punishments.PunishmentAction;
+import com.ruinscraft.punishments.PunishmentEntry;
+
 public interface MessageConsumer {
 
     default void consume(Message message) {
-        System.out.println("Recieved message: " + message.messageId);
+        final PunishmentEntry entry = message.datum;
+        final PunishmentAction action = message.action;
+        action.call(entry, false);
     }
 
 }

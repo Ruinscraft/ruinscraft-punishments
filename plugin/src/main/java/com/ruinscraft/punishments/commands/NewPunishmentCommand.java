@@ -85,7 +85,7 @@ public class NewPunishmentCommand implements CommandExecutor {
                 .reason(reason)
                 .build()
                 .entry(type)
-                .perform(PunishmentAction.CREATE);
+                .perform(PunishmentAction.CREATE, true);
 
         return true;
     }

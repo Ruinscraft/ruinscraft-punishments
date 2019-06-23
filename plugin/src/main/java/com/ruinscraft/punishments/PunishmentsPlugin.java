@@ -73,6 +73,14 @@ public class PunishmentsPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (storage != null) {
+            storage.close();
+        }
+
+        if (messageManager != null) {
+            messageManager.close();
+        }
+
         singleton = null;
     }
 

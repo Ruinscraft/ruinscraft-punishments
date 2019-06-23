@@ -10,6 +10,7 @@ public class PunishmentBehaviorRegistry {
     protected static final Map<PunishmentType, PunishmentBehavior> _registry_ = new HashMap<>();
 
     static {
+        _registry_.put(PunishmentType.KICK, new KickBehavior());
         _registry_.put(PunishmentType.WARN, new WarnBehavior());
         _registry_.put(PunishmentType.MUTE, new MuteBehavior());
         _registry_.put(PunishmentType.BAN, new BanBehavior());
