@@ -6,6 +6,7 @@ import com.ruinscraft.punishments.PunishmentEntry;
 import com.ruinscraft.punishments.PunishmentType;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 public interface Storage {
@@ -26,9 +27,9 @@ public interface Storage {
 
     Callable<Void> delete(int punishmentId);
 
-    Callable<List<PunishmentEntry>> query(String offender);
+    Callable<List<PunishmentEntry>> query(UUID offender);
 
-    Callable<List<Punishment>> queryByType(String offender, PunishmentType type);
+    Callable<List<Punishment>> queryByType(UUID offender, PunishmentType type);
 
     default void close() {
     }

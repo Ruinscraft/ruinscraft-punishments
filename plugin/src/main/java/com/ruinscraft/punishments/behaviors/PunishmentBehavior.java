@@ -17,23 +17,26 @@ public interface PunishmentBehavior {
 
         switch (action) {
             case CREATE:
-                joiner.setEmptyValue(Messages.COLOR_ERROR.toString());
-                joiner.add(punishment.getOffenderUsername().orElse(punishment.getOffender()));
+                joiner.add(Messages.COLOR_WARN + punishment.getOffenderUsername());
                 joiner.add("has been");
-                joiner.add(type.getVerb() + ".");
+                joiner.add(type.getVerb());
+                joiner.add("for");
+                joiner.add(punishment.getReason());
                 if (punishment.isTemporary()) {
-                    joiner.add("for");
+                    joiner.add("Expires in:");
                     joiner.add(punishment.getRemainingDurationWords());
                 }
-                joiner.add("Reason:");
-                joiner.add(punishment.getReason());
                 break;
             case UNDO:
             case DELETE:
-                break;// TODO
+                break;
         }
 
         Bukkit.broadcastMessage(joiner.toString());
+    }
+
+    default String getKickMessage(Punishment punishment) {
+        return "";
     }
 
 }

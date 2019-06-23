@@ -1,38 +1,35 @@
 package com.ruinscraft.punishments;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 public class PunishmentProfile {
 
-    private static final Map<String, PunishmentProfile> cache = new HashMap<>();
+    private static final Map<UUID, PunishmentProfile> cache = new HashMap<>();
 
-    public static PunishmentProfile get(String username) {
-        return cache.get(username);
+    public static PunishmentProfile get(UUID uuid) {
+        return cache.get(uuid);
     }
 
-    public static Callable<PunishmentProfile> load(String username) {
+    public static Callable<PunishmentProfile> load(UUID uuid) {
         return () -> {
-            PunishmentProfile profile = new PunishmentProfile(username);
-            profile.punishments = PunishmentsPlugin.get().getStorage().query(username).call();
-            cache.put(username, profile);
+            PunishmentProfile profile = new PunishmentProfile(uuid);
+            profile.punishments = PunishmentsPlugin.get().getStorage().query(uuid).call();
+            cache.put(uuid, profile);
             return profile;
         };
     }
 
-    public static void unload(String username) {
-        cache.remove(username);
+    public static void unload(UUID uuid) {
+        cache.remove(uuid);
     }
 
-    private final String username;
+    private final UUID uuid;
     private List<PunishmentEntry> punishments;
 
-    public PunishmentProfile(String username) {
-        this.username = username;
+    public PunishmentProfile(UUID uuid) {
+        this.uuid = uuid;
         this.punishments = new ArrayList<>();
     }
 

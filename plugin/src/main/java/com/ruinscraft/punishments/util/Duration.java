@@ -1,11 +1,18 @@
 package com.ruinscraft.punishments.util;
 
 import com.ruinscraft.punishments.Punishment;
+import org.apache.commons.lang.time.DurationFormatUtils;
 
 public final class Duration {
 
     public static String getRemainingDurationWords(Punishment punishment) {
-        return "some time"; // TODO:
+        final long timeLeftMillis = punishment.getTimeLeftMillis();
+
+        if (timeLeftMillis == 0L) {
+            return "never";
+        }
+
+        return DurationFormatUtils.formatDurationWords(timeLeftMillis, true, true);
     }
 
 }

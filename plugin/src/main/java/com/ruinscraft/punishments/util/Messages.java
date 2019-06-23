@@ -4,7 +4,7 @@ import org.bukkit.ChatColor;
 
 public final class Messages {
 
-    public final static ChatColor COLOR_MAIN = ChatColor.GOLD;
-    public final static ChatColor COLOR_ERROR = ChatColor.RED;
+    public static final ChatColor COLOR_MAIN = ChatColor.GOLD;
+    public static final ChatColor COLOR_WARN = ChatColor.RED;
 
 }

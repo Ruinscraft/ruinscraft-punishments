@@ -2,7 +2,6 @@ package com.ruinscraft.punishments;
 
 import com.ruinscraft.punishments.util.Duration;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Optional;
@@ -12,7 +11,8 @@ public class Punishment {
 
     private int punishmentId;
     private UUID punisher;
-    private String offender; // UUID, IP, etc
+    private UUID offender;
+    private String offenderUsername;
     private long inceptionTime;
     private long expirationTime;
     private String reason;
@@ -33,8 +33,16 @@ public class Punishment {
         return punisher;
     }
 
-    public String getOffender() {
+    public UUID getOffender() {
         return offender;
+    }
+
+    public String getOffenderUsername() {
+        if (offenderUsername == null) {
+            return "?";
+        } else {
+            return offenderUsername;
+        }
     }
 
     public long getInceptionTime() {
@@ -49,6 +57,16 @@ public class Punishment {
         return expirationTime != -1L;
     }
 
+    public long getTimeLeftMillis() {
+        if (expirationTime == -1L) {
+            return 0L;
+        } else if (expirationTime < System.currentTimeMillis()) {
+            return 0L;
+        } else {
+            return expirationTime - System.currentTimeMillis();
+        }
+    }
+
     public String getReason() {
         return reason;
     }
@@ -58,31 +76,7 @@ public class Punishment {
     }
 
     public Optional<Player> getOffenderPlayer() {
-        final UUID offenderUUID;
-        try {
-            offenderUUID = UUID.fromString(offender);
-        } catch (IllegalArgumentException e) {
-            return Optional.empty();
-        }
-        return Optional.of(Bukkit.getPlayer(offenderUUID));
-    }
-
-    public Optional<String> getOffenderUsername() {
-        UUID uuid = null;
-        OfflinePlayer offlinePlayer = null;
-
-        try {
-            uuid = UUID.fromString(offender);
-            offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-        } catch (IllegalArgumentException e) {
-            offlinePlayer = Bukkit.getOfflinePlayer(offender);
-        }
-
-        if (offlinePlayer.hasPlayedBefore()) {
-            return Optional.of(offlinePlayer.getName());
-        } else {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(Bukkit.getPlayer(offender));
     }
 
     public PunishmentEntry entry(PunishmentType type) {
@@ -114,8 +108,13 @@ public class Punishment {
             return this;
         }
 
-        public PunishmentBuilder offender(String offender) {
+        public PunishmentBuilder offender(UUID offender) {
             build.offender = offender;
+            return this;
+        }
+
+        public PunishmentBuilder offenderUsername(String offenderUsername) {
+            build.offenderUsername = offenderUsername;
             return this;
         }
 

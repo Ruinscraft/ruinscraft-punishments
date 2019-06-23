@@ -67,7 +67,7 @@ public class MySQLStorage implements SQLStorage {
                             " VALUES (?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
                 insert.setString(1, entry.type.name());
                 insert.setString(2, entry.punishment.getPunisher().toString());
-                insert.setString(3, entry.punishment.getOffender());
+                insert.setString(3, entry.punishment.getOffender().toString());
                 insert.setLong(4, entry.punishment.getInceptionTime());
                 insert.setLong(5, entry.punishment.getExpirationTime());
                 insert.setString(6, entry.punishment.getReason());
@@ -96,13 +96,13 @@ public class MySQLStorage implements SQLStorage {
     }
 
     @Override
-    public Callable<List<PunishmentEntry>> query(String offender) {
+    public Callable<List<PunishmentEntry>> query(UUID offender) {
         return () -> {
             List<PunishmentEntry> entries = new ArrayList<>();
 
             try (PreparedStatement query = getConnection().prepareStatement(
                     "SELECT * FROM " + Table.PUNISHMENTS + " WHERE offender = ?;")) {
-                query.setString(1, offender);
+                query.setString(1, offender.toString());
 
                 try (ResultSet rs = query.executeQuery()) {
                     while (rs.next()) {
@@ -129,7 +129,7 @@ public class MySQLStorage implements SQLStorage {
     }
 
     @Override
-    public Callable<List<Punishment>> queryByType(String offender, PunishmentType type) {
+    public Callable<List<Punishment>> queryByType(UUID offender, PunishmentType type) {
         return () -> {
 
             try (PreparedStatement query = getConnection().prepareStatement("")) {

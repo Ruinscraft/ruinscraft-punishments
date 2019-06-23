@@ -4,6 +4,8 @@ import com.ruinscraft.punishments.Punishment;
 import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentType;
 import com.ruinscraft.punishments.console;
+import com.ruinscraft.punishments.mojang.AccountsAPI;
+import com.ruinscraft.punishments.util.Messages;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -11,6 +13,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -32,17 +35,17 @@ public class NewPunishmentCommand implements CommandExecutor {
             throw new IllegalStateException("PunishmentType was null");
         }
 
-        if (args.length >= 2) {
-            if (temporary) {
-                return showHelp(sender, label, true);
-            } else {
-                return createPunishment(sender, args, type, false);
-            }
-        } else if (args.length >= 3) {
+        if (args.length >= 3) {
             if (!temporary) {
                 return showHelp(sender, label, false);
             } else {
                 return createPunishment(sender, args, type, true);
+            }
+        } else if (args.length >= 2) {
+            if (temporary) {
+                return showHelp(sender, label, true);
+            } else {
+                return createPunishment(sender, args, type, false);
             }
         }
 
@@ -50,18 +53,32 @@ public class NewPunishmentCommand implements CommandExecutor {
     }
 
     private boolean showHelp(CommandSender sender, String label, boolean temporary) {
-        String help = "/" + label + " <player>" + (temporary ? " <duration>" : "") + " <reason>";
+        String help = "/" + label + " <username>" + (temporary ? " <duration>" : "") + " <reason>";
         sender.sendMessage(help);
         return true;
     }
 
     private boolean createPunishment(CommandSender sender, String args[], PunishmentType type, boolean temporary) {
-        String offender = args[0];
+        final UUID offender;
 
-        OfflinePlayer offlineOffenderPlayer = Bukkit.getOfflinePlayer(offender);
+        OfflinePlayer offlineOffenderPlayer = Bukkit.getOfflinePlayer(args[0]);
 
         if (offlineOffenderPlayer.hasPlayedBefore()) {
-            offender = offlineOffenderPlayer.getUniqueId().toString();
+            offender = offlineOffenderPlayer.getUniqueId();
+        } else {
+            try {
+                AccountsAPI.AccountsProfile profile = AccountsAPI.getAccountsProfile(args[0]);
+                if (profile == null) {
+                    sender.sendMessage(Messages.COLOR_WARN + "Player with username " + args[0] + " does not exist.");
+                    return true;
+                }
+                offender = profile.getUniqueId();
+                args[0] = profile.getName();
+            } catch (IOException e) {
+                e.printStackTrace();
+                sender.sendMessage("Error while looking up username.");
+                return false;
+            }
         }
 
         long duration = -1L;
@@ -90,6 +107,7 @@ public class NewPunishmentCommand implements CommandExecutor {
         Punishment.builder()
                 .punisher(punisher)
                 .offender(offender)
+                .offenderUsername(args[0])
                 .duration(duration)
                 .reason(reason)
                 .build()

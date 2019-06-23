@@ -28,17 +28,25 @@
             <version>1.13.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <!-- use version provided with Minecraft -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <!-- use version provided with Minecraft -->
             <version>21.0</version>
             <scope>provided</scope>
         </dependency>
+        <!--&lt;!&ndash; use version provided with Minecraft &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.commons</groupId>-->
+            <!--<artifactId>commons-lang3</artifactId>-->
+            <!--<version>3.9</version>-->
+            <!--<scope>provided</scope>-->
+        <!--</dependency>-->
+        <!-- use latest full release -->
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <!-- use latest full release -->
+
             <version>2.9.3</version>
             <scope>compile</scope>
         </dependency>
