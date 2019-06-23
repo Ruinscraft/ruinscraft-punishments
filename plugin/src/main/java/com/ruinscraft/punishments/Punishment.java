@@ -11,7 +11,8 @@ public class Punishment {
     private int punishmentId;
     private UUID punisher;
     private String offender; // UUID, IP, etc
-    private long duration;
+    private long inceptionTime;
+    private long expirationTime;
     private String reason;
 
     private Punishment() {
@@ -29,8 +30,12 @@ public class Punishment {
         return offender;
     }
 
-    public long getDuration() {
-        return duration;
+    public long getInceptionTime() {
+        return inceptionTime;
+    }
+
+    public long getExpirationTime() {
+        return expirationTime;
     }
 
     public String getReason() {
@@ -82,7 +87,8 @@ public class Punishment {
         }
 
         public PunishmentBuilder duration(long duration) {
-            build.duration = duration;
+            build.inceptionTime = System.currentTimeMillis();
+            build.expirationTime = build.inceptionTime + duration;
             return this;
         }
 

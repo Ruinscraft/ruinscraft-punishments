@@ -3,6 +3,7 @@ package com.ruinscraft.punishments.commands;
 import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentEntry;
 import com.ruinscraft.punishments.TransientPunisherHistory;
+import com.ruinscraft.punishments.console;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,7 +18,7 @@ public class UndoPunishmentCommand implements CommandExecutor {
         final UUID punisher;
 
         if (!(sender instanceof Player)) {
-            punisher = TransientPunisherHistory.CONSOLE;
+            punisher = console.UUID;
         } else {
             punisher = ((Player) sender).getUniqueId();
         }
