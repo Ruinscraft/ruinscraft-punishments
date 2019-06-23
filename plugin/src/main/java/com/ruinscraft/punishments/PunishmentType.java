@@ -1,5 +1,19 @@
 package com.ruinscraft.punishments;
 
 public enum PunishmentType {
-    KICK, WARN, MUTE, BAN
+    KICK("kicked"),
+    WARN("warned"),
+    MUTE("muted"),
+    BAN("banned");
+
+    final String verb;
+
+    PunishmentType(String verb) {
+        this.verb = verb;
+    }
+
+    public String getVerb() {
+        return verb;
+    }
+
 }

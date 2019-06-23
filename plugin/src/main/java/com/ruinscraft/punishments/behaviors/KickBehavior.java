@@ -4,18 +4,18 @@ import com.ruinscraft.punishments.Punishment;
 import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentType;
 
-public class BanBehavior implements PunishmentBehavior {
+public class KickBehavior implements PunishmentBehavior {
 
     @Override
     public void punish(Punishment punishment, PunishmentAction action) {
         switch (action) {
             case CREATE:
-                punishment.getOffenderPlayer().ifPresent(p -> p.kickPlayer("You have been banned."));
+                punishment.getOffenderPlayer().ifPresent(p -> p.kickPlayer("You have been kicked."));
             case UNDO:
             case DELETE:
                 break; // TODO:
         }
-        notify(punishment, PunishmentType.BAN, action);
+        notify(punishment, PunishmentType.KICK, action);
     }
 
 }

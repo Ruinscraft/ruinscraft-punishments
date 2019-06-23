@@ -1,6 +1,8 @@
 package com.ruinscraft.punishments;
 
+import com.ruinscraft.punishments.util.Duration;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Optional;
@@ -42,6 +44,10 @@ public class Punishment {
         return reason;
     }
 
+    public String getRemainingDurationWords() {
+        return Duration.getRemainingDurationWords(this);
+    }
+
     public Optional<Player> getOffenderPlayer() {
         final UUID offenderUUID;
         try {
@@ -50,6 +56,16 @@ public class Punishment {
             return Optional.empty();
         }
         return Optional.of(Bukkit.getPlayer(offenderUUID));
+    }
+
+    public Optional<String> getOffenderUsername() {
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(offender);
+
+        if (offlinePlayer.hasPlayedBefore()) {
+            return Optional.of(offlinePlayer.getName());
+        } else {
+            return Optional.empty();
+        }
     }
 
     public PunishmentEntry entry(PunishmentType type) {

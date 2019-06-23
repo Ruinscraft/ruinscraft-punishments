@@ -1,5 +1,6 @@
 package com.ruinscraft.punishments;
 
+import com.ruinscraft.punishments.behaviors.PunishmentBehaviorRegistry;
 import com.ruinscraft.punishments.messaging.Message;
 
 public enum PunishmentAction {
@@ -13,6 +14,8 @@ public enum PunishmentAction {
         PunishmentsPlugin.get().getMessageManager().getDispatcher().dispatch(message);
         // save to transient punisher history
         TransientPunisherHistory.insert(entry);
+        // enact punishment behavior
+        PunishmentBehaviorRegistry.get(entry.type).punish(entry.punishment, this);
     }
 
 }

@@ -1,4 +1,6 @@
-package com.ruinscraft.punishments;
+package com.ruinscraft.punishments.util;
+
+import com.ruinscraft.punishments.PunishmentsPlugin;
 
 public final class Tasks {
 

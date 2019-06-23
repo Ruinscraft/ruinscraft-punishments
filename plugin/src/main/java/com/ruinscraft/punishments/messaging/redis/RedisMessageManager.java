@@ -1,6 +1,6 @@
 package com.ruinscraft.punishments.messaging.redis;
 
-import com.ruinscraft.punishments.Tasks;
+import com.ruinscraft.punishments.util.Tasks;
 import com.ruinscraft.punishments.messaging.MessageConsumer;
 import com.ruinscraft.punishments.messaging.MessageDispatcher;
 import com.ruinscraft.punishments.messaging.MessageManager;
