@@ -14,8 +14,8 @@ public class PunishmentEntry {
         return new PunishmentEntry(punishment, type);
     }
 
-    public void perform(PunishmentAction action, boolean origin) {
-        action.call(this, origin);
+    public void call(PunishmentAction action) {
+        action.call(this);
     }
 
 }

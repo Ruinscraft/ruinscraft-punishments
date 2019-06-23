@@ -29,7 +29,7 @@ public class UndoPunishmentCommand implements CommandExecutor {
             return true;
         }
 
-        last.perform(PunishmentAction.UNDO);
+        last.call(PunishmentAction.UNDO);
 
         return true;
     }

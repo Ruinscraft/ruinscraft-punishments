@@ -7,7 +7,7 @@ import com.ruinscraft.punishments.PunishmentType;
 public class KickBehavior implements PunishmentBehavior {
 
     @Override
-    public void punish(Punishment punishment, PunishmentAction action) {
+    public void perform(Punishment punishment, PunishmentAction action) {
         switch (action) {
             case CREATE:
                 punishment.getOffenderPlayer().ifPresent(p -> p.kickPlayer("You have been kicked."));

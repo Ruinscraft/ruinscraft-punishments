@@ -5,7 +5,9 @@ import com.ruinscraft.punishments.PunishmentEntry;
 import com.ruinscraft.punishments.PunishmentType;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 public class MySQLStorage implements SQLStorage {
@@ -32,7 +34,8 @@ public class MySQLStorage implements SQLStorage {
                         "punishment_type VARCHAR(12), " +
                         "punisher VARCHAR(36), " +
                         "offender VARCHAR(36), " +
-                        "duration BIGINT, " +
+                        "inception_time BIGINT, " +
+                        "expiration_time BIGINT, " +
                         "reason VARCHAR(255)," +
                         "PRIMARY KEY (punishment_id));")) {
             create.execute();
@@ -45,7 +48,7 @@ public class MySQLStorage implements SQLStorage {
     public Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
-                final String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + database + "&useSSL=false";
+                final String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false";
                 connection = DriverManager.getConnection(jdbcUrl, username, new String(password));
             }
         } catch (SQLException e) {
@@ -59,11 +62,21 @@ public class MySQLStorage implements SQLStorage {
     public Callable<Void> insert(PunishmentEntry entry) {
         return () -> {
             try (PreparedStatement insert = getConnection().prepareStatement(
-                    "INSERT INTO " + Table.PUNISHMENTS + " () VALUES ();", Statement.RETURN_GENERATED_KEYS)) {
+                    "INSERT INTO " + Table.PUNISHMENTS +
+                            " (punishment_type, punisher, offender, inception_time, expiration_time, reason)" +
+                            " VALUES (?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
+                insert.setString(1, entry.type.name());
+                insert.setString(2, entry.punishment.getPunisher().toString());
+                insert.setString(3, entry.punishment.getOffender());
+                insert.setLong(4, entry.punishment.getInceptionTime());
+                insert.setLong(5, entry.punishment.getExpirationTime());
+                insert.setString(6, entry.punishment.getReason());
                 insert.execute();
                 try (ResultSet rs = insert.getGeneratedKeys()) {
-                    final int punishmentId = rs.getInt(1);
-                    entry.punishment.setPunishmentId(punishmentId);
+                    while (rs.next()) {
+                        final int punishmentId = rs.getInt(1);
+                        entry.punishment.setPunishmentId(punishmentId);
+                    }
                 }
             }
             return null;
@@ -84,12 +97,47 @@ public class MySQLStorage implements SQLStorage {
 
     @Override
     public Callable<List<PunishmentEntry>> query(String offender) {
-        return null;
+        return () -> {
+            List<PunishmentEntry> entries = new ArrayList<>();
+
+            try (PreparedStatement query = getConnection().prepareStatement(
+                    "SELECT * FROM " + Table.PUNISHMENTS + " WHERE offender = ?;")) {
+                query.setString(1, offender);
+
+                try (ResultSet rs = query.executeQuery()) {
+                    while (rs.next()) {
+                        int punishmentId = rs.getInt("punishment_id");
+                        PunishmentType type = PunishmentType.valueOf(rs.getString("punishment_type"));
+                        UUID punisher = UUID.fromString(rs.getString("punisher"));
+                        long inceptionTime = rs.getLong("inception_time");
+                        long expirationTime = rs.getLong("expiration_time");
+                        String reason = rs.getString("reason");
+                        Punishment punishment = Punishment.builder(punishmentId)
+                                .punisher(punisher)
+                                .inceptionTime(inceptionTime)
+                                .expirationTime(expirationTime)
+                                .reason(reason)
+                                .build();
+                        PunishmentEntry entry = PunishmentEntry.of(punishment, type);
+                        entries.add(entry);
+                    }
+                }
+            }
+
+            return entries;
+        };
     }
 
     @Override
     public Callable<List<Punishment>> queryByType(String offender, PunishmentType type) {
-        return null;
+        return () -> {
+
+            try (PreparedStatement query = getConnection().prepareStatement("")) {
+
+            }
+
+            return null;
+        };
     }
 
     @Override

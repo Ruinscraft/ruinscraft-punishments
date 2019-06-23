@@ -7,25 +7,23 @@ import com.ruinscraft.punishments.util.Tasks;
 public enum PunishmentAction {
     CREATE, UNDO, DELETE;
 
-    public void call(PunishmentEntry entry, boolean origin) {
+    public void call(PunishmentEntry entry) {
         Tasks.async(() -> {
-            if (origin) {
-                // save to db
-                try {
-                    PunishmentsPlugin.get().getStorage().callAction(entry, this);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                // dispatch on messenger
-                Message message = new Message(entry, this);
-                PunishmentsPlugin.get().getMessageManager().getDispatcher().dispatch(message);
+            // save to db
+            try {
+                PunishmentsPlugin.get().getStorage().callAction(entry, this);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            // save to transient punisher history
-            TransientPunisherHistory.insert(entry);
-            // enact punishment behavior
-            PunishmentBehaviorRegistry.get(entry.type).punish(entry.punishment, this);
+            // dispatch on messenger
+            Message message = new Message(entry, this);
+            PunishmentsPlugin.get().getMessageManager().getDispatcher().dispatch(message);
         });
+    }
+
+    public void propegate(PunishmentEntry entry) {
+        TransientPunisherHistory.insert(entry);
+        PunishmentBehaviorRegistry.get(entry.type).perform(entry.punishment, this);
     }
 
 }

@@ -8,7 +8,7 @@ public interface MessageConsumer {
     default void consume(Message message) {
         final PunishmentEntry entry = message.datum;
         final PunishmentAction action = message.action;
-        action.call(entry, false);
+        action.propegate(entry);
     }
 
 }

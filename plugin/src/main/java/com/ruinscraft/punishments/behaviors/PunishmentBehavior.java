@@ -9,7 +9,7 @@ import java.util.StringJoiner;
 
 public interface PunishmentBehavior {
 
-    void punish(Punishment punishment, PunishmentAction action);
+    void perform(Punishment punishment, PunishmentAction action);
 
     default void notify(Punishment punishment, PunishmentType type, PunishmentAction action) {
         StringJoiner joiner = new StringJoiner(" ");

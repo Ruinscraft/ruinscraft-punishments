@@ -69,6 +69,9 @@ public class PunishmentsPlugin extends JavaPlugin {
         // query punishment commands
         QueryPunishmentCommand queryPunishmentCommand = new QueryPunishmentCommand();
         getCommand("pinfo").setExecutor(queryPunishmentCommand);
+
+        // register listeners
+        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
     }
 
     @Override

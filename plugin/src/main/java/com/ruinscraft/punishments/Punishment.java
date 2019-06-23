@@ -107,9 +107,25 @@ public class Punishment {
             return this;
         }
 
+        public PunishmentBuilder inceptionTime(long inceptionTime) {
+            build.inceptionTime = inceptionTime;
+            return this;
+        }
+
+        public PunishmentBuilder expirationTime(long expirationTime) {
+            build.expirationTime = expirationTime;
+            return this;
+        }
+
         public PunishmentBuilder duration(long duration) {
             build.inceptionTime = System.currentTimeMillis();
-            build.expirationTime = build.inceptionTime + duration;
+
+            if (duration == -1L) {
+                build.expirationTime = -1L;
+            } else {
+                build.expirationTime = build.inceptionTime + duration;
+            }
+
             return this;
         }
 
