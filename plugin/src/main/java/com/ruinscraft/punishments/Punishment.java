@@ -45,6 +45,10 @@ public class Punishment {
         return expirationTime;
     }
 
+    public boolean isTemporary() {
+        return expirationTime != -1L;
+    }
+
     public String getReason() {
         return reason;
     }
@@ -64,7 +68,15 @@ public class Punishment {
     }
 
     public Optional<String> getOffenderUsername() {
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(offender);
+        UUID uuid = null;
+        OfflinePlayer offlinePlayer = null;
+
+        try {
+            uuid = UUID.fromString(offender);
+            offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+        } catch (IllegalArgumentException e) {
+            offlinePlayer = Bukkit.getOfflinePlayer(offender);
+        }
 
         if (offlinePlayer.hasPlayedBefore()) {
             return Optional.of(offlinePlayer.getName());

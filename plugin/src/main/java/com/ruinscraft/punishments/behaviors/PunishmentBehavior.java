@@ -3,6 +3,7 @@ package com.ruinscraft.punishments.behaviors;
 import com.ruinscraft.punishments.Punishment;
 import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentType;
+import com.ruinscraft.punishments.util.Messages;
 import org.bukkit.Bukkit;
 
 import java.util.StringJoiner;
@@ -16,12 +17,15 @@ public interface PunishmentBehavior {
 
         switch (action) {
             case CREATE:
+                joiner.setEmptyValue(Messages.COLOR_ERROR.toString());
                 joiner.add(punishment.getOffenderUsername().orElse(punishment.getOffender()));
                 joiner.add("has been");
-                joiner.add(type.getVerb());
-                joiner.add("for");
-                joiner.add(punishment.getRemainingDurationWords());
-                joiner.add("because");
+                joiner.add(type.getVerb() + ".");
+                if (punishment.isTemporary()) {
+                    joiner.add("for");
+                    joiner.add(punishment.getRemainingDurationWords());
+                }
+                joiner.add("Reason:");
                 joiner.add(punishment.getReason());
                 break;
             case UNDO:

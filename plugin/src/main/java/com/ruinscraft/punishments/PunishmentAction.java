@@ -22,8 +22,10 @@ public enum PunishmentAction {
     }
 
     public void propegate(PunishmentEntry entry) {
-        TransientPunisherHistory.insert(entry);
-        PunishmentBehaviorRegistry.get(entry.type).perform(entry.punishment, this);
+        Tasks.sync(() -> {
+            TransientPunisherHistory.insert(entry);
+            PunishmentBehaviorRegistry.get(entry.type).perform(entry.punishment, this);
+        });
     }
 
 }

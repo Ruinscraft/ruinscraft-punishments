@@ -7,6 +7,9 @@ load: STARTUP
 api-version: 1.13
 
 commands:
+  kick:
+    description: Kick a player
+    permission: punishments.command.kick
   warn:
     description: Warn a player
     permission: punishments.command.warn

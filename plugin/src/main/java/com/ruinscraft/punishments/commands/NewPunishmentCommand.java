@@ -4,11 +4,14 @@ import com.ruinscraft.punishments.Punishment;
 import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentType;
 import com.ruinscraft.punishments.console;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 public class NewPunishmentCommand implements CommandExecutor {
@@ -26,25 +29,24 @@ public class NewPunishmentCommand implements CommandExecutor {
         }
 
         if (type == null) {
-            return false; // should never happen...
+            throw new IllegalStateException("PunishmentType was null");
         }
 
-        switch (args.length) {
-            case 2:
-                if (temporary) {
-                    return showHelp(sender, label, true);
-                } else {
-                    return createPunishment(sender, args, type, false);
-                }
-            case 3:
-                if (!temporary) {
-                    return showHelp(sender, label, false);
-                } else {
-                    return createPunishment(sender, args, type, true);
-                }
-            default:
-                return showHelp(sender, label, temporary);
+        if (args.length >= 2) {
+            if (temporary) {
+                return showHelp(sender, label, true);
+            } else {
+                return createPunishment(sender, args, type, false);
+            }
+        } else if (args.length >= 3) {
+            if (!temporary) {
+                return showHelp(sender, label, false);
+            } else {
+                return createPunishment(sender, args, type, true);
+            }
         }
+
+        return showHelp(sender, label, temporary);
     }
 
     private boolean showHelp(CommandSender sender, String label, boolean temporary) {
@@ -55,19 +57,26 @@ public class NewPunishmentCommand implements CommandExecutor {
 
     private boolean createPunishment(CommandSender sender, String args[], PunishmentType type, boolean temporary) {
         String offender = args[0];
+
+        OfflinePlayer offlineOffenderPlayer = Bukkit.getOfflinePlayer(offender);
+
+        if (offlineOffenderPlayer.hasPlayedBefore()) {
+            offender = offlineOffenderPlayer.getUniqueId().toString();
+        }
+
         long duration = -1L;
         final String reason;
 
         if (temporary) {
             try {
                 duration = Long.parseLong(args[1]);
-                reason = args[2];
+                reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
             } catch (NumberFormatException e) {
                 sender.sendMessage("Invalid duration.");
                 return false;
             }
         } else {
-            reason = args[1];
+            reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
         }
 
         final UUID punisher;

@@ -47,6 +47,7 @@ public class PunishmentsPlugin extends JavaPlugin {
 
         // new punishment commands
         NewPunishmentCommand newPunishmentCommand = new NewPunishmentCommand();
+        getCommand("kick").setExecutor(newPunishmentCommand);
         getCommand("warn").setExecutor(newPunishmentCommand);
         getCommand("mute").setExecutor(newPunishmentCommand);
         getCommand("tempmute").setExecutor(newPunishmentCommand);

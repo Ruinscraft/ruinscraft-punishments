@@ -19,8 +19,13 @@ public class PunishmentProfile {
         return () -> {
             PunishmentProfile profile = new PunishmentProfile(username);
             profile.punishments = PunishmentsPlugin.get().getStorage().query(username).call();
+            cache.put(username, profile);
             return profile;
         };
+    }
+
+    public static void unload(String username) {
+        cache.remove(username);
     }
 
     private final String username;
@@ -32,19 +37,11 @@ public class PunishmentProfile {
     }
 
     public boolean isMuted() {
-        return !isExpired(PunishmentType.MUTE);
+        return getActive(PunishmentType.MUTE) != null;
     }
 
     public boolean isBanned() {
-        return !isExpired(PunishmentType.BAN);
-    }
-
-    private boolean isExpired(PunishmentType type) {
-        return getByType(type)
-                .stream()
-                .filter(p -> p.getExpirationTime() == -1L || (System.currentTimeMillis() < p.getExpirationTime()))
-                .collect(Collectors.toList())
-                .isEmpty();
+        return getActive(PunishmentType.BAN) != null;
     }
 
     public List<Punishment> getByType(PunishmentType type) {
@@ -53,6 +50,13 @@ public class PunishmentProfile {
                 .filter(entry -> entry.type == type)
                 .map(t -> t.punishment)
                 .collect(Collectors.toList());
+    }
+
+    public Punishment getActive(PunishmentType type) {
+        return getByType(type)
+                .stream()
+                .filter(p -> p.getExpirationTime() == -1L || (System.currentTimeMillis() < p.getExpirationTime()))
+                .collect(Collectors.toList()).stream().findFirst().orElse(null);
     }
 
 }

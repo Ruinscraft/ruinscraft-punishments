@@ -10,7 +10,8 @@ public class WarnBehavior implements PunishmentBehavior {
     public void perform(Punishment punishment, PunishmentAction action) {
         switch (action) {
             case CREATE:
-                punishment.getOffenderPlayer().ifPresent(p -> p.sendMessage("You have been warned."));
+                punishment.getOffenderPlayer().ifPresent(p ->
+                        p.sendMessage("You have been warned. Reason: " + punishment.getReason()));
             case UNDO:
             case DELETE:
                 break; // TODO:

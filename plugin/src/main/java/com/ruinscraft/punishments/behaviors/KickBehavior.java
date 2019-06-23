@@ -10,7 +10,8 @@ public class KickBehavior implements PunishmentBehavior {
     public void perform(Punishment punishment, PunishmentAction action) {
         switch (action) {
             case CREATE:
-                punishment.getOffenderPlayer().ifPresent(p -> p.kickPlayer("You have been kicked."));
+                punishment.getOffenderPlayer().ifPresent(p ->
+                        p.kickPlayer("You have been kicked.\nReason: " + punishment.getReason()));
             case UNDO:
             case DELETE:
                 break; // TODO:
