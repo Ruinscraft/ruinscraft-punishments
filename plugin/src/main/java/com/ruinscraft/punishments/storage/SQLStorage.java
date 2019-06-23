@@ -6,4 +6,8 @@ public interface SQLStorage extends Storage {
 
     Connection getConnection();
 
+    final class Table {
+        protected static final String PUNISHMENTS = "ruinscraft_punishments";
+    }
+
 }

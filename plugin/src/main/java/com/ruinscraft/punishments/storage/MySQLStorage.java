@@ -28,8 +28,11 @@ public class MySQLStorage implements SQLStorage {
         this.username = username;
         this.password = password;
 
-        try (PreparedStatement create = getConnection().prepareStatement("")) { // TODO:
-
+        try (PreparedStatement create = getConnection().prepareStatement(
+                "CREATE TABLE IF NOT EXISTS "
+                        + Table.PUNISHMENTS
+                        + " (punishment_id INT, punishment_type VARCHAR(12), punisher VARCHAR(36), offender VARCHAR(36), duration BIGINT, reason VARCHAR(255));")) {
+            create.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -39,24 +42,34 @@ public class MySQLStorage implements SQLStorage {
     public Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
-                connection = DriverManager.getConnection(""); // TODO:
+                final String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + database;
+                connection = DriverManager.getConnection(jdbcUrl, username, new String(password));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return connection;
     }
 
 
     @Override
     public Callable<Void> insert(PunishmentEntry entry) {
-        return null;
+        return () -> {
+            try (PreparedStatement insert = getConnection().prepareStatement("")) {
+                insert.execute();
+            }
+            return null;
+        };
     }
 
     @Override
     public Callable<Void> delete(int punishmentId) {
-        return null;
+        return () -> {
+            try (PreparedStatement delete = getConnection().prepareStatement("")) {
+                delete.execute();
+            }
+            return null;
+        };
     }
 
     @Override

@@ -6,4 +6,7 @@ public interface MessageManager {
 
     MessageDispatcher getDispatcher();
 
+    default void close() {
+    }
+
 }

@@ -14,7 +14,7 @@ public class PunishmentEntry {
         return new PunishmentEntry(punishment, type);
     }
 
-    public void action(PunishmentAction action) {
+    public void perform(PunishmentAction action) {
         action.sync(this);
     }
 

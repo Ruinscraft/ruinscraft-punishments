@@ -55,35 +55,44 @@ public class Punishment {
         return new PunishmentBuilder();
     }
 
+    public static PunishmentBuilder builder(int punishmentId) {
+        return new PunishmentBuilder(punishmentId);
+    }
+
     public static class PunishmentBuilder {
-        private Punishment canidate;
+        private Punishment build;
 
         private PunishmentBuilder() {
-            canidate = new Punishment();
+            build = new Punishment();
+        }
+
+        private PunishmentBuilder(int punishmentId) {
+            build = new Punishment();
+            build.punishmentId = punishmentId;
         }
 
         public PunishmentBuilder punisher(UUID punisher) {
-            canidate.punisher = punisher;
+            build.punisher = punisher;
             return this;
         }
 
         public PunishmentBuilder offender(String offender) {
-            canidate.offender = offender;
+            build.offender = offender;
             return this;
         }
 
         public PunishmentBuilder duration(long duration) {
-            canidate.duration = duration;
+            build.duration = duration;
             return this;
         }
 
         public PunishmentBuilder reason(String reason) {
-            canidate.reason = reason;
+            build.reason = reason;
             return this;
         }
 
         public Punishment build() {
-            return canidate;
+            return build;
         }
     }
 
