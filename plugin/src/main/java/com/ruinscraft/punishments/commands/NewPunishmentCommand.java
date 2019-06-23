@@ -19,12 +19,13 @@ public class NewPunishmentCommand implements CommandExecutor {
         PunishmentType type = null;
 
         for (PunishmentType _type : PunishmentType.values()) {
-            if (label.toLowerCase().contains(_type.name())) {
+            if (label.toUpperCase().contains(_type.name())) {
                 type = _type;
             }
         }
 
         if (type == null) {
+            System.out.println("was null");
             return false; // should never happen...
         }
 
@@ -47,7 +48,7 @@ public class NewPunishmentCommand implements CommandExecutor {
     }
 
     private boolean showHelp(CommandSender sender, String label, boolean temporary) {
-        String help = "/" + label + " <player> " + (temporary ? "" : "<duration>") + " <reason>";
+        String help = "/" + label + " <player>" + (temporary ? " <duration>" : "") + " <reason>";
         sender.sendMessage(help);
         return true;
     }

@@ -2,6 +2,8 @@ package com.ruinscraft.punishments;
 
 import com.ruinscraft.punishments.commands.*;
 import com.ruinscraft.punishments.messaging.MessageManager;
+import com.ruinscraft.punishments.messaging.redis.RedisMessageManager;
+import com.ruinscraft.punishments.storage.MySQLStorage;
 import com.ruinscraft.punishments.storage.Storage;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -22,11 +24,26 @@ public class PunishmentsPlugin extends JavaPlugin {
     public void onEnable() {
         singleton = this;
 
+        saveDefaultConfig();
+
         if (getServer().getPluginManager().getPlugin("BanManager") != null) {
             getLogger().warning("BanManager is loaded on this server. Please remove it.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+
+        // setup storage
+        String mysqlHost = getConfig().getString("storage.mysql.host");
+        int mysqlPort = getConfig().getInt("storage.mysql.port");
+        String mysqlDatabase = getConfig().getString("storage.mysql.database");
+        String mysqlUsername = getConfig().getString("storage.mysql.username");
+        String mysqlPassword = getConfig().getString("storage.mysql.password");
+        storage = new MySQLStorage(mysqlHost, mysqlPort, mysqlDatabase, mysqlUsername, mysqlPassword.toCharArray());
+
+        // setup message manager
+        String redisHost = getConfig().getString("messaging.redis.host");
+        int redisPort = getConfig().getInt("messaging.redis.port");
+        messageManager = new RedisMessageManager(redisHost, redisPort);
 
         // new punishment commands
         NewPunishmentCommand newPunishmentCommand = new NewPunishmentCommand();

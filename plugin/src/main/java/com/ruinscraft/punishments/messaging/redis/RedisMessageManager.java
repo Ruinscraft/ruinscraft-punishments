@@ -16,6 +16,11 @@ public class RedisMessageManager implements MessageManager {
     private RedisMessageConsumer consumer;
     private RedisMessageDispatcher dispatcher;
 
+    public RedisMessageManager(String host, int port) {
+        consumer = new RedisMessageConsumer();
+        dispatcher = new RedisMessageDispatcher();
+    }
+
     @Override
     public MessageConsumer getConsumer() {
         return consumer;
