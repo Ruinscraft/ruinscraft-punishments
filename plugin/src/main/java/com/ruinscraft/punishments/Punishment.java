@@ -4,6 +4,9 @@ import com.ruinscraft.punishments.util.Duration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -47,6 +50,11 @@ public class Punishment {
 
     public long getInceptionTime() {
         return inceptionTime;
+    }
+
+    public String getInceptionTimeFormatted() {
+        DateFormat df = new SimpleDateFormat("MM/dd/yy");
+        return df.format(new Date(inceptionTime));
     }
 
     public long getExpirationTime() {
