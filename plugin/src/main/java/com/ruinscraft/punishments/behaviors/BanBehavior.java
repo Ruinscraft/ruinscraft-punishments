@@ -8,21 +8,21 @@ import com.ruinscraft.punishments.util.Messages;
 
 import java.util.StringJoiner;
 
-public class BanBehavior implements PunishmentBehavior {
+public class BanBehavior implements KickablePunishmentBehavior {
 
     @Override
     public void perform(Punishment punishment, PunishmentAction action) {
         switch (action) {
             case CREATE:
-                punishment.getOffenderPlayer().ifPresent(p -> p.kickPlayer(getKickMessage(punishment)));
+                punishment.kickOffender(getKickMessage(punishment));
                 break;
             case UNDO:
             case DELETE:
-                punishment.getOffenderPlayer().ifPresent(p ->
-                        p.sendMessage(Messages.COLOR_WARN + "A previous ban of yours has been deleted."));
+                punishment.sendMessageToOffender(Messages.COLOR_WARN + "A previous ban of yours has been deleted.");
                 break;
         }
-        notify(punishment, PunishmentType.BAN, action);
+
+        notifyServer(punishment, PunishmentType.BAN, action);
     }
 
     @Override

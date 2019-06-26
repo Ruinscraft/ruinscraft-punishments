@@ -12,6 +12,7 @@ public final class Duration {
             return "never";
         }
 
+        // Apache Commons Lang included with Minecraft
         return DurationFormatUtils.formatDurationWords(timeLeftMillis, true, true);
     }
 

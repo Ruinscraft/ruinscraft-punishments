@@ -1,5 +1,6 @@
 package com.ruinscraft.punishments;
 
+import com.ruinscraft.punishments.behaviors.BanBehavior;
 import com.ruinscraft.punishments.behaviors.PunishmentBehaviorRegistry;
 import com.ruinscraft.punishments.util.Messages;
 import org.bukkit.entity.Player;
@@ -14,16 +15,19 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPreJoin(AsyncPlayerPreLoginEvent event) {
-        try {
-            PunishmentProfile profile = PunishmentProfile.load(event.getUniqueId()).call();
+        PunishmentProfile profile;
 
-            if (profile.isBanned()) {
-                Punishment ban = profile.getActive(PunishmentType.BAN);
-                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED,
-                        PunishmentBehaviorRegistry.get(PunishmentType.BAN).getKickMessage(ban));
-            }
+        try {
+            profile = PunishmentProfile.load(event.getUniqueId()).call();
         } catch (Exception e) {
             e.printStackTrace();
+            return;
+        }
+
+        if (profile.isBanned()) {
+            Punishment ban = profile.getActive(PunishmentType.BAN);
+            BanBehavior banBehavior = (BanBehavior) PunishmentBehaviorRegistry.get(PunishmentType.BAN);
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, banBehavior.getKickMessage(ban));
         }
     }
 

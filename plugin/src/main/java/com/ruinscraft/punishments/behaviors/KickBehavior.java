@@ -7,21 +7,21 @@ import com.ruinscraft.punishments.util.Messages;
 
 import java.util.StringJoiner;
 
-public class KickBehavior implements PunishmentBehavior {
+public class KickBehavior implements KickablePunishmentBehavior {
 
     @Override
     public void perform(Punishment punishment, PunishmentAction action) {
         switch (action) {
             case CREATE:
-                punishment.getOffenderPlayer().ifPresent(p -> p.kickPlayer(getKickMessage(punishment)));
+                punishment.kickOffender(getKickMessage(punishment));
                 break;
             case UNDO:
             case DELETE:
-                punishment.getOffenderPlayer().ifPresent(p ->
-                        p.sendMessage(Messages.COLOR_WARN + "A previous kick of yours has been deleted."));
+                punishment.sendMessageToOffender(Messages.COLOR_WARN + "A previous kick of yours has been deleted.");
                 break;
         }
-        notify(punishment, PunishmentType.KICK, action);
+
+        notifyServer(punishment, PunishmentType.KICK, action);
     }
 
     @Override

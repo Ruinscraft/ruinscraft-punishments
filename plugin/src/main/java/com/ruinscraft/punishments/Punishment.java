@@ -87,6 +87,24 @@ public class Punishment {
         return Optional.ofNullable(Bukkit.getPlayer(offender));
     }
 
+    public boolean sendMessageToOffender(String msg) {
+        try {
+            Bukkit.getPlayer(offender).sendMessage(msg);
+        } catch (NullPointerException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean kickOffender(String kickMsg) {
+        try {
+            Bukkit.getPlayer(offender).kickPlayer(kickMsg);
+        } catch (NullPointerException e) {
+            return false;
+        }
+        return true;
+    }
+
     public PunishmentEntry entry(PunishmentType type) {
         return PunishmentEntry.of(this, type);
     }

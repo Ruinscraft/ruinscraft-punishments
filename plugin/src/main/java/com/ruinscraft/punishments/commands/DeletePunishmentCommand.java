@@ -31,7 +31,6 @@ public class DeletePunishmentCommand implements CommandExecutor {
         }
     }
 
-
     private boolean showHelp() {
         return true;
     }

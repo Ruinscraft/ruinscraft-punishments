@@ -1,6 +1,7 @@
 package com.ruinscraft.punishments.mojang;
 
 import com.google.gson.Gson;
+import com.ruinscraft.punishments.console;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,6 +23,7 @@ public final class AccountsAPI {
     }
 
     public static AccountsProfile getAccountsProfile(UUID uuid) throws IOException {
+        if (uuid.equals(console.UUID)) return CONSOLE_PROFILE;
         final String id = uuid.toString().replace("-", "");
         URL url = new URL(String.format(URL_MATCH_ID, id));
         try (InputStreamReader reader = new InputStreamReader(url.openStream())) {
@@ -34,6 +36,11 @@ public final class AccountsAPI {
         protected String name;
 
         private AccountsProfile() {
+        }
+
+        private AccountsProfile(String id, String name) {
+            this.id = id;
+            this.name = name;
         }
 
         public UUID getUniqueId() {
@@ -50,11 +57,13 @@ public final class AccountsAPI {
         }
     }
 
-    // uuid util
+    public static final AccountsProfile CONSOLE_PROFILE = new AccountsProfile(console.UUID.toString(), console.NAME);
+
+    // uuid util, Mojang-style UUIDs don't have dashes
     private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 
-    private static UUID formatFromInput(String uuid) {
-        return UUID.fromString(UUID_FIX.matcher(uuid.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
+    private static UUID formatFromInput(String uuidWithoutDashes) {
+        return UUID.fromString(UUID_FIX.matcher(uuidWithoutDashes.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
     }
 
 }

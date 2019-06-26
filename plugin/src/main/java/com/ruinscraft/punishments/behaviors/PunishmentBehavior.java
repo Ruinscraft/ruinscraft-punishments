@@ -12,7 +12,7 @@ public interface PunishmentBehavior {
 
     void perform(Punishment punishment, PunishmentAction action);
 
-    default void notify(Punishment punishment, PunishmentType type, PunishmentAction action) {
+    default void notifyServer(Punishment punishment, PunishmentType type, PunishmentAction action) {
         StringJoiner joiner = new StringJoiner(" ");
 
         switch (action) {
@@ -33,10 +33,6 @@ public interface PunishmentBehavior {
         }
 
         Bukkit.broadcastMessage(joiner.toString());
-    }
-
-    default String getKickMessage(Punishment punishment) {
-        return "";
     }
 
 }
