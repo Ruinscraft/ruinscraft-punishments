@@ -1,4 +1,3 @@
-package com.ruinscraft.punishments.util;
 
 import java.sql.*;
 import java.util.UUID;
