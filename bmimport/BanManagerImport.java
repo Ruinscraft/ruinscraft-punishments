@@ -16,7 +16,6 @@ public class BanManagerImport {
     public static void main(String[] args) {
         if (args.length < 2) {
             System.out.println("Missing arguments <username> and <password>");
-            System.out.println("Example: java -jar BMImport.jar root password");
             return;
         }
 
