@@ -60,6 +60,8 @@ public class PardonPunishmentCommand implements CommandExecutor {
                 return;
             }
 
+            active.setExpired();
+
             PunishmentAction.PARDON.call(PunishmentEntry.of(active, type));
 
             sender.sendMessage(Messages.COLOR_MAIN + "un" + type.getVerb() + " " + args[0] + ".");

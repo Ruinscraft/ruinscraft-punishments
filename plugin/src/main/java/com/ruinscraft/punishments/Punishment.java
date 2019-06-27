@@ -61,6 +61,14 @@ public class Punishment {
         return expirationTime;
     }
 
+    public void setExpirationTime(long expirationTime) {
+        this.expirationTime = expirationTime;
+    }
+
+    public void setExpired() {
+        this.expirationTime = -1;
+    }
+
     public boolean isTemporary() {
         return expirationTime != -1L;
     }
@@ -77,6 +85,10 @@ public class Punishment {
 
     public String getReason() {
         return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     public String getRemainingDurationWords() {

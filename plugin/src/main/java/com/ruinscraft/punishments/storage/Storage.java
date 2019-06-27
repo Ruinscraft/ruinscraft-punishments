@@ -1,9 +1,7 @@
 package com.ruinscraft.punishments.storage;
 
-import com.ruinscraft.punishments.Punishment;
 import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentEntry;
-import com.ruinscraft.punishments.PunishmentType;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +15,7 @@ public interface Storage {
                 insert(entry).call();
                 return;
             case PARDON:
+                update(entry).call();
             case DELETE:
                 delete(entry.punishment.getPunishmentId()).call();
                 return;
@@ -25,11 +24,11 @@ public interface Storage {
 
     Callable<Void> insert(PunishmentEntry entry);
 
+    Callable<Void> update(PunishmentEntry entry);
+
     Callable<Void> delete(int punishmentId);
 
     Callable<List<PunishmentEntry>> query(UUID offender);
-
-    Callable<List<Punishment>> queryByType(UUID offender, PunishmentType type);
 
     default void close() {
     }

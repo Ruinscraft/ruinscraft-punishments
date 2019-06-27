@@ -14,6 +14,8 @@ public class MuteBehavior implements PunishmentBehavior {
                 punishment.sendMessageToOffender(Messages.COLOR_WARN + "You have been muted. Reason: " + punishment.getReason());
                 break;
             case PARDON:
+                punishment.sendMessageToOffender(Messages.COLOR_WARN + "Your current mute has been pardoned.");
+                break;
             case DELETE:
                 punishment.sendMessageToOffender(Messages.COLOR_WARN + "A previous mute of yours has been deleted.");
                 break;

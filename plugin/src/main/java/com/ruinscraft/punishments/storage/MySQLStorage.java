@@ -84,6 +84,24 @@ public class MySQLStorage implements SQLStorage {
     }
 
     @Override
+    public Callable<Void> update(PunishmentEntry entry) {
+        return () -> {
+            if (entry.punishment.getPunishmentId() == 0) {
+                return null; // punishment not in database
+            }
+
+            try (PreparedStatement update = getConnection().prepareStatement(
+                    "UPDATE " + Table.PUNISHMENTS + " SET expiration_time = ?, reason = ? WHERE punishment_id = ?;")) {
+                update.setLong(1, entry.punishment.getExpirationTime());
+                update.setString(2, entry.punishment.getReason());
+                update.setInt(3, entry.punishment.getPunishmentId());
+                update.execute();
+            }
+            return null;
+        };
+    }
+
+    @Override
     public Callable<Void> delete(int punishmentId) {
         return () -> {
             try (PreparedStatement delete = getConnection().prepareStatement(
@@ -129,18 +147,6 @@ public class MySQLStorage implements SQLStorage {
     }
 
     @Override
-    public Callable<List<Punishment>> queryByType(UUID offender, PunishmentType type) {
-        return () -> {
-
-            try (PreparedStatement query = getConnection().prepareStatement("")) {
-
-            }
-
-            return null;
-        };
-    }
-
-    @Override
     public void close() {
         try {
             if (connection != null && !connection.isClosed()) {
@@ -150,4 +156,5 @@ public class MySQLStorage implements SQLStorage {
             e.printStackTrace();
         }
     }
+
 }

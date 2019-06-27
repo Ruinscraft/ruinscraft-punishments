@@ -13,7 +13,6 @@ public class WarnBehavior implements PunishmentBehavior {
             case CREATE:
                 punishment.sendMessageToOffender(Messages.COLOR_WARN + "You have been warned. Reason: " + punishment.getReason());
                 break;
-            case PARDON:
             case DELETE:
                 punishment.sendMessageToOffender(Messages.COLOR_WARN + "A previous warn of yours has been deleted.");
                 break;

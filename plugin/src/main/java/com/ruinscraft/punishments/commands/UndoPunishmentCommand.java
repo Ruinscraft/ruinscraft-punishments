@@ -4,6 +4,7 @@ import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentEntry;
 import com.ruinscraft.punishments.TransientPunisherHistory;
 import com.ruinscraft.punishments.console;
+import com.ruinscraft.punishments.util.Messages;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,19 +18,22 @@ public class UndoPunishmentCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         final UUID punisher;
 
-        if (!(sender instanceof Player)) {
-            punisher = console.UUID;
-        } else {
+        if (sender instanceof Player) {
             punisher = ((Player) sender).getUniqueId();
+        } else {
+            punisher = console.UUID;
         }
 
-        PunishmentEntry last = TransientPunisherHistory.getLast(punisher);
+        PunishmentEntry entry = TransientPunisherHistory.getLast(punisher);
 
-        if (last == null) {
+        if (entry == null) {
+            sender.sendMessage(Messages.COLOR_WARN + "No punishment history. Did the server reboot?");
             return true;
         }
 
-        last.call(PunishmentAction.PARDON);
+        entry.call(PunishmentAction.DELETE);
+
+        sender.sendMessage(Messages.COLOR_MAIN + "The " + entry.type.name() + " has been deleted.");
 
         return true;
     }

@@ -17,6 +17,8 @@ public class BanBehavior implements KickablePunishmentBehavior {
                 punishment.kickOffender(getKickMessage(punishment));
                 break;
             case PARDON:
+                punishment.sendMessageToOffender(Messages.COLOR_WARN + "Your current ban has been pardoned.");
+                break;
             case DELETE:
                 punishment.sendMessageToOffender(Messages.COLOR_WARN + "A previous ban of yours has been deleted.");
                 break;

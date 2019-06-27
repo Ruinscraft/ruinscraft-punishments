@@ -15,7 +15,6 @@ public class KickBehavior implements KickablePunishmentBehavior {
             case CREATE:
                 punishment.kickOffender(getKickMessage(punishment));
                 break;
-            case PARDON:
             case DELETE:
                 punishment.sendMessageToOffender(Messages.COLOR_WARN + "A previous kick of yours has been deleted.");
                 break;
