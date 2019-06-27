@@ -23,13 +23,7 @@ public class NewPunishmentCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         boolean temporary = label.toLowerCase().startsWith("temp");
 
-        PunishmentType type = null;
-
-        for (PunishmentType _type : PunishmentType.values()) {
-            if (label.toUpperCase().contains(_type.name())) {
-                type = _type;
-            }
-        }
+        PunishmentType type = PunishmentType.match(label);
 
         if (type == null) {
             throw new IllegalStateException("PunishmentType was null");

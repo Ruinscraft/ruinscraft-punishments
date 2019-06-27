@@ -5,7 +5,7 @@ import com.ruinscraft.punishments.messaging.Message;
 import com.ruinscraft.punishments.util.Tasks;
 
 public enum PunishmentAction {
-    CREATE, UNDO, DELETE;
+    CREATE, PARDON, DELETE;
 
     public void call(PunishmentEntry entry) {
         Tasks.async(() -> {

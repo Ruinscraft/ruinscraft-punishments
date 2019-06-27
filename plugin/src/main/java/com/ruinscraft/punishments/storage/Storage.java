@@ -16,7 +16,7 @@ public interface Storage {
             case CREATE:
                 insert(entry).call();
                 return;
-            case UNDO:
+            case PARDON:
             case DELETE:
                 delete(entry.punishment.getPunishmentId()).call();
                 return;

@@ -27,7 +27,7 @@ public interface PunishmentBehavior {
                     joiner.add(punishment.getRemainingDurationWords());
                 }
                 break;
-            case UNDO:
+            case PARDON:
             case DELETE:
                 break;
         }
