@@ -16,7 +16,7 @@ public class QueryPunishmentCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0 && sender instanceof Player) {
-            args[0] = sender.getName();
+            args = new String[]{sender.getName()};
         }
 
         sender.sendMessage(Messages.COLOR_MAIN + "Looking up punishment profile for " + args[0] + "...");

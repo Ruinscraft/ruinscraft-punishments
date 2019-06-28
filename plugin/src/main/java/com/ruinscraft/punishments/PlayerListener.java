@@ -3,6 +3,7 @@ package com.ruinscraft.punishments;
 import com.ruinscraft.punishments.behaviors.BanBehavior;
 import com.ruinscraft.punishments.behaviors.PunishmentBehaviorRegistry;
 import com.ruinscraft.punishments.util.Messages;
+import com.ruinscraft.punishments.util.Tasks;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -38,7 +39,8 @@ public class PlayerListener implements Listener {
         PunishmentProfile profile = PunishmentProfile.get(player.getUniqueId());
 
         if (profile.hasExcessiveAmount()) {
-            player.sendMessage(Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments.");
+            Tasks.syncLater(() -> player.sendMessage(Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments."),
+                    3 * 20L);
         }
     }
 

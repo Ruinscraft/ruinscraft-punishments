@@ -14,4 +14,8 @@ public final class Tasks {
         plugin.getServer().getScheduler().runTask(plugin, task);
     }
 
+    public static void syncLater(Runnable task, long delay) {
+        plugin.getServer().getScheduler().runTaskLater(plugin, task, delay);
+    }
+
 }
