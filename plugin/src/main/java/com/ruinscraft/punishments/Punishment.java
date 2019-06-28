@@ -66,7 +66,7 @@ public class Punishment {
     }
 
     public void setExpired() {
-        this.expirationTime = -1;
+        this.expirationTime = System.currentTimeMillis();
     }
 
     public boolean isTemporary() {
@@ -93,6 +93,10 @@ public class Punishment {
 
     public String getRemainingDurationWords() {
         return Duration.getRemainingDurationWords(this);
+    }
+
+    public String getTotalDurationWords() {
+        return Duration.getTotalDurationWords(this);
     }
 
     public Optional<Player> getOffenderPlayer() {

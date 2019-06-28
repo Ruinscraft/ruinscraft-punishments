@@ -29,6 +29,7 @@ public class PardonPunishmentCommand implements CommandExecutor {
 
             try {
                 target = PlayerLookups.getUniqueId(args[0]).call();
+                args[0] = PlayerLookups.getName(target).call();
             } catch (Exception e) {
                 e.printStackTrace();
                 return;
@@ -64,7 +65,7 @@ public class PardonPunishmentCommand implements CommandExecutor {
 
             PunishmentAction.PARDON.call(PunishmentEntry.of(active, type));
 
-            sender.sendMessage(Messages.COLOR_MAIN + "un" + type.getVerb() + " " + args[0] + ".");
+            sender.sendMessage(Messages.COLOR_MAIN + "Un" + type.getVerb() + " " + args[0] + ".");
         });
 
         return true;

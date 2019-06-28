@@ -33,7 +33,7 @@ public class UndoPunishmentCommand implements CommandExecutor {
 
         entry.call(PunishmentAction.DELETE);
 
-        sender.sendMessage(Messages.COLOR_MAIN + "The " + entry.type.name() + " has been deleted.");
+        sender.sendMessage(Messages.COLOR_MAIN + "The " + entry.type.getNoun() + " has been deleted.");
 
         return true;
     }

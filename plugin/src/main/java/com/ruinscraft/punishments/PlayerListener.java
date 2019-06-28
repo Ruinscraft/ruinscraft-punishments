@@ -9,6 +9,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerListener implements Listener {
@@ -28,6 +29,16 @@ public class PlayerListener implements Listener {
             Punishment ban = profile.getActive(PunishmentType.BAN);
             BanBehavior banBehavior = (BanBehavior) PunishmentBehaviorRegistry.get(PunishmentType.BAN);
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, banBehavior.getKickMessage(ban));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        PunishmentProfile profile = PunishmentProfile.get(player.getUniqueId());
+
+        if (profile.hasExcessiveAmount()) {
+            player.sendMessage(Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments.");
         }
     }
 

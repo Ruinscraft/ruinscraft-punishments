@@ -29,7 +29,7 @@ public interface PunishmentBehavior {
                 break;
             case PARDON:
             case DELETE:
-                break;
+                return;
         }
 
         Bukkit.broadcastMessage(joiner.toString());

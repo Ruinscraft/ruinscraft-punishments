@@ -1,6 +1,7 @@
 package com.ruinscraft.punishments;
 
 import com.ruinscraft.punishments.util.Messages;
+import org.apache.commons.lang.WordUtils;
 import org.bukkit.command.CommandSender;
 
 import java.util.*;
@@ -18,7 +19,9 @@ public class PunishmentProfile {
     public static Callable<PunishmentProfile> load(UUID uuid) {
         return () -> {
             PunishmentProfile profile = new PunishmentProfile(uuid);
-            profile.punishments = PunishmentsPlugin.get().getStorage().query(uuid).call();
+            for (PunishmentEntry entry : PunishmentsPlugin.get().getStorage().query(uuid).call()) {
+                profile.punishments.put(entry.punishment.getPunishmentId(), entry);
+            }
             cache.put(uuid, profile);
             return profile;
         };
@@ -38,11 +41,11 @@ public class PunishmentProfile {
     }
 
     private final UUID uuid;
-    private List<PunishmentEntry> punishments;
+    private Map<Integer, PunishmentEntry> punishments;
 
     public PunishmentProfile(UUID uuid) {
         this.uuid = uuid;
-        this.punishments = new ArrayList<>();
+        this.punishments = new HashMap<>();
     }
 
     public boolean isMuted() {
@@ -55,6 +58,7 @@ public class PunishmentProfile {
 
     public List<Punishment> getByType(PunishmentType type) {
         return punishments
+                .values()
                 .stream()
                 .filter(entry -> entry.type == type)
                 .map(t -> t.punishment)
@@ -68,24 +72,45 @@ public class PunishmentProfile {
                 .collect(Collectors.toList()).stream().findFirst().orElse(null);
     }
 
+    public boolean hasExcessiveAmount() {
+        return punishments.size() > 25;
+    }
+
+    public void update(PunishmentEntry entry, PunishmentAction action) {
+        switch (action) {
+            case CREATE:
+            case PARDON:
+                punishments.put(entry.punishment.getPunishmentId(), entry);
+                break;
+            case DELETE:
+                punishments.remove(entry.punishment.getPunishmentId());
+                break;
+        }
+    }
+
     private static final String offset = "    ";
 
     public void show(CommandSender caller) {
-        caller.sendMessage(Messages.COLOR_MAIN + "Kicks");
-        for (Punishment kick : getByType(PunishmentType.KICK)) {
-            caller.sendMessage(Messages.COLOR_WARN + offset + kick.getInceptionTimeFormatted() + " : " + kick.getReason());
-        }
-        caller.sendMessage(Messages.COLOR_MAIN + "Warns");
-        for (Punishment warn : getByType(PunishmentType.WARN)) {
-            caller.sendMessage(Messages.COLOR_WARN + offset + warn.getInceptionTimeFormatted() + " : " + warn.getReason());
-        }
-        caller.sendMessage(Messages.COLOR_MAIN + "Mutes");
-        for (Punishment mute : getByType(PunishmentType.MUTE)) {
-            caller.sendMessage(Messages.COLOR_WARN + offset + mute.getInceptionTimeFormatted() + " : " + mute.getReason());
-        }
-        caller.sendMessage(Messages.COLOR_MAIN + "Bans");
-        for (Punishment ban : getByType(PunishmentType.BAN)) {
-            caller.sendMessage(Messages.COLOR_WARN + offset + ban.getInceptionTimeFormatted() + " : " + ban.getReason());
+        for (PunishmentType type : PunishmentType.values()) {
+            final List<Punishment> punishments = getByType(type);
+
+            caller.sendMessage(Messages.COLOR_MAIN + WordUtils.capitalize(type.getPlural()) + " (" + punishments.size() + "):");
+
+            for (Punishment punishment : getByType(type)) {
+                StringJoiner joiner = new StringJoiner(" ");
+
+                joiner.add(Messages.COLOR_WARN + offset);
+                joiner.add(punishment.getInceptionTimeFormatted());
+
+                if (type.canBeTemporary()) {
+                    joiner.add("[" + punishment.getTotalDurationWords() + "]");
+                }
+
+                joiner.add(":");
+                joiner.add(punishment.getReason());
+
+                caller.sendMessage(joiner.toString());
+            }
         }
     }
 

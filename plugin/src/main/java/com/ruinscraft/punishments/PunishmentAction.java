@@ -21,9 +21,12 @@ public enum PunishmentAction {
         });
     }
 
-    public void propegate(PunishmentEntry entry) {
+    public void propagate(PunishmentEntry entry) {
         Tasks.sync(() -> {
             TransientPunisherHistory.insert(entry);
+            if (PunishmentProfile.get(entry.punishment.getOffender()) != null) {
+                PunishmentProfile.get(entry.punishment.getOffender()).update(entry, this);
+            }
             PunishmentBehaviorRegistry.get(entry.type).perform(entry.punishment, this);
         });
     }

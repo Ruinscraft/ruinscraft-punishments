@@ -6,14 +6,18 @@ import org.apache.commons.lang.time.DurationFormatUtils;
 public final class Duration {
 
     public static String getRemainingDurationWords(Punishment punishment) {
-        final long timeLeftMillis = punishment.getTimeLeftMillis();
-
-        if (timeLeftMillis == 0L) {
+        if (punishment.getTimeLeftMillis() == 0L) {
             return "never";
         }
+        return DurationFormatUtils.formatDurationWords(punishment.getTimeLeftMillis(), true, true);
+    }
 
-        // Apache Commons Lang included with Minecraft
-        return DurationFormatUtils.formatDurationWords(timeLeftMillis, true, true);
+    public static String getTotalDurationWords(Punishment punishment) {
+        if (punishment.getExpirationTime() == -1) {
+            return "forever";
+        }
+        final long duration = punishment.getExpirationTime() - punishment.getInceptionTime();
+        return DurationFormatUtils.formatDurationWords(duration, true, true);
     }
 
 }

@@ -52,7 +52,7 @@ public final class PlayerLookups {
 
             final UUID uuid = accountsProfile.getUniqueId();
 
-            name_uuid_cache.put(name, uuid);
+            name_uuid_cache.put(accountsProfile.getName(), uuid);
 
             return uuid;
         };

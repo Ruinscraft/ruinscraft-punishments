@@ -13,12 +13,13 @@ public interface Storage {
         switch (action) {
             case CREATE:
                 insert(entry).call();
-                return;
+                break;
             case PARDON:
                 update(entry).call();
+                break;
             case DELETE:
                 delete(entry.punishment.getPunishmentId()).call();
-                return;
+                break;
         }
     }
 
