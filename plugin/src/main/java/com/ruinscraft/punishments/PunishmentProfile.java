@@ -73,6 +73,23 @@ public class PunishmentProfile {
                 .collect(Collectors.toList()).stream().findFirst().orElse(null);
     }
 
+    public PunishmentEntry getMostRecent() {
+        PunishmentEntry mostRecent = null;
+
+        for (PunishmentEntry entry : punishments.values()) {
+            if (mostRecent == null) {
+                mostRecent = entry;
+                continue;
+            }
+
+            if (entry.punishment.getInceptionTime() > mostRecent.punishment.getInceptionTime()) {
+                mostRecent = entry;
+            }
+        }
+
+        return mostRecent;
+    }
+
     public boolean hasExcessiveAmount() {
         return punishments.size() > 25;
     }

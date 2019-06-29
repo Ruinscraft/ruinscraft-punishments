@@ -3,6 +3,7 @@ package com.ruinscraft.punishments.commands;
 import com.ruinscraft.punishments.*;
 import com.ruinscraft.punishments.util.Duration;
 import com.ruinscraft.punishments.util.Messages;
+import com.ruinscraft.punishments.util.Tasks;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -10,6 +11,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class NewPunishmentCommand implements CommandExecutor {
 
@@ -77,16 +79,35 @@ public class NewPunishmentCommand implements CommandExecutor {
             punisher = console.UUID;
         }
 
-        Punishment.builder()
-                .serverContext(PunishmentsPlugin.getServerContext())
-                .punisher(punisher)
-                .offender(target)
-                .offenderUsername(args[0])
-                .duration(duration)
-                .reason(reason)
-                .build()
-                .entry(type)
-                .call(PunishmentAction.CREATE);
+        final long finalDuration = duration;
+
+        Tasks.async(() -> {
+            try {
+                PunishmentProfile targetProfile = PunishmentProfile.getOrLoad(target).call();
+
+                if (targetProfile.getMostRecent() != null) {
+                    long timeDiff = System.currentTimeMillis() - targetProfile.getMostRecent().punishment.getInceptionTime();
+                    if (timeDiff < TimeUnit.SECONDS.toMillis(5)) {
+                        sender.sendMessage(Messages.COLOR_WARN + "This user was just punished. Wait a few seconds.");
+                        return;
+                    }
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            Punishment.builder()
+                    .serverContext(PunishmentsPlugin.getServerContext())
+                    .punisher(punisher)
+                    .offender(target)
+                    .offenderUsername(args[0])
+                    .duration(finalDuration)
+                    .reason(reason)
+                    .build()
+                    .entry(type)
+                    .call(PunishmentAction.CREATE);
+        });
 
         return true;
     }
