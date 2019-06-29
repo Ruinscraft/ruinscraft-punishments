@@ -13,6 +13,7 @@ import java.util.UUID;
 public class Punishment {
 
     private int punishmentId;
+    private String serverContext;
     private UUID punisher;
     private UUID offender;
     private String offenderUsername;
@@ -30,6 +31,14 @@ public class Punishment {
 
     public int getPunishmentId() {
         return punishmentId;
+    }
+
+    public String getServerContext() {
+        return serverContext;
+    }
+
+    public boolean isInContext() {
+        return getServerContext().equals(PunishmentsPlugin.get());
     }
 
     public UUID getPunisher() {
@@ -143,6 +152,11 @@ public class Punishment {
         private PunishmentBuilder(int punishmentId) {
             build = new Punishment();
             build.punishmentId = punishmentId;
+        }
+
+        public PunishmentBuilder serverContext(String serverContext) {
+            build.serverContext = serverContext;
+            return this;
         }
 
         public PunishmentBuilder punisher(UUID punisher) {

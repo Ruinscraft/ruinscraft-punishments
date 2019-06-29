@@ -1,3 +1,5 @@
+server-context: primary # change this for servers off the primary network
+
 storage:
   mysql:
     use: true

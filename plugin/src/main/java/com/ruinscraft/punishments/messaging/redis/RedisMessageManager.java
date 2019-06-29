@@ -11,6 +11,9 @@ public class RedisMessageManager implements MessageManager {
 
     protected static final String REDIS_CHANNEL = "rcpunishments";
 
+    private final String host;
+    private final int port;
+
     private RedisMessageConsumer consumer;
     private RedisMessageDispatcher dispatcher;
 
@@ -18,6 +21,9 @@ public class RedisMessageManager implements MessageManager {
     private Jedis subscriber;
 
     public RedisMessageManager(String host, int port) {
+        this.host = host;
+        this.port = port;
+
         consumer = new RedisMessageConsumer();
         dispatcher = new RedisMessageDispatcher(this);
         pool = new JedisPool(host, port);
@@ -54,6 +60,9 @@ public class RedisMessageManager implements MessageManager {
     }
 
     protected JedisPool getPool() {
+        if (pool == null || pool.isClosed()) {
+            pool = new JedisPool(host, port);
+        }
         return pool;
     }
 

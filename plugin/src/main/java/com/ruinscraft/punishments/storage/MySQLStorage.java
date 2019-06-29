@@ -31,6 +31,7 @@ public class MySQLStorage implements SQLStorage {
                 "CREATE TABLE IF NOT EXISTS " +
                         Table.PUNISHMENTS +
                         " (punishment_id INT NOT NULL AUTO_INCREMENT, " +
+                        "server_context VARCHAR(64), " +
                         "punishment_type VARCHAR(12), " +
                         "punisher VARCHAR(36), " +
                         "offender VARCHAR(36), " +
@@ -63,14 +64,15 @@ public class MySQLStorage implements SQLStorage {
         return () -> {
             try (PreparedStatement insert = getConnection().prepareStatement(
                     "INSERT INTO " + Table.PUNISHMENTS +
-                            " (punishment_type, punisher, offender, inception_time, expiration_time, reason)" +
-                            " VALUES (?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
-                insert.setString(1, entry.type.name());
-                insert.setString(2, entry.punishment.getPunisher().toString());
-                insert.setString(3, entry.punishment.getOffender().toString());
-                insert.setLong(4, entry.punishment.getInceptionTime());
-                insert.setLong(5, entry.punishment.getExpirationTime());
-                insert.setString(6, entry.punishment.getReason());
+                            " (server_context, punishment_type, punisher, offender, inception_time, expiration_time, reason)" +
+                            " VALUES (?, ?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
+                insert.setString(1, entry.punishment.getServerContext());
+                insert.setString(2, entry.type.name());
+                insert.setString(3, entry.punishment.getPunisher().toString());
+                insert.setString(4, entry.punishment.getOffender().toString());
+                insert.setLong(5, entry.punishment.getInceptionTime());
+                insert.setLong(6, entry.punishment.getExpirationTime());
+                insert.setString(7, entry.punishment.getReason());
                 insert.execute();
                 try (ResultSet rs = insert.getGeneratedKeys()) {
                     while (rs.next()) {
@@ -125,12 +127,14 @@ public class MySQLStorage implements SQLStorage {
                 try (ResultSet rs = query.executeQuery()) {
                     while (rs.next()) {
                         int punishmentId = rs.getInt("punishment_id");
+                        String serverContext = rs.getString("server_context");
                         PunishmentType type = PunishmentType.valueOf(rs.getString("punishment_type"));
                         UUID punisher = UUID.fromString(rs.getString("punisher"));
                         long inceptionTime = rs.getLong("inception_time");
                         long expirationTime = rs.getLong("expiration_time");
                         String reason = rs.getString("reason");
                         Punishment punishment = Punishment.builder(punishmentId)
+                                .serverContext(serverContext)
                                 .punisher(punisher)
                                 .inceptionTime(inceptionTime)
                                 .expirationTime(expirationTime)

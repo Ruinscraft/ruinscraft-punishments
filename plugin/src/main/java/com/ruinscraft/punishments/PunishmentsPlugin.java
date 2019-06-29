@@ -5,6 +5,7 @@ import com.ruinscraft.punishments.messaging.MessageManager;
 import com.ruinscraft.punishments.messaging.redis.RedisMessageManager;
 import com.ruinscraft.punishments.storage.MySQLStorage;
 import com.ruinscraft.punishments.storage.Storage;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PunishmentsPlugin extends JavaPlugin {
@@ -55,12 +56,24 @@ public class PunishmentsPlugin extends JavaPlugin {
 
         // new punishment commands
         NewPunishmentCommand newPunishmentCommand = new NewPunishmentCommand();
-        getCommand("kick").setExecutor(newPunishmentCommand);
-        getCommand("warn").setExecutor(newPunishmentCommand);
-        getCommand("mute").setExecutor(newPunishmentCommand);
-        getCommand("tempmute").setExecutor(newPunishmentCommand);
-        getCommand("ban").setExecutor(newPunishmentCommand);
-        getCommand("tempban").setExecutor(newPunishmentCommand);
+
+        PluginCommand kickCommand = getCommand("kick");
+        kickCommand.setExecutor(newPunishmentCommand);
+
+        PluginCommand warnCommand = getCommand("warn");
+        warnCommand.setExecutor(newPunishmentCommand);
+
+        PluginCommand muteCommand = getCommand("mute");
+        muteCommand.setExecutor(newPunishmentCommand);
+
+        PluginCommand tempMuteCommand = getCommand("tempmute");
+        tempMuteCommand.setExecutor(newPunishmentCommand);
+
+        PluginCommand banCommand = getCommand("ban");
+        banCommand.setExecutor(newPunishmentCommand);
+
+        PluginCommand tempBanCommand = getCommand("tempban");
+        tempBanCommand.setExecutor(newPunishmentCommand);
 
         // pardon punishment commands (unmute, unban)
         PardonPunishmentCommand pardonPunishmentCommand = new PardonPunishmentCommand();
@@ -94,6 +107,10 @@ public class PunishmentsPlugin extends JavaPlugin {
         }
 
         singleton = null;
+    }
+
+    public static String getServerContext() {
+        return get().getConfig().getString("server-context");
     }
 
     private static PunishmentsPlugin singleton;

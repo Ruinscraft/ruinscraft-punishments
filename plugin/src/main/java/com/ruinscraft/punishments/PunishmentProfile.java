@@ -68,6 +68,7 @@ public class PunishmentProfile {
     public Punishment getActive(PunishmentType type) {
         return getByType(type)
                 .stream()
+                .filter(p -> p.isInContext())
                 .filter(p -> p.getExpirationTime() == -1L || (System.currentTimeMillis() < p.getExpirationTime()))
                 .collect(Collectors.toList()).stream().findFirst().orElse(null);
     }
@@ -101,6 +102,10 @@ public class PunishmentProfile {
 
                 joiner.add(Messages.COLOR_WARN + offset);
                 joiner.add(punishment.getInceptionTimeFormatted());
+
+                if (!punishment.getServerContext().equals("primary")) {
+                    joiner.add("[" + punishment.getServerContext() + "]");
+                }
 
                 if (type.canBeTemporary()) {
                     joiner.add("[" + punishment.getTotalDurationWords() + "]");
