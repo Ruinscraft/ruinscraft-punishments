@@ -31,7 +31,7 @@ public class MySQLStorage implements SQLStorage {
                 "CREATE TABLE IF NOT EXISTS " +
                         Table.PUNISHMENTS +
                         " (punishment_id INT NOT NULL AUTO_INCREMENT, " +
-                        "server_context VARCHAR(64), " +
+                        "server_context VARCHAR(64) DEFAULT 'primary', " +
                         "punishment_type VARCHAR(12), " +
                         "punisher VARCHAR(36), " +
                         "offender VARCHAR(36), " +
