@@ -69,8 +69,8 @@ public class BanManagerImport {
                 while (rs.next()) {
                     UUID offender = formatFromInput(rs.getString("offender"));
                     UUID punisher = formatFromInput(rs.getString("punisher"));
-                    long created = rs.getLong("created");
-                    long expires = rs.getLong("expires");
+                    long created = rs.getLong("created") * 1000;
+                    long expires = rs.getLong("expires") * 1000;
                     if (expires == 0) {
                         expires = -1L;
                     }
@@ -102,8 +102,8 @@ public class BanManagerImport {
                 while (rs.next()) {
                     UUID offender = formatFromInput(rs.getString("offender"));
                     UUID punisher = formatFromInput(rs.getString("punisher"));
-                    long created = rs.getLong("created");
-                    long expires = rs.getLong("expires");
+                    long created = rs.getLong("created") * 1000;
+                    long expires = rs.getLong("expires") * 1000;
                     if (expires == 0) {
                         expires = -1L;
                     }
@@ -135,8 +135,8 @@ public class BanManagerImport {
                 while (rs.next()) {
                     UUID offender = formatFromInput(rs.getString("offender"));
                     UUID punisher = formatFromInput(rs.getString("punisher"));
-                    long created = rs.getLong("created");
-                    long expires = rs.getLong("expires");
+                    long created = rs.getLong("created") * 1000;
+                    long expires = rs.getLong("expires") * 1000;
                     if (expires == 0) {
                         expires = -1L;
                     }
