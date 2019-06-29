@@ -94,8 +94,14 @@ public class PunishmentProfile {
     public void show(CommandSender caller) {
         for (PunishmentType type : PunishmentType.values()) {
             final List<Punishment> punishments = getByType(type);
+            boolean truncate = punishments.size() > 30;
 
             caller.sendMessage(Messages.COLOR_MAIN + WordUtils.capitalize(type.getPlural()) + " (" + punishments.size() + "):");
+
+            if (truncate) {
+                caller.sendMessage(Messages.COLOR_WARN + offset + "Too many to show (consider following the rules)");
+                continue;
+            }
 
             for (Punishment punishment : getByType(type)) {
                 StringJoiner joiner = new StringJoiner(" ");

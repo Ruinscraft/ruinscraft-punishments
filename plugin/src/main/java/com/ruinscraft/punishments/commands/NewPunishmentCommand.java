@@ -1,6 +1,7 @@
 package com.ruinscraft.punishments.commands;
 
 import com.ruinscraft.punishments.*;
+import com.ruinscraft.punishments.util.Duration;
 import com.ruinscraft.punishments.util.Messages;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -58,10 +59,10 @@ public class NewPunishmentCommand implements CommandExecutor {
 
         if (temporary) {
             try {
-                duration = Long.parseLong(args[1]);
+                duration = Duration.getDurationFromWords(args[1]);
                 reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
-            } catch (NumberFormatException e) {
-                sender.sendMessage("Invalid duration.");
+            } catch (Exception e) {
+                sender.sendMessage(Messages.COLOR_WARN + "Invalid duration.");
                 return false;
             }
         } else {
@@ -77,6 +78,7 @@ public class NewPunishmentCommand implements CommandExecutor {
         }
 
         Punishment.builder()
+                .serverContext(PunishmentsPlugin.getServerContext())
                 .punisher(punisher)
                 .offender(target)
                 .offenderUsername(args[0])

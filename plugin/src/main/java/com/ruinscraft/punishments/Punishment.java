@@ -38,7 +38,7 @@ public class Punishment {
     }
 
     public boolean isInContext() {
-        return getServerContext().equals(PunishmentsPlugin.get());
+        return getServerContext().equals(PunishmentsPlugin.getServerContext());
     }
 
     public UUID getPunisher() {

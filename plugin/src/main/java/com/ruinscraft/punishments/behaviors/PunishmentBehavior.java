@@ -21,7 +21,7 @@ public interface PunishmentBehavior {
                 joiner.add("has been");
                 joiner.add(type.getVerb());
                 joiner.add("for");
-                joiner.add(punishment.getReason());
+                joiner.add(punishment.getReason() + ".");
                 if (punishment.isTemporary()) {
                     joiner.add("Expires in:");
                     joiner.add(punishment.getRemainingDurationWords());
