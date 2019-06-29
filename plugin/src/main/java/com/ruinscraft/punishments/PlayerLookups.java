@@ -31,6 +31,7 @@ public final class PlayerLookups {
             final String name = accountsProfile.getName();
 
             uuid_name_cache.put(uuid, name);
+            name_uuid_cache.put(name, uuid);
 
             return name;
         };
@@ -53,6 +54,7 @@ public final class PlayerLookups {
             final UUID uuid = accountsProfile.getUniqueId();
 
             name_uuid_cache.put(accountsProfile.getName(), uuid);
+            uuid_name_cache.put(uuid, accountsProfile.getName());
 
             return uuid;
         };
