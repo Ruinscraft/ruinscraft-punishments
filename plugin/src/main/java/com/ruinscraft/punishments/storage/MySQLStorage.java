@@ -58,7 +58,6 @@ public class MySQLStorage implements SQLStorage {
         return connection;
     }
 
-
     @Override
     public Callable<Void> insert(PunishmentEntry entry) {
         return () -> {
