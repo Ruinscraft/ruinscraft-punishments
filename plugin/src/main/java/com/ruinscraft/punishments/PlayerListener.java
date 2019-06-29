@@ -33,7 +33,7 @@ public class PlayerListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         PunishmentProfile profile = PunishmentProfile.get(player.getUniqueId());
@@ -44,12 +44,12 @@ public class PlayerListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         PunishmentProfile.unload(event.getPlayer().getUniqueId());
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         PunishmentProfile profile = PunishmentProfile.get(player.getUniqueId());

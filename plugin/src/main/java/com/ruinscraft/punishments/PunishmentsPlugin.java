@@ -5,7 +5,10 @@ import com.ruinscraft.punishments.messaging.MessageManager;
 import com.ruinscraft.punishments.messaging.redis.RedisMessageManager;
 import com.ruinscraft.punishments.storage.MySQLStorage;
 import com.ruinscraft.punishments.storage.Storage;
+import com.ruinscraft.punishments.util.Tasks;
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PunishmentsPlugin extends JavaPlugin {
@@ -94,10 +97,24 @@ public class PunishmentsPlugin extends JavaPlugin {
 
         // register listeners
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+
+        Tasks.async(() -> {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                try {
+                    PunishmentProfile.load(player.getUniqueId()).call();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
     public void onDisable() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            PunishmentProfile.unload(player.getUniqueId());
+        }
+
         if (storage != null) {
             storage.close();
         }

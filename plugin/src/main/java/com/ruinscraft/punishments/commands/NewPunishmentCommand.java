@@ -41,47 +41,48 @@ public class NewPunishmentCommand implements CommandExecutor {
     }
 
     private boolean createPunishment(CommandSender sender, String args[], PunishmentType type, boolean temporary) {
-        final UUID target;
-
-        try {
-            target = PlayerLookups.getUniqueId(args[0]).call();
-            args[0] = PlayerLookups.getName(target).call();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return true;
-        }
-
-        if (target == null) {
-            sender.sendMessage(Messages.COLOR_WARN + args[0] + " is not a valid Minecraft username.");
-            return true;
-        }
-
-        long duration = -1L;
-        final String reason;
-
-        if (temporary) {
-            try {
-                duration = Duration.getDurationFromWords(args[1]);
-                reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
-            } catch (Exception e) {
-                sender.sendMessage(Messages.COLOR_WARN + "Invalid duration.");
-                return false;
-            }
-        } else {
-            reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-        }
-
-        final UUID punisher;
-
-        if (sender instanceof Player) {
-            punisher = ((Player) sender).getUniqueId();
-        } else {
-            punisher = console.UUID;
-        }
-
-        final long finalDuration = duration;
-
         Tasks.async(() -> {
+
+            final UUID target;
+
+            try {
+                target = PlayerLookups.getUniqueId(args[0]).call();
+                if (target != null) {
+                    args[0] = PlayerLookups.getName(target).call();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+
+            if (target == null) {
+                sender.sendMessage(Messages.COLOR_WARN + args[0] + " is not a valid Minecraft username.");
+                return;
+            }
+
+            long duration = -1L;
+            final String reason;
+
+            if (temporary) {
+                try {
+                    duration = Duration.getDurationFromWords(args[1]);
+                    reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+                } catch (Exception e) {
+                    sender.sendMessage(Messages.COLOR_WARN + "Invalid duration.");
+                    return;
+                }
+            } else {
+                reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+            }
+
+            final UUID punisher;
+
+            if (sender instanceof Player) {
+                punisher = ((Player) sender).getUniqueId();
+            } else {
+                punisher = console.UUID;
+            }
+
             try {
                 PunishmentProfile targetProfile = PunishmentProfile.getOrLoad(target).call();
 
@@ -102,7 +103,7 @@ public class NewPunishmentCommand implements CommandExecutor {
                     .punisher(punisher)
                     .offender(target)
                     .offenderUsername(args[0])
-                    .duration(finalDuration)
+                    .duration(duration)
                     .reason(reason)
                     .build()
                     .entry(type)

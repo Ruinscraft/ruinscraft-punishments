@@ -28,10 +28,13 @@ public final class PlayerLookups {
 
             AccountsAPI.AccountsProfile accountsProfile = AccountsAPI.getAccountsProfile(uuid);
 
-            final String name = accountsProfile.getName();
+            String name = null;
 
-            uuid_name_cache.put(uuid, name);
-            name_uuid_cache.put(name, uuid);
+            if (accountsProfile != null) {
+                name = accountsProfile.getName();
+                uuid_name_cache.put(uuid, name);
+                name_uuid_cache.put(name, uuid);
+            }
 
             return name;
         };
@@ -51,10 +54,13 @@ public final class PlayerLookups {
 
             AccountsAPI.AccountsProfile accountsProfile = AccountsAPI.getAccountsProfile(name);
 
-            final UUID uuid = accountsProfile.getUniqueId();
+            UUID uuid = null;
 
-            name_uuid_cache.put(accountsProfile.getName(), uuid);
-            uuid_name_cache.put(uuid, accountsProfile.getName());
+            if (accountsProfile != null) {
+                uuid = accountsProfile.getUniqueId();
+                name_uuid_cache.put(accountsProfile.getName(), uuid);
+                uuid_name_cache.put(uuid, accountsProfile.getName());
+            }
 
             return uuid;
         };
