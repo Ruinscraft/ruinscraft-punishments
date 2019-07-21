@@ -4,6 +4,7 @@ import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentEntry;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -30,6 +31,12 @@ public interface Storage {
     Callable<Void> delete(int punishmentId);
 
     Callable<List<PunishmentEntry>> query(UUID offender);
+
+    Callable<Set<Long>> getAddresses(UUID user);
+
+    Callable<Void> insertAddress(UUID user, Long address);
+
+    Callable<Set<UUID>> getUsersForAddress(Long address);
 
     default void close() {
     }

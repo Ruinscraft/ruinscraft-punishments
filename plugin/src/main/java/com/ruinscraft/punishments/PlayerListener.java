@@ -26,6 +26,10 @@ public class PlayerListener implements Listener {
             return;
         }
 
+        Long addressLong = AddressUtil.ipToLong(event.getAddress().getHostAddress());
+
+        profile.addAddress(addressLong);
+
         if (profile.isBanned()) {
             Punishment ban = profile.getActive(PunishmentType.BAN);
             BanBehavior banBehavior = (BanBehavior) PunishmentBehaviorRegistry.get(PunishmentType.BAN);

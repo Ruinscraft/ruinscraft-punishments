@@ -1,6 +1,7 @@
 package com.ruinscraft.punishments;
 
 import com.ruinscraft.punishments.util.Messages;
+import com.ruinscraft.punishments.util.Tasks;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.command.CommandSender;
 
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 
 public class PunishmentProfile {
 
+    /* cache ============== */
     private static final Map<UUID, PunishmentProfile> cache = new HashMap<>();
 
     public static PunishmentProfile get(UUID uuid) {
@@ -22,6 +24,7 @@ public class PunishmentProfile {
             for (PunishmentEntry entry : PunishmentsPlugin.get().getStorage().query(uuid).call()) {
                 profile.punishments.put(entry.punishment.getPunishmentId(), entry);
             }
+            profile.addresses = PunishmentsPlugin.get().getStorage().getAddresses(uuid).call();
             cache.put(uuid, profile);
             return profile;
         };
@@ -39,13 +42,16 @@ public class PunishmentProfile {
     public static void unload(UUID uuid) {
         cache.remove(uuid);
     }
+    /* cache ============== */
 
     private final UUID uuid;
     private Map<Integer, PunishmentEntry> punishments;
+    private Set<Long> addresses;
 
     public PunishmentProfile(UUID uuid) {
         this.uuid = uuid;
         this.punishments = new HashMap<>();
+        this.addresses = new HashSet<>();
     }
 
     public boolean isMuted() {
@@ -94,6 +100,22 @@ public class PunishmentProfile {
         return punishments.size() > 25;
     }
 
+    public Set<Long> getAddresses() {
+        return addresses;
+    }
+
+    public void addAddress(Long address) {
+        if (addresses.add(address)) {
+            Tasks.async(() -> {
+                try {
+                    PunishmentsPlugin.get().getStorage().insertAddress(uuid, address).call();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
     public void update(PunishmentEntry entry, PunishmentAction action) {
         switch (action) {
             case CREATE:
@@ -111,12 +133,12 @@ public class PunishmentProfile {
     public void show(CommandSender caller) {
         for (PunishmentType type : PunishmentType.values()) {
             final List<Punishment> punishments = getByType(type);
-            boolean truncate = punishments.size() > 30;
+            boolean truncate = punishments.size() > 32;
 
             caller.sendMessage(Messages.COLOR_MAIN + WordUtils.capitalize(type.getPlural()) + " (" + punishments.size() + "):");
 
             if (truncate) {
-                caller.sendMessage(Messages.COLOR_WARN + offset + "Too many to show (consider following the rules)");
+                caller.sendMessage(Messages.COLOR_WARN + offset + "Too many to show");
                 continue;
             }
 

@@ -8,6 +8,7 @@ public interface SQLStorage extends Storage {
 
     final class Table {
         protected static final String PUNISHMENTS = "ruinscraft_punishments";
+        protected static final String ADDRESSES = "ruinscraft_addresses";
     }
 
 }

@@ -5,9 +5,7 @@ import com.ruinscraft.punishments.PunishmentEntry;
 import com.ruinscraft.punishments.PunishmentType;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 public class MySQLStorage implements SQLStorage {
@@ -27,7 +25,7 @@ public class MySQLStorage implements SQLStorage {
         this.username = username;
         this.password = password;
 
-        try (PreparedStatement create = getConnection().prepareStatement(
+        try (PreparedStatement create_punishments = getConnection().prepareStatement(
                 "CREATE TABLE IF NOT EXISTS " +
                         Table.PUNISHMENTS +
                         " (punishment_id INT NOT NULL AUTO_INCREMENT, " +
@@ -39,7 +37,17 @@ public class MySQLStorage implements SQLStorage {
                         "expiration_time BIGINT, " +
                         "reason VARCHAR(255)," +
                         "PRIMARY KEY (punishment_id));")) {
-            create.execute();
+            create_punishments.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try (PreparedStatement create_addresses = getConnection().prepareStatement(
+                "CREATE TABLE IF NOT EXISTS " +
+                        Table.ADDRESSES +
+                        " (user VARCHAR(36) NOT NULL, " +
+                        "address BIGINT NOT NULL);")) {
+            create_addresses.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -146,6 +154,59 @@ public class MySQLStorage implements SQLStorage {
             }
 
             return entries;
+        };
+    }
+
+    @Override
+    public Callable<Set<Long>> getAddresses(UUID user) {
+        return () -> {
+            Set<Long> addresses = new HashSet<>();
+
+            try (PreparedStatement select = getConnection().prepareStatement(
+                    "SELECT address FROM " + Table.ADDRESSES + " WHERE user = ?;")) {
+                select.setString(1, user.toString());
+
+                try (ResultSet rs = select.executeQuery()) {
+                    while (rs.next()) {
+                        addresses.add(rs.getLong(1));
+                    }
+                }
+            }
+
+            return addresses;
+        };
+    }
+
+    @Override
+    public Callable<Void> insertAddress(UUID user, Long address) {
+        return () -> {
+            try (PreparedStatement insert = getConnection().prepareStatement(
+                    "INSERT INTO " + Table.ADDRESSES + " (user, address) VAULES (?, ?);")) {
+                insert.setString(1, user.toString());
+                insert.setLong(2, address);
+                insert.execute();
+            }
+            return null;
+        };
+    }
+
+    @Override
+    public Callable<Set<UUID>> getUsersForAddress(Long address) {
+        return () -> {
+          Set<UUID> users = new HashSet<>();
+
+          try (PreparedStatement select = getConnection().prepareStatement(
+                  "SELECT user FROM " + Table.ADDRESSES + " WHERE address = ?;")) {
+              select.setLong(1, address);
+
+              try (ResultSet rs = select.executeQuery()) {
+                  while (rs.next()) {
+                      users.add(UUID.fromString(rs.getString(1)));
+                  }
+              }
+          }
+
+          return users;
         };
     }
 
