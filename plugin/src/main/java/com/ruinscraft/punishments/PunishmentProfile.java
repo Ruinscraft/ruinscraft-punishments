@@ -130,38 +130,45 @@ public class PunishmentProfile {
 
     private static final String offset = "    ";
 
-    public void show(CommandSender caller) {
-        for (PunishmentType type : PunishmentType.values()) {
-            final List<Punishment> punishments = getByType(type);
-            boolean truncate = punishments.size() > 32;
+    public Callable<Void> show(final CommandSender caller) {
+        return () -> {
+            for (PunishmentType type : PunishmentType.values()) {
+                final List<Punishment> punishments = getByType(type);
+                boolean truncate = punishments.size() > 32;
 
-            caller.sendMessage(Messages.COLOR_MAIN + WordUtils.capitalize(type.getPlural()) + " (" + punishments.size() + "):");
+                caller.sendMessage(Messages.COLOR_MAIN + WordUtils.capitalize(type.getPlural()) + " (" + punishments.size() + "):");
 
-            if (truncate) {
-                caller.sendMessage(Messages.COLOR_WARN + offset + "Too many to show");
-                continue;
-            }
-
-            for (Punishment punishment : getByType(type)) {
-                StringJoiner joiner = new StringJoiner(" ");
-
-                joiner.add(Messages.COLOR_WARN + offset);
-                joiner.add(punishment.getInceptionTimeFormatted());
-
-                if (!punishment.getServerContext().equals("primary")) {
-                    joiner.add("[" + punishment.getServerContext() + "]");
+                if (truncate) {
+                    caller.sendMessage(Messages.COLOR_WARN + offset + "Too many to show");
+                    continue;
                 }
 
-                if (type.canBeTemporary()) {
-                    joiner.add("[" + punishment.getTotalDurationWords() + "]");
+                for (Punishment punishment : getByType(type)) {
+                    StringJoiner joiner = new StringJoiner(" ");
+
+                    joiner.add(Messages.COLOR_WARN + offset);
+                    joiner.add(punishment.getInceptionTimeFormatted());
+
+                    if (!punishment.getServerContext().equals("primary")) {
+                        joiner.add("[" + punishment.getServerContext() + "]");
+                    }
+
+                    if (caller.hasPermission("ruinscraft.punishments.viewpunisher")) {
+                        joiner.add("[" + PlayerLookups.getName(punishment.getPunisher()) + "]");
+                    }
+
+                    if (type.canBeTemporary()) {
+                        joiner.add("[" + punishment.getTotalDurationWords() + "]");
+                    }
+
+                    joiner.add(":");
+                    joiner.add(punishment.getReason());
+
+                    caller.sendMessage(joiner.toString());
                 }
-
-                joiner.add(":");
-                joiner.add(punishment.getReason());
-
-                caller.sendMessage(joiner.toString());
             }
-        }
+            return null;
+        };
     }
 
 }

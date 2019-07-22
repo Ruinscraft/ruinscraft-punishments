@@ -58,7 +58,11 @@ public class QueryPunishmentCommand implements CommandExecutor {
                 return;
             }
 
-            profile.show(caller);
+            try {
+                profile.show(caller).call();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             List<String> alts = new ArrayList<>();
 
