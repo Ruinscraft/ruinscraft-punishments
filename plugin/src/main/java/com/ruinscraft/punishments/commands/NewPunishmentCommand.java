@@ -86,9 +86,14 @@ public class NewPunishmentCommand implements CommandExecutor {
             try {
                 PunishmentProfile targetProfile = PunishmentProfile.getOrLoad(target).call();
 
+                if (type.canBeTemporary() && (targetProfile.getActive(type) != null)) {
+                    sender.sendMessage(Messages.COLOR_WARN + args[0] + " is already " + type.getVerb() + ".");
+                    return;
+                }
+
                 if (targetProfile.getMostRecent() != null) {
                     long timeDiff = System.currentTimeMillis() - targetProfile.getMostRecent().punishment.getInceptionTime();
-                    if (timeDiff < TimeUnit.SECONDS.toMillis(5)) {
+                    if (timeDiff < TimeUnit.SECONDS.toMillis(10)) {
                         sender.sendMessage(Messages.COLOR_WARN + "This user was just punished. Wait a few seconds.");
                         return;
                     }
