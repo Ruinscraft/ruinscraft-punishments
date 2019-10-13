@@ -23,7 +23,6 @@ public enum PunishmentAction {
 
     public void propagate(PunishmentEntry entry) {
         Tasks.sync(() -> {
-            TransientPunisherHistory.insert(entry);
             if (PunishmentProfile.get(entry.punishment.getOffender()) != null) {
                 PunishmentProfile.get(entry.punishment.getOffender()).update(entry, this);
             }

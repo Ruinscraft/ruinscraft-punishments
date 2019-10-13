@@ -13,10 +13,10 @@ public class KickBehavior implements KickablePunishmentBehavior {
     public void perform(Punishment punishment, PunishmentAction action) {
         switch (action) {
             case CREATE:
-                punishment.kickOffender(getKickMessage(punishment));
+                punishment.getOffender().offerKick(getKickMessage(punishment));
                 break;
             case DELETE:
-                punishment.sendMessageToOffender(Messages.COLOR_WARN + "A previous kick of yours has been deleted.");
+                punishment.getOffender().offerChatMessage(Messages.COLOR_WARN + "A previous kick of yours has been deleted.");
                 break;
         }
 

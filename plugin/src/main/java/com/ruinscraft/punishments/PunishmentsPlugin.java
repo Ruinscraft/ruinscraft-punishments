@@ -3,6 +3,7 @@ package com.ruinscraft.punishments;
 import com.ruinscraft.punishments.commands.*;
 import com.ruinscraft.punishments.messaging.MessageManager;
 import com.ruinscraft.punishments.messaging.redis.RedisMessageManager;
+import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.storage.MySQLStorage;
 import com.ruinscraft.punishments.storage.Storage;
 import com.ruinscraft.punishments.util.Tasks;
@@ -100,8 +101,10 @@ public class PunishmentsPlugin extends JavaPlugin {
 
         Tasks.async(() -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
+                UUIDOffender uuidOffender = new UUIDOffender(player.getUniqueId());
+
                 try {
-                    PunishmentProfile.load(player.getUniqueId()).call();
+                    PunishmentProfile.load(uuidOffender).call();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -111,9 +114,7 @@ public class PunishmentsPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            PunishmentProfile.unload(player.getUniqueId());
-        }
+        PunishmentProfile.clearCache();
 
         if (storage != null) {
             storage.close();

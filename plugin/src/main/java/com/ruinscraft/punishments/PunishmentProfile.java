@@ -1,57 +1,61 @@
 package com.ruinscraft.punishments;
 
+import com.ruinscraft.punishments.offender.Offender;
 import com.ruinscraft.punishments.util.Messages;
-import com.ruinscraft.punishments.util.Tasks;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.command.CommandSender;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 public class PunishmentProfile {
 
     /* cache ========================================================================= */
-    private static final Map<UUID, PunishmentProfile> cache = new HashMap<>();
+    private static final Map<Offender, PunishmentProfile> cache = new HashMap<>();
 
-    public static PunishmentProfile get(UUID uuid) {
-        return cache.get(uuid);
+    public static PunishmentProfile get(Offender offender) {
+        return cache.get(offender);
     }
 
-    public static Callable<PunishmentProfile> load(UUID uuid) {
+    public static Callable<PunishmentProfile> load(Offender offender) {
         return () -> {
-            PunishmentProfile profile = new PunishmentProfile(uuid);
-            for (PunishmentEntry entry : PunishmentsPlugin.get().getStorage().queryOffender(uuid).call()) {
+            PunishmentProfile profile = new PunishmentProfile(offender);
+            for (PunishmentEntry entry : PunishmentsPlugin.get().getStorage().queryOffender(offender).call()) {
                 profile.punishments.put(entry.punishment.getPunishmentId(), entry);
             }
-            profile.addresses = PunishmentsPlugin.get().getStorage().getAddresses(uuid).call();
-            cache.put(uuid, profile);
+            cache.put(offender, profile);
             return profile;
         };
     }
 
-    public static Callable<PunishmentProfile> getOrLoad(UUID uuid) {
+    public static Callable<PunishmentProfile> getOrLoad(Offender offender) {
         return () -> {
-            if (cache.containsKey(uuid)) {
-                return cache.get(uuid);
+            if (cache.containsKey(offender)) {
+                return cache.get(offender);
             }
-            return load(uuid).call();
+            return load(offender).call();
         };
     }
 
-    public static void unload(UUID uuid) {
-        cache.remove(uuid);
+    public static void unload(Offender offender) {
+        cache.remove(offender);
+    }
+
+    public static void clearCache() {
+        cache.clear();
     }
     /* cache ========================================================================= */
 
-    private final UUID uuid;
+    private final Offender offender;
     private Map<Integer, PunishmentEntry> punishments;
-    private Set<Long> addresses;
 
-    public PunishmentProfile(UUID uuid) {
-        this.uuid = uuid;
+    public PunishmentProfile(Offender offender) {
+        this.offender = offender;
         this.punishments = new HashMap<>();
-        this.addresses = new HashSet<>();
     }
 
     public boolean isMuted() {
@@ -98,23 +102,6 @@ public class PunishmentProfile {
 
     public boolean hasExcessiveAmount() {
         return punishments.size() > 25;
-    }
-
-    public Set<Long> getAddresses() {
-        return addresses;
-    }
-
-    public Callable<Void> addAddress(Long address) {
-        return () -> {
-            if (addresses.add(address)) {
-                try {
-                    PunishmentsPlugin.get().getStorage().insertAddress(uuid, address).call();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        };
     }
 
     public void update(PunishmentEntry entry, PunishmentAction action) {

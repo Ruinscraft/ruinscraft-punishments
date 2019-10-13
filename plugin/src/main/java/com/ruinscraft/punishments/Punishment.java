@@ -1,13 +1,11 @@
 package com.ruinscraft.punishments;
 
+import com.ruinscraft.punishments.offender.Offender;
 import com.ruinscraft.punishments.util.Duration;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Optional;
 import java.util.UUID;
 
 public class Punishment {
@@ -15,7 +13,7 @@ public class Punishment {
     private int punishmentId;
     private String serverContext;
     private UUID punisher;
-    private UUID offender;
+    private Offender offender;
     private String offenderUsername;
     private long inceptionTime;
     private long expirationTime;
@@ -45,7 +43,7 @@ public class Punishment {
         return punisher;
     }
 
-    public UUID getOffender() {
+    public Offender getOffender() {
         return offender;
     }
 
@@ -108,28 +106,6 @@ public class Punishment {
         return Duration.getTotalDurationWords(this);
     }
 
-    public Optional<Player> getOffenderPlayer() {
-        return Optional.ofNullable(Bukkit.getPlayer(offender));
-    }
-
-    public boolean sendMessageToOffender(String msg) {
-        try {
-            Bukkit.getPlayer(offender).sendMessage(msg);
-        } catch (NullPointerException e) {
-            return false;
-        }
-        return true;
-    }
-
-    public boolean kickOffender(String kickMsg) {
-        try {
-            Bukkit.getPlayer(offender).kickPlayer(kickMsg);
-        } catch (NullPointerException e) {
-            return false;
-        }
-        return true;
-    }
-
     public PunishmentEntry entry(PunishmentType type) {
         return PunishmentEntry.of(this, type);
     }
@@ -164,7 +140,7 @@ public class Punishment {
             return this;
         }
 
-        public PunishmentBuilder offender(UUID offender) {
+        public PunishmentBuilder offender(Offender offender) {
             build.offender = offender;
             return this;
         }

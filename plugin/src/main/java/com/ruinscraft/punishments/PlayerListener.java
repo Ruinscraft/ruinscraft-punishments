@@ -2,6 +2,8 @@ package com.ruinscraft.punishments;
 
 import com.ruinscraft.punishments.behaviors.BanBehavior;
 import com.ruinscraft.punishments.behaviors.PunishmentBehaviorRegistry;
+import com.ruinscraft.punishments.offender.IPOffender;
+import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.util.Messages;
 import com.ruinscraft.punishments.util.Tasks;
 import org.bukkit.entity.Player;
@@ -17,25 +19,37 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPreJoin(AsyncPlayerPreLoginEvent event) {
-        PunishmentProfile profile;
+        final String ip = event.getAddress().getHostAddress();
+        final UUIDOffender uuidOffender = new UUIDOffender(event.getUniqueId());
+        final IPOffender ipOffender = new IPOffender(ip);
+
+        PunishmentProfile uuidProfile, ipProfile;
 
         try {
-            profile = PunishmentProfile.load(event.getUniqueId()).call();
+            uuidProfile = PunishmentProfile.load(uuidOffender).call();
+            ipProfile = PunishmentProfile.load(ipOffender).call();
         } catch (Exception e) {
             e.printStackTrace();
             return;
         }
 
-        Long addressLong = AddressUtil.ipToLong(event.getAddress().getHostAddress());
-
         try {
-            profile.addAddress(addressLong).call();
+            uuidOffender.registerAddress(ip);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        if (profile.isBanned()) {
-            Punishment ban = profile.getActive(PunishmentType.BAN);
+        Punishment ban = null;
+
+        if (uuidProfile.isBanned()) {
+            ban = uuidProfile.getActive(PunishmentType.BAN);
+        }
+
+        else if (ipProfile.isBanned()) {
+            ban = ipProfile.getActive(PunishmentType.BAN);
+        }
+
+        if (ban != null) {
             BanBehavior banBehavior = (BanBehavior) PunishmentBehaviorRegistry.get(PunishmentType.BAN);
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, banBehavior.getKickMessage(ban));
         }

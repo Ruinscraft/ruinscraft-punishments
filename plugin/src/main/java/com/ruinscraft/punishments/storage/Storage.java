@@ -2,9 +2,9 @@ package com.ruinscraft.punishments.storage;
 
 import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentEntry;
+import com.ruinscraft.punishments.offender.Offender;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -25,21 +25,25 @@ public interface Storage {
         }
     }
 
+    // Punishments
+
     Callable<Void> insert(PunishmentEntry entry);
 
     Callable<Void> update(PunishmentEntry entry);
 
     Callable<Void> delete(int punishmentId);
 
-    Callable<List<PunishmentEntry>> queryOffender(UUID offender);
+    Callable<List<PunishmentEntry>> queryOffender(Offender offender);
 
     Callable<List<PunishmentEntry>> queryPunisher(UUID punisher);
 
-    Callable<Set<Long>> getAddresses(UUID user);
+    // IP logging
 
-    Callable<Void> insertAddress(UUID user, Long address);
+    Callable<Set<String>> getAddresses(UUID user);
 
-    Callable<Set<UUID>> getUsersForAddress(Long address);
+    Callable<Void> insertAddress(UUID user, String address);
+
+    Callable<Set<UUID>> getUsersForAddress(String address);
 
     default void close() {
     }
