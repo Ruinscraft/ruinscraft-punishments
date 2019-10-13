@@ -11,10 +11,10 @@ public class WarnBehavior implements PunishmentBehavior {
     public void perform(Punishment punishment, PunishmentAction action) {
         switch (action) {
             case CREATE:
-                punishment.sendMessageToOffender(Messages.COLOR_WARN + "You have been warned. Reason: " + punishment.getReason());
+                punishment.getOffender().offerChatMessage(Messages.COLOR_WARN + "You have been warned. Reason: " + punishment.getReason());
                 break;
             case DELETE:
-                punishment.sendMessageToOffender(Messages.COLOR_WARN + "A previous warn of yours has been deleted.");
+                punishment.getOffender().offerChatMessage(Messages.COLOR_WARN + "A previous warn of yours has been deleted.");
                 break;
         }
         

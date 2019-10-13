@@ -34,7 +34,13 @@ public class PlayerListener implements Listener {
         }
 
         try {
-            uuidOffender.registerAddress(ip);
+            uuidOffender.loadAddresses().call();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            uuidOffender.registerAddress(ip).call();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -58,7 +64,8 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        PunishmentProfile profile = PunishmentProfile.get(player.getUniqueId());
+        UUIDOffender uuidOffender = new UUIDOffender(player.getUniqueId());
+        PunishmentProfile profile = PunishmentProfile.get(uuidOffender);
 
         if (profile.hasExcessiveAmount()) {
             Tasks.syncLater(() -> player.sendMessage(Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments. Check your punishments with /pinfo"),
@@ -68,13 +75,16 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        PunishmentProfile.unload(event.getPlayer().getUniqueId());
+        UUIDOffender uuidOffender = new UUIDOffender(event.getPlayer().getUniqueId());
+
+        PunishmentProfile.unload(uuidOffender);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
-        PunishmentProfile profile = PunishmentProfile.get(player.getUniqueId());
+        UUIDOffender uuidOffender = new UUIDOffender(player.getUniqueId());
+        PunishmentProfile profile = PunishmentProfile.get(uuidOffender);
 
         if (profile.isMuted()) {
             Punishment mute = profile.getActive(PunishmentType.MUTE);

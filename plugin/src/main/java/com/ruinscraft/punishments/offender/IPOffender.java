@@ -23,4 +23,9 @@ public class IPOffender implements Offender<String> {   // using String to suppo
         return false;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return ip.equals(obj);
+    }
+
 }

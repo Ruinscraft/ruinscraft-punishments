@@ -1,6 +1,7 @@
 package com.ruinscraft.punishments.commands;
 
 import com.ruinscraft.punishments.*;
+import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.util.Messages;
 import com.ruinscraft.punishments.util.Tasks;
 import org.bukkit.command.Command;
@@ -40,10 +41,12 @@ public class PardonPunishmentCommand implements CommandExecutor {
                 return;
             }
 
+            UUIDOffender uuidOffender = new UUIDOffender(target);
+
             final PunishmentProfile profile;
 
             try {
-                profile = PunishmentProfile.getOrLoad(target).call();
+                profile = PunishmentProfile.getOrLoad(uuidOffender).call();
             } catch (Exception e) {
                 e.printStackTrace();
                 return;

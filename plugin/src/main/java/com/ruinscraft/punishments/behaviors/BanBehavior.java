@@ -14,13 +14,13 @@ public class BanBehavior implements KickablePunishmentBehavior {
     public void perform(Punishment punishment, PunishmentAction action) {
         switch (action) {
             case CREATE:
-                punishment.kickOffender(getKickMessage(punishment));
+                punishment.getOffender().offerKick(getKickMessage(punishment));
                 break;
             case PARDON:
-                punishment.sendMessageToOffender(Messages.COLOR_WARN + "Your current ban has been pardoned.");
+                punishment.getOffender().offerChatMessage(Messages.COLOR_WARN + "Your current ban has been pardoned.");
                 break;
             case DELETE:
-                punishment.sendMessageToOffender(Messages.COLOR_WARN + "A previous ban of yours has been deleted.");
+                punishment.getOffender().offerChatMessage(Messages.COLOR_WARN + "A previous ban of yours has been deleted.");
                 break;
         }
 

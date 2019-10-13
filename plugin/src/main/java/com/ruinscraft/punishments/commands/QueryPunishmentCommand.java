@@ -3,6 +3,7 @@ package com.ruinscraft.punishments.commands;
 import com.ruinscraft.punishments.PlayerLookups;
 import com.ruinscraft.punishments.PunishmentProfile;
 import com.ruinscraft.punishments.PunishmentsPlugin;
+import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.util.Messages;
 import com.ruinscraft.punishments.util.Tasks;
 import org.bukkit.command.Command;
@@ -44,10 +45,12 @@ public class QueryPunishmentCommand implements CommandExecutor {
                 return;
             }
 
+            UUIDOffender uuidOffender = new UUIDOffender(target);
+
             final PunishmentProfile profile;
 
             try {
-                profile = PunishmentProfile.getOrLoad(target).call();
+                profile = PunishmentProfile.getOrLoad(uuidOffender).call();
             } catch (Exception e) {
                 e.printStackTrace();
                 return;
@@ -66,8 +69,14 @@ public class QueryPunishmentCommand implements CommandExecutor {
 
             List<String> alts = new ArrayList<>();
 
+            try {
+                uuidOffender.loadAddresses().call();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             // find alts
-            for (Long address : profile.getAddresses()) {
+            for (String address : uuidOffender.getAddresses()) {
                 Set<UUID> users = null;
                 try {
                     users = PunishmentsPlugin.get().getStorage().getUsersForAddress(address).call();

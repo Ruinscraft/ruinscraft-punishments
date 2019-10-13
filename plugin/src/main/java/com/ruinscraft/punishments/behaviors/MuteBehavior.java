@@ -11,13 +11,13 @@ public class MuteBehavior implements PunishmentBehavior {
     public void perform(Punishment punishment, PunishmentAction action) {
         switch (action) {
             case CREATE:
-                punishment.sendMessageToOffender(Messages.COLOR_WARN + "You have been muted. Reason: " + punishment.getReason());
+                punishment.getOffender().offerChatMessage(Messages.COLOR_WARN + "You have been muted. Reason: " + punishment.getReason());
                 break;
             case PARDON:
-                punishment.sendMessageToOffender(Messages.COLOR_WARN + "Your current mute has been pardoned.");
+                punishment.getOffender().offerChatMessage(Messages.COLOR_WARN + "Your current mute has been pardoned.");
                 break;
             case DELETE:
-                punishment.sendMessageToOffender(Messages.COLOR_WARN + "A previous mute of yours has been deleted.");
+                punishment.getOffender().offerChatMessage(Messages.COLOR_WARN + "A previous mute of yours has been deleted.");
                 break;
         }
 

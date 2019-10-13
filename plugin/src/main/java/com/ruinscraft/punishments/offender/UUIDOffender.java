@@ -1,13 +1,13 @@
 package com.ruinscraft.punishments.offender;
 
 import com.ruinscraft.punishments.PunishmentsPlugin;
-import com.ruinscraft.punishments.util.Tasks;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 public class UUIDOffender implements Offender<UUID> {
 
@@ -50,20 +50,33 @@ public class UUIDOffender implements Offender<UUID> {
         return true;
     }
 
-    public boolean registerAddress(String address) {
-        if (getAddresses().add(address)) {
-            Tasks.async(() -> {
+    @Override
+    public boolean equals(Object obj) {
+        return uuid.equals(obj);
+    }
+
+    public Callable<Boolean> registerAddress(String address) {
+        return () -> {
+            if (addresses.add(address)) {
                 try {
                     PunishmentsPlugin.get().getStorage().insertAddress(uuid, address).call();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            });
 
-            return true;
-        } else {
-            return false;
-        }
+                return true;
+            } else {
+                return false;
+            }
+        };
+    }
+
+    public Callable<Void> loadAddresses() {
+        return () -> {
+            addresses = PunishmentsPlugin.get().getStorage().getAddresses(uuid).call();
+
+            return null;
+        };
     }
 
     public Set<String> getAddresses() {

@@ -1,6 +1,7 @@
 package com.ruinscraft.punishments.commands;
 
 import com.ruinscraft.punishments.*;
+import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.util.Duration;
 import com.ruinscraft.punishments.util.Messages;
 import com.ruinscraft.punishments.util.Tasks;
@@ -60,6 +61,8 @@ public class NewPunishmentCommand implements CommandExecutor {
                 return;
             }
 
+            UUIDOffender uuidOffender = new UUIDOffender(target);
+
             long duration = -1L;
             final String reason;
 
@@ -84,7 +87,7 @@ public class NewPunishmentCommand implements CommandExecutor {
             }
 
             try {
-                PunishmentProfile targetProfile = PunishmentProfile.getOrLoad(target).call();
+                PunishmentProfile targetProfile = PunishmentProfile.getOrLoad(uuidOffender).call();
 
                 if (type.canBeTemporary() && (targetProfile.getActive(type) != null)) {
                     sender.sendMessage(Messages.COLOR_WARN + args[0] + " is already " + type.getVerb() + ".");
@@ -106,7 +109,7 @@ public class NewPunishmentCommand implements CommandExecutor {
             Punishment.builder()
                     .serverContext(PunishmentsPlugin.getServerContext())
                     .punisher(punisher)
-                    .offender(target)
+                    .offender(uuidOffender)
                     .offenderUsername(args[0])
                     .duration(duration)
                     .reason(reason)

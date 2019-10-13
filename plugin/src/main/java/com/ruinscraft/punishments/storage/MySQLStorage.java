@@ -3,6 +3,8 @@ package com.ruinscraft.punishments.storage;
 import com.ruinscraft.punishments.Punishment;
 import com.ruinscraft.punishments.PunishmentEntry;
 import com.ruinscraft.punishments.PunishmentType;
+import com.ruinscraft.punishments.offender.Offender;
+import com.ruinscraft.punishments.offender.UUIDOffender;
 
 import java.sql.*;
 import java.util.*;
@@ -46,7 +48,7 @@ public class MySQLStorage implements SQLStorage {
                 "CREATE TABLE IF NOT EXISTS " +
                         Table.ADDRESSES +
                         " (user VARCHAR(36) NOT NULL, " +
-                        "address BIGINT NOT NULL);")) {
+                        "address VARCHAR(127) NOT NULL);")) {
             create_addresses.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -123,7 +125,7 @@ public class MySQLStorage implements SQLStorage {
     }
 
     @Override
-    public Callable<List<PunishmentEntry>> queryOffender(UUID offender) {
+    public Callable<List<PunishmentEntry>> queryOffender(Offender offender) {
         return () -> {
             List<PunishmentEntry> entries = new ArrayList<>();
 
@@ -172,14 +174,14 @@ public class MySQLStorage implements SQLStorage {
                         int punishmentId = rs.getInt("punishment_id");
                         String serverContext = rs.getString("server_context");
                         PunishmentType type = PunishmentType.valueOf(rs.getString("punishment_type"));
-                        UUID offender = UUID.fromString(rs.getString("offender"));
+                        UUIDOffender uuidOffender = new UUIDOffender(UUID.fromString(rs.getString("offender")));
                         long inceptionTime = rs.getLong("inception_time");
                         long expirationTime = rs.getLong("expiration_time");
                         String reason = rs.getString("reason");
                         Punishment punishment = Punishment.builder(punishmentId)
                                 .serverContext(serverContext)
                                 .punisher(punisher)
-                                .offender(offender)
+                                .offender(uuidOffender)
                                 .inceptionTime(inceptionTime)
                                 .expirationTime(expirationTime)
                                 .reason(reason)
@@ -195,9 +197,9 @@ public class MySQLStorage implements SQLStorage {
     }
 
     @Override
-    public Callable<Set<Long>> getAddresses(UUID user) {
+    public Callable<Set<String>> getAddresses(UUID user) {
         return () -> {
-            Set<Long> addresses = new HashSet<>();
+            Set<String> addresses = new HashSet<>();
 
             try (PreparedStatement select = getConnection().prepareStatement(
                     "SELECT address FROM " + Table.ADDRESSES + " WHERE user = ?;")) {
@@ -205,7 +207,7 @@ public class MySQLStorage implements SQLStorage {
 
                 try (ResultSet rs = select.executeQuery()) {
                     while (rs.next()) {
-                        addresses.add(rs.getLong(1));
+                        addresses.add(rs.getString(1));
                     }
                 }
             }
@@ -215,12 +217,12 @@ public class MySQLStorage implements SQLStorage {
     }
 
     @Override
-    public Callable<Void> insertAddress(UUID user, Long address) {
+    public Callable<Void> insertAddress(UUID user, String address) {
         return () -> {
             try (PreparedStatement insert = getConnection().prepareStatement(
                     "INSERT INTO " + Table.ADDRESSES + " (user, address) VAULES (?, ?);")) {
                 insert.setString(1, user.toString());
-                insert.setLong(2, address);
+                insert.setString(2, address);
                 insert.execute();
             }
             return null;
@@ -228,13 +230,13 @@ public class MySQLStorage implements SQLStorage {
     }
 
     @Override
-    public Callable<Set<UUID>> getUsersForAddress(Long address) {
+    public Callable<Set<UUID>> getUsersForAddress(String address) {
         return () -> {
             Set<UUID> users = new HashSet<>();
 
             try (PreparedStatement select = getConnection().prepareStatement(
                     "SELECT user FROM " + Table.ADDRESSES + " WHERE address = ?;")) {
-                select.setLong(1, address);
+                select.setString(1, address);
 
                 try (ResultSet rs = select.executeQuery()) {
                     while (rs.next()) {

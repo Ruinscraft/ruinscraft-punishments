@@ -4,6 +4,7 @@ import com.ruinscraft.punishments.PlayerLookups;
 import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentEntry;
 import com.ruinscraft.punishments.PunishmentsPlugin;
+import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.util.Messages;
 import com.ruinscraft.punishments.util.Tasks;
 import org.bukkit.command.Command;
@@ -44,10 +45,11 @@ public class UndoPunishmentCommand implements CommandExecutor {
                 return;
             }
 
+            UUIDOffender uuidOffender = new UUIDOffender(offender);
             List<PunishmentEntry> entries;
 
             try {
-                entries = PunishmentsPlugin.get().getStorage().queryOffender(offender).call();
+                entries = PunishmentsPlugin.get().getStorage().queryOffender(uuidOffender).call();
             } catch (Exception e) {
                 sender.sendMessage(Messages.COLOR_WARN + "There was an error. Please notify an admin.");
 
