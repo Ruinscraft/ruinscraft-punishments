@@ -123,7 +123,7 @@ public class MySQLStorage implements SQLStorage {
     }
 
     @Override
-    public Callable<List<PunishmentEntry>> query(UUID offender) {
+    public Callable<List<PunishmentEntry>> queryOffender(UUID offender) {
         return () -> {
             List<PunishmentEntry> entries = new ArrayList<>();
 
@@ -143,6 +143,43 @@ public class MySQLStorage implements SQLStorage {
                         Punishment punishment = Punishment.builder(punishmentId)
                                 .serverContext(serverContext)
                                 .punisher(punisher)
+                                .offender(offender)
+                                .inceptionTime(inceptionTime)
+                                .expirationTime(expirationTime)
+                                .reason(reason)
+                                .build();
+                        PunishmentEntry entry = PunishmentEntry.of(punishment, type);
+                        entries.add(entry);
+                    }
+                }
+            }
+
+            return entries;
+        };
+    }
+
+    @Override
+    public Callable<List<PunishmentEntry>> queryPunisher(UUID punisher) {
+        return () -> {
+            List<PunishmentEntry> entries = new ArrayList();
+
+            try (PreparedStatement query = getConnection().prepareStatement(
+                    "SELECT * FROM " + Table.PUNISHMENTS + " WHERE punisher = ?;")) {
+                query.setString(1, punisher.toString());
+
+                try (ResultSet rs = query.executeQuery()) {
+                    while (rs.next()) {
+                        int punishmentId = rs.getInt("punishment_id");
+                        String serverContext = rs.getString("server_context");
+                        PunishmentType type = PunishmentType.valueOf(rs.getString("punishment_type"));
+                        UUID offender = UUID.fromString(rs.getString("offender"));
+                        long inceptionTime = rs.getLong("inception_time");
+                        long expirationTime = rs.getLong("expiration_time");
+                        String reason = rs.getString("reason");
+                        Punishment punishment = Punishment.builder(punishmentId)
+                                .serverContext(serverContext)
+                                .punisher(punisher)
+                                .offender(offender)
                                 .inceptionTime(inceptionTime)
                                 .expirationTime(expirationTime)
                                 .reason(reason)
@@ -193,20 +230,20 @@ public class MySQLStorage implements SQLStorage {
     @Override
     public Callable<Set<UUID>> getUsersForAddress(Long address) {
         return () -> {
-          Set<UUID> users = new HashSet<>();
+            Set<UUID> users = new HashSet<>();
 
-          try (PreparedStatement select = getConnection().prepareStatement(
-                  "SELECT user FROM " + Table.ADDRESSES + " WHERE address = ?;")) {
-              select.setLong(1, address);
+            try (PreparedStatement select = getConnection().prepareStatement(
+                    "SELECT user FROM " + Table.ADDRESSES + " WHERE address = ?;")) {
+                select.setLong(1, address);
 
-              try (ResultSet rs = select.executeQuery()) {
-                  while (rs.next()) {
-                      users.add(UUID.fromString(rs.getString(1)));
-                  }
-              }
-          }
+                try (ResultSet rs = select.executeQuery()) {
+                    while (rs.next()) {
+                        users.add(UUID.fromString(rs.getString(1)));
+                    }
+                }
+            }
 
-          return users;
+            return users;
         };
     }
 

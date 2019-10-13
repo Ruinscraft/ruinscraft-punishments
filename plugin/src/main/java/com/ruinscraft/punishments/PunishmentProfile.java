@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class PunishmentProfile {
 
-    /* cache ============== */
+    /* cache ========================================================================= */
     private static final Map<UUID, PunishmentProfile> cache = new HashMap<>();
 
     public static PunishmentProfile get(UUID uuid) {
@@ -21,7 +21,7 @@ public class PunishmentProfile {
     public static Callable<PunishmentProfile> load(UUID uuid) {
         return () -> {
             PunishmentProfile profile = new PunishmentProfile(uuid);
-            for (PunishmentEntry entry : PunishmentsPlugin.get().getStorage().query(uuid).call()) {
+            for (PunishmentEntry entry : PunishmentsPlugin.get().getStorage().queryOffender(uuid).call()) {
                 profile.punishments.put(entry.punishment.getPunishmentId(), entry);
             }
             profile.addresses = PunishmentsPlugin.get().getStorage().getAddresses(uuid).call();
@@ -42,7 +42,7 @@ public class PunishmentProfile {
     public static void unload(UUID uuid) {
         cache.remove(uuid);
     }
-    /* cache ============== */
+    /* cache ========================================================================= */
 
     private final UUID uuid;
     private Map<Integer, PunishmentEntry> punishments;
@@ -104,16 +104,17 @@ public class PunishmentProfile {
         return addresses;
     }
 
-    public void addAddress(Long address) {
-        if (addresses.add(address)) {
-            Tasks.async(() -> {
+    public Callable<Void> addAddress(Long address) {
+        return () -> {
+            if (addresses.add(address)) {
                 try {
                     PunishmentsPlugin.get().getStorage().insertAddress(uuid, address).call();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            });
-        }
+            }
+            return null;
+        };
     }
 
     public void update(PunishmentEntry entry, PunishmentAction action) {

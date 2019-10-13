@@ -28,7 +28,11 @@ public class PlayerListener implements Listener {
 
         Long addressLong = AddressUtil.ipToLong(event.getAddress().getHostAddress());
 
-        profile.addAddress(addressLong);
+        try {
+            profile.addAddress(addressLong).call();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (profile.isBanned()) {
             Punishment ban = profile.getActive(PunishmentType.BAN);
