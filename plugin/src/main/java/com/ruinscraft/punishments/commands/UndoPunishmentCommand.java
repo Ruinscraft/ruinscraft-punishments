@@ -1,12 +1,14 @@
 package com.ruinscraft.punishments.commands;
 
-import com.ruinscraft.punishments.*;
+import com.ruinscraft.punishments.PlayerLookups;
+import com.ruinscraft.punishments.PunishmentAction;
+import com.ruinscraft.punishments.PunishmentEntry;
+import com.ruinscraft.punishments.PunishmentsPlugin;
 import com.ruinscraft.punishments.util.Messages;
 import com.ruinscraft.punishments.util.Tasks;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,14 +23,6 @@ public class UndoPunishmentCommand implements CommandExecutor {
         if (args.length < 1) {
             sender.sendMessage(Messages.COLOR_WARN + "No target specified.");
             return true;
-        }
-
-        UUID punisher;
-
-        if (sender instanceof Player) {
-            punisher = ((Player) sender).getUniqueId();
-        } else {
-            punisher = console.UUID;
         }
 
         Tasks.async(() -> {
