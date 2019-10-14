@@ -9,24 +9,18 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-public class UUIDOffender implements Offender<UUID> {
+public class UUIDOffender extends Offender<UUID> {
 
-    private final UUID uuid;
-    private Set<String> addresses;
+    private transient Set<String> addresses;
 
     public UUIDOffender(UUID uuid) {
-        this.uuid = uuid;
+        super(uuid);
         this.addresses = new HashSet<>();
     }
 
     @Override
-    public UUID getIdentifier() {
-        return uuid;
-    }
-
-    @Override
     public boolean offerChatMessage(String msg) {
-        Player offenderPlayer = Bukkit.getPlayer(uuid);
+        Player offenderPlayer = Bukkit.getPlayer(identifier);
 
         if (offenderPlayer == null) {
             return false;
@@ -39,7 +33,7 @@ public class UUIDOffender implements Offender<UUID> {
 
     @Override
     public boolean offerKick(String kickMsg) {
-        Player offenderPlayer = Bukkit.getPlayer(uuid);
+        Player offenderPlayer = Bukkit.getPlayer(identifier);
 
         if (offenderPlayer == null) {
             return false;
@@ -50,16 +44,11 @@ public class UUIDOffender implements Offender<UUID> {
         return true;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return uuid.equals(obj);
-    }
-
     public Callable<Boolean> registerAddress(String address) {
         return () -> {
             if (addresses.add(address)) {
                 try {
-                    PunishmentsPlugin.get().getStorage().insertAddress(uuid, address).call();
+                    PunishmentsPlugin.get().getStorage().insertAddress(identifier, address).call();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -73,7 +62,7 @@ public class UUIDOffender implements Offender<UUID> {
 
     public Callable<Void> loadAddresses() {
         return () -> {
-            addresses = PunishmentsPlugin.get().getStorage().getAddresses(uuid).call();
+            addresses = PunishmentsPlugin.get().getStorage().getAddresses(identifier).call();
 
             return null;
         };

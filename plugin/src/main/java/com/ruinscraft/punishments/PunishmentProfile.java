@@ -10,15 +10,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class PunishmentProfile {
 
-    /* cache ========================================================================= */
-    private static final Map<Offender, PunishmentProfile> cache = new HashMap<>();
+    /* cache =========================================================================================== */
+    private static final Map<Offender, PunishmentProfile> cache = new ConcurrentHashMap<>();
 
-    public static PunishmentProfile get(Offender offender) {
-        return cache.get(offender);
+    public static <OFFENDERIDENTIFIER> PunishmentProfile get(OFFENDERIDENTIFIER offenderidentifier) {
+        for (Offender offender : cache.keySet()) {
+            if (offender.getIdentifier().equals(offenderidentifier)) {
+                return cache.get(offender);
+            }
+        }
+        return null;
     }
 
     public static Callable<PunishmentProfile> load(Offender offender) {
@@ -28,6 +34,7 @@ public class PunishmentProfile {
                 profile.punishments.put(entry.punishment.getPunishmentId(), entry);
             }
             cache.put(offender, profile);
+            System.out.println("CACHE SIZE: " + cache.size());
             return profile;
         };
     }
@@ -41,14 +48,20 @@ public class PunishmentProfile {
         };
     }
 
-    public static void unload(Offender offender) {
-        cache.remove(offender);
+    public static <OFFENDERIDENTIFIER> void unload(OFFENDERIDENTIFIER offenderidentifier) {
+        PunishmentProfile punishmentProfile = get(offenderidentifier);
+
+        if (punishmentProfile == null) {
+            return;
+        }
+
+        cache.remove(punishmentProfile.offender);
     }
 
     public static void clearCache() {
         cache.clear();
     }
-    /* cache ========================================================================= */
+    /* cache =========================================================================================== */
 
     private final Offender offender;
     private Map<Integer, PunishmentEntry> punishments;
@@ -142,7 +155,7 @@ public class PunishmentProfile {
                     }
 
                     if (caller.hasPermission("ruinscraft.punishments.viewpunisher")) {
-                        joiner.add("[" + PlayerLookups.getName(punishment.getPunisher()) + "]");
+                        joiner.add("[" + PlayerLookups.getName(punishment.getPunisher()).call() + "]");
                     }
 
                     if (type.canBeTemporary()) {

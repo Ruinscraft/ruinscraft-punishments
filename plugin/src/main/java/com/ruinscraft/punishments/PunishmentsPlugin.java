@@ -31,14 +31,6 @@ public class PunishmentsPlugin extends JavaPlugin {
 
         saveDefaultConfig();
 
-        try {
-            Class.forName("com.destroystokyo.paper.event.entity.EntityAddToWorldEvent"); // change check to shaded/relocated Jedis
-        } catch (ClassNotFoundException e) {
-            getLogger().warning("Ruinscraft Paper is required.");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
         if (getServer().getPluginManager().getPlugin("BanManager") != null) {
             getLogger().warning("BanManager is loaded on this server. Please remove it.");
             getServer().getPluginManager().disablePlugin(this);

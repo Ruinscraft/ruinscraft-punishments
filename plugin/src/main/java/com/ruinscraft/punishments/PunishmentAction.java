@@ -23,8 +23,9 @@ public enum PunishmentAction {
 
     public void propagate(PunishmentEntry entry) {
         Tasks.sync(() -> {
-            if (PunishmentProfile.get(entry.punishment.getOffender()) != null) {
-                PunishmentProfile.get(entry.punishment.getOffender()).update(entry, this);
+            // TODO: fix this nastiness
+            if (PunishmentProfile.get(entry.punishment.getOffender().getIdentifier()) != null) {
+                PunishmentProfile.get(entry.punishment.getOffender().getIdentifier()).update(entry, this);
             }
             PunishmentBehaviorRegistry.get(entry.type).perform(entry.punishment, this);
         });

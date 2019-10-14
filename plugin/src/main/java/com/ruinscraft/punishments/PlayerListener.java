@@ -23,14 +23,18 @@ public class PlayerListener implements Listener {
         final UUIDOffender uuidOffender = new UUIDOffender(event.getUniqueId());
         final IPOffender ipOffender = new IPOffender(ip);
 
-        PunishmentProfile uuidProfile, ipProfile;
+        PunishmentProfile uuidProfile = null, ipProfile = null;
 
         try {
             uuidProfile = PunishmentProfile.load(uuidOffender).call();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
             ipProfile = PunishmentProfile.load(ipOffender).call();
         } catch (Exception e) {
             e.printStackTrace();
-            return;
         }
 
         try {
@@ -64,8 +68,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        UUIDOffender uuidOffender = new UUIDOffender(player.getUniqueId());
-        PunishmentProfile profile = PunishmentProfile.get(uuidOffender);
+        PunishmentProfile profile = PunishmentProfile.get(player.getUniqueId());
 
         if (profile.hasExcessiveAmount()) {
             Tasks.syncLater(() -> player.sendMessage(Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments. Check your punishments with /pinfo"),
@@ -75,16 +78,13 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        UUIDOffender uuidOffender = new UUIDOffender(event.getPlayer().getUniqueId());
-
-        PunishmentProfile.unload(uuidOffender);
+        PunishmentProfile.unload(event.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
-        UUIDOffender uuidOffender = new UUIDOffender(player.getUniqueId());
-        PunishmentProfile profile = PunishmentProfile.get(uuidOffender);
+        PunishmentProfile profile = PunishmentProfile.get(player.getUniqueId());
 
         if (profile.isMuted()) {
             Punishment mute = profile.getActive(PunishmentType.MUTE);

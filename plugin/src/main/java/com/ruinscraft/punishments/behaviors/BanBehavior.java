@@ -4,6 +4,7 @@ import com.ruinscraft.punishments.Punishment;
 import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentType;
 import com.ruinscraft.punishments.PunishmentsPlugin;
+import com.ruinscraft.punishments.offender.Offender;
 import com.ruinscraft.punishments.util.Messages;
 
 import java.util.StringJoiner;
@@ -12,15 +13,17 @@ public class BanBehavior implements KickablePunishmentBehavior {
 
     @Override
     public void perform(Punishment punishment, PunishmentAction action) {
+        Offender offender = punishment.getOffender();
+
         switch (action) {
             case CREATE:
-                punishment.getOffender().offerKick(getKickMessage(punishment));
+                offender.offerKick(getKickMessage(punishment));
                 break;
             case PARDON:
-                punishment.getOffender().offerChatMessage(Messages.COLOR_WARN + "Your current ban has been pardoned.");
+                offender.offerChatMessage(Messages.COLOR_WARN + "Your current ban has been pardoned.");
                 break;
             case DELETE:
-                punishment.getOffender().offerChatMessage(Messages.COLOR_WARN + "A previous ban of yours has been deleted.");
+                offender.offerChatMessage(Messages.COLOR_WARN + "A previous ban of yours has been deleted.");
                 break;
         }
 

@@ -1,11 +1,29 @@
 package com.ruinscraft.punishments.offender;
 
-public interface Offender<IDENTIFIER> {
+public abstract class Offender<IDENTIFIER> {
 
-    IDENTIFIER getIdentifier();
+    protected IDENTIFIER identifier;
 
-    boolean offerChatMessage(String msg);
+    public Offender(IDENTIFIER identifier) {
+        this.identifier = identifier;
+    }
 
-    boolean offerKick(String kickMsg);
+    public IDENTIFIER getIdentifier() {
+        return identifier;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return identifier.equals(obj);
+    }
+
+    @Override
+    public String toString() {
+        return identifier.toString();
+    }
+
+    public abstract boolean offerChatMessage(String msg);
+
+    public abstract boolean offerKick(String kickMsg);
 
 }

@@ -78,7 +78,7 @@ public class MySQLStorage implements SQLStorage {
                 insert.setString(1, entry.punishment.getServerContext());
                 insert.setString(2, entry.type.name());
                 insert.setString(3, entry.punishment.getPunisher().toString());
-                insert.setString(4, entry.punishment.getOffender().toString());
+                insert.setString(4, entry.punishment.getOffender().getIdentifier().toString());
                 insert.setLong(5, entry.punishment.getInceptionTime());
                 insert.setLong(6, entry.punishment.getExpirationTime());
                 insert.setString(7, entry.punishment.getReason());
@@ -220,7 +220,7 @@ public class MySQLStorage implements SQLStorage {
     public Callable<Void> insertAddress(UUID user, String address) {
         return () -> {
             try (PreparedStatement insert = getConnection().prepareStatement(
-                    "INSERT INTO " + Table.ADDRESSES + " (user, address) VAULES (?, ?);")) {
+                    "INSERT INTO " + Table.ADDRESSES + " (user, address) VALUES (?, ?);")) {
                 insert.setString(1, user.toString());
                 insert.setString(2, address);
                 insert.execute();
