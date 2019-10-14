@@ -24,8 +24,8 @@ public class PardonPunishmentCommand implements CommandExecutor {
 
         final String target = args[0];
 
-        PlayerLookups.getUniqueId(target).thenAcceptAsync((uuid -> {
-            PlayerLookups.getName(uuid).thenAcceptAsync((name -> {
+        PlayerLookups.getUniqueId(target).thenAcceptAsync(uuid -> {
+            PlayerLookups.getName(uuid).thenAcceptAsync(name -> {
                 if (target == null) {
                     sender.sendMessage(Messages.COLOR_WARN + name + " is not a valid Minecraft username.");
                     return;
@@ -50,8 +50,8 @@ public class PardonPunishmentCommand implements CommandExecutor {
                         sender.sendMessage(Messages.COLOR_MAIN + "Un" + type.getVerb() + " " + args[0] + ".");
                     });
                 });
-            }));
-        }));
+            });
+        });
 
         return true;
     }

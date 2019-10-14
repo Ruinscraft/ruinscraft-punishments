@@ -55,7 +55,7 @@ public class NewPunishmentCommand implements CommandExecutor {
             reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
         }
 
-        PlayerLookups.getUniqueId(args[0]).thenAcceptAsync((uuid -> {
+        PlayerLookups.getUniqueId(args[0]).thenAcceptAsync(uuid -> {
             PlayerLookups.getName(uuid).thenAcceptAsync(name -> {
                 if (uuid == null) {
                     sender.sendMessage(Messages.COLOR_WARN + name + " is not a valid Minecraft username.");
@@ -88,7 +88,7 @@ public class NewPunishmentCommand implements CommandExecutor {
                             .call(PunishmentAction.CREATE).join();
                 });
             });
-        }));
+        });
 
         return true;
     }

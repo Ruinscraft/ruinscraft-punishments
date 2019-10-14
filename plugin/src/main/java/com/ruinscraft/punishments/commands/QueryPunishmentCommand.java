@@ -23,18 +23,18 @@ public class QueryPunishmentCommand implements CommandExecutor {
 
         sender.sendMessage(Messages.COLOR_MAIN + "Looking up punishment profile for " + target + "...");
 
-        PlayerLookups.getUniqueId(target).thenAcceptAsync((uuid -> {
+        PlayerLookups.getUniqueId(target).thenAcceptAsync(uuid -> {
             PlayerLookups.getName(uuid).thenAcceptAsync((name) -> {
                 if (uuid == null) {
                     sender.sendMessage(Messages.COLOR_WARN + name + " is not a valid Minecraft username.");
                     return;
                 }
 
-                PunishmentProfiles.getOrLoadProfile(uuid, UUIDOffender.class).thenAcceptAsync((profile -> {
+                PunishmentProfiles.getOrLoadProfile(uuid, UUIDOffender.class).thenAcceptAsync(profile -> {
                     profile.show(sender);
-                }));
+                });
             });
-        }));
+        });
 
         return true;
     }
