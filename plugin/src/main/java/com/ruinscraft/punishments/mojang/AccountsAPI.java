@@ -11,9 +11,12 @@ import java.util.regex.Pattern;
 
 public final class AccountsAPI {
 
+    public static final AccountsProfile CONSOLE_PROFILE = new AccountsProfile(console.UUID.toString(), console.NAME);
     protected static final Gson GSON = new Gson();
     protected static final String URL_MATCH_NAME = "https://api.mojang.com/users/profiles/minecraft/%s";
     protected static final String URL_MATCH_ID = "https://api.mojang.com/user/profiles/%s/names";
+    // uuid util, Mojang-style UUIDs don't have dashes
+    private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 
     public static AccountsProfile getAccountsProfile(String name) throws IOException {
         URL url = new URL(String.format(URL_MATCH_NAME, name));
@@ -29,6 +32,10 @@ public final class AccountsAPI {
         try (InputStreamReader reader = new InputStreamReader(url.openStream())) {
             return GSON.fromJson(reader, AccountsProfile.class);
         }
+    }
+
+    private static UUID formatFromInput(String uuidWithoutDashes) {
+        return UUID.fromString(UUID_FIX.matcher(uuidWithoutDashes.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
     }
 
     public static final class AccountsProfile {
@@ -55,15 +62,6 @@ public final class AccountsAPI {
         public String toString() {
             return "[id=" + id + ", name=" + name + "]";
         }
-    }
-
-    public static final AccountsProfile CONSOLE_PROFILE = new AccountsProfile(console.UUID.toString(), console.NAME);
-
-    // uuid util, Mojang-style UUIDs don't have dashes
-    private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
-
-    private static UUID formatFromInput(String uuidWithoutDashes) {
-        return UUID.fromString(UUID_FIX.matcher(uuidWithoutDashes.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
     }
 
 }

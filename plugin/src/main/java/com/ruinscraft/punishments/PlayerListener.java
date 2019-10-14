@@ -2,7 +2,8 @@ package com.ruinscraft.punishments;
 
 import com.ruinscraft.punishments.behaviors.BanBehavior;
 import com.ruinscraft.punishments.behaviors.PunishmentBehaviorRegistry;
-import com.ruinscraft.punishments.offender.IPOffender;
+import com.ruinscraft.punishments.offender.OnlineIPOffender;
+import com.ruinscraft.punishments.offender.OnlineUUIDOffender;
 import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.util.Messages;
 import com.ruinscraft.punishments.util.Tasks;
@@ -19,46 +20,30 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPreJoin(AsyncPlayerPreLoginEvent event) {
-        final String ip = event.getAddress().getHostAddress();
-        final UUIDOffender uuidOffender = new UUIDOffender(event.getUniqueId());
-        final IPOffender ipOffender = new IPOffender(ip);
+        final String address = event.getAddress().getHostAddress();
 
-        PunishmentProfile uuidProfile = null, ipProfile = null;
+        /* Load profiles for user */
+        PunishmentProfile uuidProfile
+                = PunishmentProfiles.getOrLoadProfile(event.getUniqueId(), OnlineUUIDOffender.class).join();
+        PunishmentProfile ipProfile
+                = PunishmentProfiles.getOrLoadProfile(address, OnlineIPOffender.class).join();
 
-        try {
-            uuidProfile = PunishmentProfile.load(uuidOffender).call();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        if (uuidProfile.offender instanceof UUIDOffender) {
+            UUIDOffender uuidOffender = (UUIDOffender) uuidProfile.offender;
 
-        try {
-            ipProfile = PunishmentProfile.load(ipOffender).call();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            uuidOffender.loadAddresses().call();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            uuidOffender.registerAddress(ip).call();
-        } catch (Exception e) {
-            e.printStackTrace();
+            uuidOffender.loadAddresses().join();
+            uuidOffender.logAddress(address).join();
         }
 
         Punishment ban = null;
 
         if (uuidProfile.isBanned()) {
             ban = uuidProfile.getActive(PunishmentType.BAN);
-        }
-
-        else if (ipProfile.isBanned()) {
+        } else if (ipProfile.isBanned()) {
             ban = ipProfile.getActive(PunishmentType.BAN);
         }
 
+        /* player is banned */
         if (ban != null) {
             BanBehavior banBehavior = (BanBehavior) PunishmentBehaviorRegistry.get(PunishmentType.BAN);
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, banBehavior.getKickMessage(ban));
@@ -68,7 +53,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        PunishmentProfile profile = PunishmentProfile.get(player.getUniqueId());
+        PunishmentProfile profile = PunishmentProfiles.getProfile(player.getUniqueId());
 
         if (profile.hasExcessiveAmount()) {
             Tasks.syncLater(() -> player.sendMessage(Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments. Check your punishments with /pinfo"),
@@ -78,13 +63,13 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        PunishmentProfile.unload(event.getPlayer().getUniqueId());
+        PunishmentProfiles.unload(event.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
-        PunishmentProfile profile = PunishmentProfile.get(player.getUniqueId());
+        PunishmentProfile profile = PunishmentProfiles.getProfile(player.getUniqueId());
 
         if (profile.isMuted()) {
             Punishment mute = profile.getActive(PunishmentType.MUTE);

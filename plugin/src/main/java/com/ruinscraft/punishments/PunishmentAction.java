@@ -2,33 +2,37 @@ package com.ruinscraft.punishments;
 
 import com.ruinscraft.punishments.behaviors.PunishmentBehaviorRegistry;
 import com.ruinscraft.punishments.messaging.Message;
-import com.ruinscraft.punishments.util.Tasks;
+import com.ruinscraft.punishments.offender.Offender;
+
+import java.util.concurrent.CompletableFuture;
 
 public enum PunishmentAction {
     CREATE, PARDON, DELETE;
 
-    public void call(PunishmentEntry entry) {
-        Tasks.async(() -> {
-            // save to db
-            try {
-                PunishmentsPlugin.get().getStorage().callAction(entry, this);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            // dispatch on messenger
+    /***
+     * Saves to the database and sends over the Messenger
+     * @param entry
+     */
+    public CompletableFuture<Void> performRemote(PunishmentEntry entry) {
+        return CompletableFuture.supplyAsync(() -> {
+            PunishmentsPlugin.get().getStorage().callAction(entry, this);
             Message message = new Message(entry, this);
             PunishmentsPlugin.get().getMessageManager().getDispatcher().dispatch(message);
+            return null;
         });
     }
 
-    public void propagate(PunishmentEntry entry) {
-        Tasks.sync(() -> {
-            // TODO: fix this nastiness
-            if (PunishmentProfile.get(entry.punishment.getOffender().getIdentifier()) != null) {
-                PunishmentProfile.get(entry.punishment.getOffender().getIdentifier()).update(entry, this);
-            }
-            PunishmentBehaviorRegistry.get(entry.type).perform(entry.punishment, this);
-        });
+    /***
+     * Updates local cache and calls the punishment action
+     * @param entry
+     */
+    public void performLocal(PunishmentEntry entry) {
+        Offender offender = entry.punishment.getOffender();
+        PunishmentProfile profile = PunishmentProfiles.getProfile(offender.getIdentifier());
+        if (profile != null) {
+            profile.update(entry, this);
+        }
+        PunishmentBehaviorRegistry.get(entry.type).perform(entry.punishment, this);
     }
 
 }

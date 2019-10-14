@@ -14,8 +14,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class PunishmentsPlugin extends JavaPlugin {
 
+    private static PunishmentsPlugin singleton;
     private Storage storage;
     private MessageManager messageManager;
+
+    public static String getServerContext() {
+        return get().getConfig().getString("server-context");
+    }
+
+    public static PunishmentsPlugin get() {
+        return singleton;
+    }
 
     public Storage getStorage() {
         return storage;
@@ -117,16 +126,6 @@ public class PunishmentsPlugin extends JavaPlugin {
         }
 
         singleton = null;
-    }
-
-    public static String getServerContext() {
-        return get().getConfig().getString("server-context");
-    }
-
-    private static PunishmentsPlugin singleton;
-
-    public static PunishmentsPlugin get() {
-        return singleton;
     }
 
 }

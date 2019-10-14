@@ -6,14 +6,4 @@ public class IPOffender extends Offender<String> { // using String to support ip
         super(ip);
     }
 
-    @Override
-    public boolean offerChatMessage(String msg) {
-        return false;   // TODO:
-    }
-
-    @Override
-    public boolean offerKick(String kickMsg) {
-        return false;   // TODO:
-    }
-
 }

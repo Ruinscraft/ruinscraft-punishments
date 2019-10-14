@@ -4,6 +4,8 @@ import com.ruinscraft.punishments.messaging.Message;
 import com.ruinscraft.punishments.messaging.MessageDispatcher;
 import redis.clients.jedis.Jedis;
 
+import java.util.concurrent.CompletableFuture;
+
 public class RedisMessageDispatcher implements MessageDispatcher {
 
     private RedisMessageManager manager;
@@ -13,10 +15,14 @@ public class RedisMessageDispatcher implements MessageDispatcher {
     }
 
     @Override
-    public void dispatch(Message message) {
-        try (Jedis jedis = manager.getPool().getResource()) {
-            jedis.publish(RedisMessageManager.REDIS_CHANNEL, message.serialize());
-        }
+    public CompletableFuture<Void> dispatch(Message message) {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Jedis jedis = manager.getPool().getResource()) {
+                jedis.publish(RedisMessageManager.REDIS_CHANNEL, message.serialize());
+            }
+
+            return null;
+        });
     }
 
 }

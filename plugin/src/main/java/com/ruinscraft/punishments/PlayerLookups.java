@@ -4,18 +4,19 @@ import com.ruinscraft.punishments.mojang.AccountsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 
 public final class PlayerLookups {
 
     private static final Map<String, UUID> name_uuid_cache = new HashMap<>();
     private static final Map<UUID, String> uuid_name_cache = new HashMap<>();
 
-    public static Callable<String> getName(UUID uuid) {
-        return () -> {
+    public static CompletableFuture<String> getName(UUID uuid) {
+        return CompletableFuture.supplyAsync(() -> {
             if (uuid_name_cache.containsKey(uuid)) {
                 return uuid_name_cache.get(uuid);
             }
@@ -26,7 +27,12 @@ public final class PlayerLookups {
                 return offlinePlayer.getName();
             }
 
-            AccountsAPI.AccountsProfile accountsProfile = AccountsAPI.getAccountsProfile(uuid);
+            AccountsAPI.AccountsProfile accountsProfile = null;
+            try {
+                accountsProfile = AccountsAPI.getAccountsProfile(uuid);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             String name = null;
 
@@ -37,11 +43,11 @@ public final class PlayerLookups {
             }
 
             return name;
-        };
+        });
     }
 
-    public static Callable<UUID> getUniqueId(String name) {
-        return () -> {
+    public static CompletableFuture<UUID> getUniqueId(String name) {
+        return CompletableFuture.supplyAsync(() -> {
             if (name_uuid_cache.containsKey(name)) {
                 return name_uuid_cache.get(name);
             }
@@ -52,7 +58,12 @@ public final class PlayerLookups {
                 return offlinePlayer.getUniqueId();
             }
 
-            AccountsAPI.AccountsProfile accountsProfile = AccountsAPI.getAccountsProfile(name);
+            AccountsAPI.AccountsProfile accountsProfile = null;
+            try {
+                accountsProfile = AccountsAPI.getAccountsProfile(name);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             UUID uuid = null;
 
@@ -63,7 +74,7 @@ public final class PlayerLookups {
             }
 
             return uuid;
-        };
+        });
     }
 
 }

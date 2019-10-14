@@ -7,43 +7,47 @@ import com.ruinscraft.punishments.offender.Offender;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 
 public interface Storage {
 
-    default void callAction(PunishmentEntry entry, PunishmentAction action) throws Exception {
-        switch (action) {
-            case CREATE:
-                insert(entry).call();
-                break;
-            case PARDON:
-                update(entry).call();
-                break;
-            case DELETE:
-                delete(entry.punishment.getPunishmentId()).call();
-                break;
-        }
+    default CompletableFuture<Void> callAction(PunishmentEntry entry, PunishmentAction action) {
+        return CompletableFuture.supplyAsync(() -> {
+            switch (action) {
+                case CREATE:
+                    insert(entry).thenRun(() -> System.out.println("callAction CREATE"));
+                    break;
+                case PARDON:
+                    update(entry).thenRun(() -> System.out.println("callAction PARDON"));
+                    break;
+                case DELETE:
+                    delete(entry.punishment.getPunishmentId()).thenRun(() -> System.out.println("callAction DELETE"));
+                    break;
+            }
+
+            return null;
+        });
     }
 
     // Punishments
 
-    Callable<Void> insert(PunishmentEntry entry);
+    CompletableFuture<Void> insert(PunishmentEntry entry);
 
-    Callable<Void> update(PunishmentEntry entry);
+    CompletableFuture<Void> update(PunishmentEntry entry);
 
-    Callable<Void> delete(int punishmentId);
+    CompletableFuture<Void> delete(int punishmentId);
 
-    Callable<List<PunishmentEntry>> queryOffender(Offender offender);
+    CompletableFuture<List<PunishmentEntry>> queryOffender(Offender offender);
 
-    Callable<List<PunishmentEntry>> queryPunisher(UUID punisher);
+    CompletableFuture<List<PunishmentEntry>> queryPunisher(UUID punisher);
 
     // IP logging
 
-    Callable<Set<String>> getAddresses(UUID user);
+    CompletableFuture<Set<String>> queryAddresses(UUID user);
 
-    Callable<Void> insertAddress(UUID user, String address);
+    CompletableFuture<Void> insertAddress(UUID user, String address);
 
-    Callable<Set<UUID>> getUsersForAddress(String address);
+    CompletableFuture<Set<UUID>> queryUsersOnAddress(String address);
 
     default void close() {
     }

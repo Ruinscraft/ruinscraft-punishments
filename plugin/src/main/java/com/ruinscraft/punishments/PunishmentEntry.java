@@ -1,5 +1,7 @@
 package com.ruinscraft.punishments;
 
+import java.util.concurrent.CompletableFuture;
+
 public class PunishmentEntry {
 
     public final Punishment punishment;
@@ -14,8 +16,8 @@ public class PunishmentEntry {
         return new PunishmentEntry(punishment, type);
     }
 
-    public void call(PunishmentAction action) {
-        action.call(this);
+    public CompletableFuture<Void> call(PunishmentAction action) {
+        return action.performRemote(this);
     }
 
 }

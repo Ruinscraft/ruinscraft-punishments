@@ -9,66 +9,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class PunishmentProfile {
 
-    /* cache =========================================================================================== */
-    private static final Map<Offender, PunishmentProfile> cache = new ConcurrentHashMap<>();
-
-    public static <OFFENDERIDENTIFIER> PunishmentProfile get(OFFENDERIDENTIFIER offenderidentifier) {
-        for (Offender offender : cache.keySet()) {
-            if (offender.getIdentifier().equals(offenderidentifier)) {
-                return cache.get(offender);
-            }
-        }
-        return null;
-    }
-
-    public static Callable<PunishmentProfile> load(Offender offender) {
-        return () -> {
-            PunishmentProfile profile = new PunishmentProfile(offender);
-            for (PunishmentEntry entry : PunishmentsPlugin.get().getStorage().queryOffender(offender).call()) {
-                profile.punishments.put(entry.punishment.getPunishmentId(), entry);
-            }
-            cache.put(offender, profile);
-            System.out.println("CACHE SIZE: " + cache.size());
-            return profile;
-        };
-    }
-
-    public static Callable<PunishmentProfile> getOrLoad(Offender offender) {
-        return () -> {
-            if (cache.containsKey(offender)) {
-                return cache.get(offender);
-            }
-            return load(offender).call();
-        };
-    }
-
-    public static <OFFENDERIDENTIFIER> void unload(OFFENDERIDENTIFIER offenderidentifier) {
-        PunishmentProfile punishmentProfile = get(offenderidentifier);
-
-        if (punishmentProfile == null) {
-            return;
-        }
-
-        cache.remove(punishmentProfile.offender);
-    }
-
-    public static void clearCache() {
-        cache.clear();
-    }
-    /* cache =========================================================================================== */
-
-    private final Offender offender;
-    private Map<Integer, PunishmentEntry> punishments;
+    protected final Offender offender;
+    protected final Map<Integer, PunishmentEntry> punishments;
 
     public PunishmentProfile(Offender offender) {
         this.offender = offender;
         this.punishments = new HashMap<>();
+    }
+
+    public Offender getOffender() {
+        return offender;
+    }
+
+    public boolean hasPunishments() {
+        return !punishments.isEmpty();
     }
 
     public boolean isMuted() {
@@ -129,10 +88,11 @@ public class PunishmentProfile {
         }
     }
 
-    private static final String offset = "    ";
+    // TODO: work on this formatting
+    public CompletableFuture<Void> show(final CommandSender caller) {
+        return CompletableFuture.supplyAsync(() -> {
+            final String OFFSET = "    ";
 
-    public Callable<Void> show(final CommandSender caller) {
-        return () -> {
             for (PunishmentType type : PunishmentType.values()) {
                 final List<Punishment> punishments = getByType(type);
                 boolean truncate = punishments.size() > 32;
@@ -140,14 +100,14 @@ public class PunishmentProfile {
                 caller.sendMessage(Messages.COLOR_MAIN + WordUtils.capitalize(type.getPlural()) + " (" + punishments.size() + "):");
 
                 if (truncate) {
-                    caller.sendMessage(Messages.COLOR_WARN + offset + "Too many to show");
+                    caller.sendMessage(Messages.COLOR_WARN + OFFSET + "Too many to show");
                     continue;
                 }
 
                 for (Punishment punishment : getByType(type)) {
                     StringJoiner joiner = new StringJoiner(" ");
 
-                    joiner.add(Messages.COLOR_WARN + offset);
+                    joiner.add(Messages.COLOR_WARN + OFFSET);
                     joiner.add(punishment.getInceptionTimeFormatted());
 
                     if (!punishment.getServerContext().equals("primary")) {
@@ -155,7 +115,7 @@ public class PunishmentProfile {
                     }
 
                     if (caller.hasPermission("ruinscraft.punishments.viewpunisher")) {
-                        joiner.add("[" + PlayerLookups.getName(punishment.getPunisher()).call() + "]");
+                        joiner.add("[" + PlayerLookups.getName(punishment.getPunisher()).join() + "]");
                     }
 
                     if (type.canBeTemporary()) {
@@ -168,8 +128,9 @@ public class PunishmentProfile {
                     caller.sendMessage(joiner.toString());
                 }
             }
+
             return null;
-        };
+        });
     }
 
 }

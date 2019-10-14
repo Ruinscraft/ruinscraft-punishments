@@ -8,7 +8,7 @@ import com.ruinscraft.punishments.offender.UUIDOffender;
 
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 
 public class MySQLStorage implements SQLStorage {
 
@@ -65,12 +65,13 @@ public class MySQLStorage implements SQLStorage {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return connection;
     }
 
     @Override
-    public Callable<Void> insert(PunishmentEntry entry) {
-        return () -> {
+    public CompletableFuture<Void> insert(PunishmentEntry entry) {
+        return CompletableFuture.supplyAsync(() -> {
             try (PreparedStatement insert = getConnection().prepareStatement(
                     "INSERT INTO " + Table.PUNISHMENTS +
                             " (server_context, punishment_type, punisher, offender, inception_time, expiration_time, reason)" +
@@ -89,16 +90,19 @@ public class MySQLStorage implements SQLStorage {
                         entry.punishment.setPunishmentId(punishmentId);
                     }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
+
             return null;
-        };
+        });
     }
 
     @Override
-    public Callable<Void> update(PunishmentEntry entry) {
-        return () -> {
+    public CompletableFuture<Void> update(PunishmentEntry entry) {
+        return CompletableFuture.supplyAsync(() -> {
             if (entry.punishment.getPunishmentId() == 0) {
-                return null; // punishment not in database
+                return null; // punishment not in database, cannot update
             }
 
             try (PreparedStatement update = getConnection().prepareStatement(
@@ -107,26 +111,32 @@ public class MySQLStorage implements SQLStorage {
                 update.setString(2, entry.punishment.getReason());
                 update.setInt(3, entry.punishment.getPunishmentId());
                 update.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
+
             return null;
-        };
+        });
     }
 
     @Override
-    public Callable<Void> delete(int punishmentId) {
-        return () -> {
+    public CompletableFuture<Void> delete(int punishmentId) {
+        return CompletableFuture.supplyAsync(() -> {
             try (PreparedStatement delete = getConnection().prepareStatement(
                     "DELETE FROM " + Table.PUNISHMENTS + " WHERE punishment_id = ?;")) {
                 delete.setInt(1, punishmentId);
                 delete.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
+
             return null;
-        };
+        });
     }
 
     @Override
-    public Callable<List<PunishmentEntry>> queryOffender(Offender offender) {
-        return () -> {
+    public CompletableFuture<List<PunishmentEntry>> queryOffender(Offender offender) {
+        return CompletableFuture.supplyAsync(() -> {
             List<PunishmentEntry> entries = new ArrayList<>();
 
             try (PreparedStatement query = getConnection().prepareStatement(
@@ -154,15 +164,17 @@ public class MySQLStorage implements SQLStorage {
                         entries.add(entry);
                     }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
 
             return entries;
-        };
+        });
     }
 
     @Override
-    public Callable<List<PunishmentEntry>> queryPunisher(UUID punisher) {
-        return () -> {
+    public CompletableFuture<List<PunishmentEntry>> queryPunisher(UUID punisher) {
+        return CompletableFuture.supplyAsync(() -> {
             List<PunishmentEntry> entries = new ArrayList();
 
             try (PreparedStatement query = getConnection().prepareStatement(
@@ -190,15 +202,17 @@ public class MySQLStorage implements SQLStorage {
                         entries.add(entry);
                     }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
 
             return entries;
-        };
+        });
     }
 
     @Override
-    public Callable<Set<String>> getAddresses(UUID user) {
-        return () -> {
+    public CompletableFuture<Set<String>> queryAddresses(UUID user) {
+        return CompletableFuture.supplyAsync(() -> {
             Set<String> addresses = new HashSet<>();
 
             try (PreparedStatement select = getConnection().prepareStatement(
@@ -210,28 +224,33 @@ public class MySQLStorage implements SQLStorage {
                         addresses.add(rs.getString(1));
                     }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
 
             return addresses;
-        };
+        });
     }
 
     @Override
-    public Callable<Void> insertAddress(UUID user, String address) {
-        return () -> {
+    public CompletableFuture<Void> insertAddress(UUID user, String address) {
+        return CompletableFuture.supplyAsync(() -> {
             try (PreparedStatement insert = getConnection().prepareStatement(
                     "INSERT INTO " + Table.ADDRESSES + " (user, address) VALUES (?, ?);")) {
                 insert.setString(1, user.toString());
                 insert.setString(2, address);
                 insert.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
+
             return null;
-        };
+        });
     }
 
     @Override
-    public Callable<Set<UUID>> getUsersForAddress(String address) {
-        return () -> {
+    public CompletableFuture<Set<UUID>> queryUsersOnAddress(String address) {
+        return CompletableFuture.supplyAsync(() -> {
             Set<UUID> users = new HashSet<>();
 
             try (PreparedStatement select = getConnection().prepareStatement(
@@ -243,10 +262,12 @@ public class MySQLStorage implements SQLStorage {
                         users.add(UUID.fromString(rs.getString(1)));
                     }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
 
             return users;
-        };
+        });
     }
 
     @Override

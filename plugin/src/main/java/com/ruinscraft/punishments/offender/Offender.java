@@ -1,6 +1,6 @@
 package com.ruinscraft.punishments.offender;
 
-public abstract class Offender<IDENTIFIER> {
+public class Offender<IDENTIFIER> {
 
     protected IDENTIFIER identifier;
 
@@ -21,9 +21,5 @@ public abstract class Offender<IDENTIFIER> {
     public String toString() {
         return identifier.toString();
     }
-
-    public abstract boolean offerChatMessage(String msg);
-
-    public abstract boolean offerKick(String kickMsg);
 
 }

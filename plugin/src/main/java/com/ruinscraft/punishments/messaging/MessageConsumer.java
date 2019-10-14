@@ -12,7 +12,7 @@ public interface MessageConsumer {
         }
         final PunishmentEntry entry = message.datum;
         final PunishmentAction action = message.action;
-        action.propagate(entry);
+        action.performLocal(entry);
     }
 
 }

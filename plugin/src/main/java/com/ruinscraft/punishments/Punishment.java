@@ -22,13 +22,21 @@ public class Punishment {
     private Punishment() {
     } // used with builder
 
-    @Deprecated // only for internal use
-    public void setPunishmentId(int punishmentId) {
-        this.punishmentId = punishmentId;
+    public static PunishmentBuilder builder() {
+        return new PunishmentBuilder();
+    }
+
+    public static PunishmentBuilder builder(int punishmentId) {
+        return new PunishmentBuilder(punishmentId);
     }
 
     public int getPunishmentId() {
         return punishmentId;
+    }
+
+    @Deprecated // only for internal use
+    public void setPunishmentId(int punishmentId) {
+        this.punishmentId = punishmentId;
     }
 
     public String getServerContext() {
@@ -108,14 +116,6 @@ public class Punishment {
 
     public PunishmentEntry entry(PunishmentType type) {
         return PunishmentEntry.of(this, type);
-    }
-
-    public static PunishmentBuilder builder() {
-        return new PunishmentBuilder();
-    }
-
-    public static PunishmentBuilder builder(int punishmentId) {
-        return new PunishmentBuilder(punishmentId);
     }
 
     public static class PunishmentBuilder {
