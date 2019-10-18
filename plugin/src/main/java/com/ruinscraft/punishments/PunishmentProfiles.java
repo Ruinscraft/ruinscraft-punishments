@@ -15,7 +15,10 @@ public final class PunishmentProfiles {
     private static Set<PunishmentProfile> profiles = new HashSet<>();
 
     public static <IDENTITY> Optional<PunishmentProfile> getProfile(IDENTITY identity) {
-        return profiles.stream().filter(profile -> profile.offender.equals(identity) || profile.offender.getIdentifier().equals(identity)).findFirst();
+        return profiles
+                .stream()
+                .filter(profile -> profile.offender.equals(identity) || profile.offender.getIdentifier().equals(identity))
+                .findFirst();
     }
 
     public static <IDENTITY> CompletableFuture<PunishmentProfile> getOrLoadProfile(IDENTITY identity, Class<? extends Offender> offenderClass) {
@@ -56,11 +59,7 @@ public final class PunishmentProfiles {
     }
 
     public static <IDENTITY> void unload(IDENTITY identity) {
-        Optional<PunishmentProfile> profile = getProfile(identity);
-
-        if (profile.isPresent()) {
-            profiles.remove(profile.get());
-        }
+        getProfile(identity).ifPresent(profile -> profiles.remove(profile));
     }
 
     public static void clear() {
