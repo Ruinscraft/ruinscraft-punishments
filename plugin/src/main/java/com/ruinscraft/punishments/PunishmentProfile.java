@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class PunishmentProfile {
@@ -74,6 +75,27 @@ public class PunishmentProfile {
 
     public boolean hasExcessiveAmount() {
         return punishments.size() > 25;
+    }
+
+    public boolean wasRecentlyPunished() {
+        PunishmentEntry mostRecent = getMostRecent();
+
+        if (mostRecent != null) {
+            long timeDiff = System.currentTimeMillis() - mostRecent.punishment.getInceptionTime();
+            if (timeDiff < TimeUnit.SECONDS.toMillis(10)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isAlready(PunishmentType type) {
+        if (type.canBeTemporary() && (getActive(type) != null)) {
+            return true;
+        }
+        
+        return false;
     }
 
     public void update(PunishmentEntry entry, PunishmentAction action) {

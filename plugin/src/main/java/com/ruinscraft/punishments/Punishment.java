@@ -7,8 +7,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class Punishment {
+
+    private static final long MAX_UNDO_TIME = TimeUnit.DAYS.toMillis(3);
 
     private int punishmentId;
     private String serverContext;
@@ -55,6 +58,10 @@ public class Punishment {
         return offender;
     }
 
+    public void setOffender(Offender offender) {
+        this.offender = offender;
+    }
+
     public String getOffenderUsername() {
         if (offenderUsername == null) {
             return "?";
@@ -86,6 +93,10 @@ public class Punishment {
 
     public boolean isTemporary() {
         return expirationTime != -1L;
+    }
+
+    public boolean canBeUndone() {
+        return getInceptionTime() + MAX_UNDO_TIME < System.currentTimeMillis();
     }
 
     public long getTimeLeftMillis() {

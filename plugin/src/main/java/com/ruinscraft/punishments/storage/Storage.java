@@ -15,13 +15,13 @@ public interface Storage {
         return CompletableFuture.supplyAsync(() -> {
             switch (action) {
                 case CREATE:
-                    insert(entry).thenRun(() -> System.out.println("callAction CREATE"));
+                    insert(entry);
                     break;
                 case PARDON:
-                    update(entry).thenRun(() -> System.out.println("callAction PARDON"));
+                    update(entry);
                     break;
                 case DELETE:
-                    delete(entry.punishment.getPunishmentId()).thenRun(() -> System.out.println("callAction DELETE"));
+                    delete(entry.punishment.getPunishmentId());
                     break;
             }
 

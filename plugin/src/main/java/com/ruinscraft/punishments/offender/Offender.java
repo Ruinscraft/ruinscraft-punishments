@@ -14,7 +14,12 @@ public class Offender<IDENTIFIER> {
 
     @Override
     public boolean equals(Object obj) {
-        return identifier.equals(obj);
+        return toString().equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
     }
 
     @Override

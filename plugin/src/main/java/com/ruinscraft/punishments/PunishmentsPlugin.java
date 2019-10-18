@@ -3,13 +3,10 @@ package com.ruinscraft.punishments;
 import com.ruinscraft.punishments.commands.*;
 import com.ruinscraft.punishments.messaging.MessageManager;
 import com.ruinscraft.punishments.messaging.redis.RedisMessageManager;
-import com.ruinscraft.punishments.offender.UUIDOffender;
+import com.ruinscraft.punishments.offender.OnlineUUIDOffender;
 import com.ruinscraft.punishments.storage.MySQLStorage;
 import com.ruinscraft.punishments.storage.Storage;
-import com.ruinscraft.punishments.util.Tasks;
 import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PunishmentsPlugin extends JavaPlugin {
@@ -46,76 +43,18 @@ public class PunishmentsPlugin extends JavaPlugin {
             return;
         }
 
-        // setup storage
-        String mysqlHost = getConfig().getString("storage.mysql.host");
-        int mysqlPort = getConfig().getInt("storage.mysql.port");
-        String mysqlDatabase = getConfig().getString("storage.mysql.database");
-        String mysqlUsername = getConfig().getString("storage.mysql.username");
-        String mysqlPassword = getConfig().getString("storage.mysql.password");
-        storage = new MySQLStorage(mysqlHost, mysqlPort, mysqlDatabase, mysqlUsername, mysqlPassword.toCharArray());
+        setupMessaging();
+        setupStorage();
+        setupCommands();
 
-        // setup message manager
-        String redisHost = getConfig().getString("messaging.redis.host");
-        int redisPort = getConfig().getInt("messaging.redis.port");
-        messageManager = new RedisMessageManager(redisHost, redisPort);
-
-        // new punishment commands
-        NewPunishmentCommand newPunishmentCommand = new NewPunishmentCommand();
-
-        PluginCommand kickCommand = getCommand("kick");
-        kickCommand.setExecutor(newPunishmentCommand);
-
-        PluginCommand warnCommand = getCommand("warn");
-        warnCommand.setExecutor(newPunishmentCommand);
-
-        PluginCommand muteCommand = getCommand("mute");
-        muteCommand.setExecutor(newPunishmentCommand);
-
-        PluginCommand tempMuteCommand = getCommand("tempmute");
-        tempMuteCommand.setExecutor(newPunishmentCommand);
-
-        PluginCommand banCommand = getCommand("ban");
-        banCommand.setExecutor(newPunishmentCommand);
-
-        PluginCommand tempBanCommand = getCommand("tempban");
-        tempBanCommand.setExecutor(newPunishmentCommand);
-
-        // pardon punishment commands (unmute, unban)
-        PardonPunishmentCommand pardonPunishmentCommand = new PardonPunishmentCommand();
-        getCommand("unmute").setExecutor(pardonPunishmentCommand);
-        getCommand("unban").setExecutor(pardonPunishmentCommand);
-
-        // undo punishment command
-        UndoPunishmentCommand undoPunishmentCommand = new UndoPunishmentCommand();
-        getCommand("pundo").setExecutor(undoPunishmentCommand);
-
-        // delete punishment command (by id, removes from the records)
-        DeletePunishmentCommand deletePunishmentCommand = new DeletePunishmentCommand();
-        getCommand("pdel").setExecutor(deletePunishmentCommand);
-
-        // query punishment commands
-        QueryPunishmentCommand queryPunishmentCommand = new QueryPunishmentCommand();
-        getCommand("pinfo").setExecutor(queryPunishmentCommand);
-
-        // register listeners
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 
-        Tasks.async(() -> {
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                UUIDOffender uuidOffender = new UUIDOffender(player.getUniqueId());
-
-                try {
-                    PunishmentProfile.load(uuidOffender).call();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        Bukkit.getOnlinePlayers().forEach(player -> PunishmentProfiles.getOrLoadProfile(player.getUniqueId(), OnlineUUIDOffender.class));
     }
 
     @Override
     public void onDisable() {
-        PunishmentProfile.clearCache();
+        PunishmentProfiles.clear();
 
         if (storage != null) {
             storage.close();
@@ -126,6 +65,55 @@ public class PunishmentsPlugin extends JavaPlugin {
         }
 
         singleton = null;
+    }
+
+    private void setupMessaging() {
+        String redisHost = getConfig().getString("messaging.redis.host");
+        int redisPort = getConfig().getInt("messaging.redis.port");
+        messageManager = new RedisMessageManager(redisHost, redisPort);
+    }
+
+    private void setupStorage() {
+        String mysqlHost = getConfig().getString("storage.mysql.host");
+        int mysqlPort = getConfig().getInt("storage.mysql.port");
+        String mysqlDatabase = getConfig().getString("storage.mysql.database");
+        String mysqlUsername = getConfig().getString("storage.mysql.username");
+        String mysqlPassword = getConfig().getString("storage.mysql.password");
+        storage = new MySQLStorage(mysqlHost, mysqlPort, mysqlDatabase, mysqlUsername, mysqlPassword.toCharArray());
+    }
+
+    private void setupCommands() {
+        NewPunishmentCommand newPunishmentCommand = new NewPunishmentCommand();
+        getCommand("kick").setExecutor(newPunishmentCommand);
+        getCommand("kickip").setExecutor(newPunishmentCommand);
+        getCommand("warn").setExecutor(newPunishmentCommand);
+        getCommand("warnip").setExecutor(newPunishmentCommand);
+        getCommand("mute").setExecutor(newPunishmentCommand);
+        getCommand("muteip").setExecutor(newPunishmentCommand);
+        getCommand("tempmute").setExecutor(newPunishmentCommand);
+        getCommand("tempmuteip").setExecutor(newPunishmentCommand);
+        getCommand("ban").setExecutor(newPunishmentCommand);
+        getCommand("banip").setExecutor(newPunishmentCommand);
+        getCommand("tempban").setExecutor(newPunishmentCommand);
+        getCommand("tempbanip").setExecutor(newPunishmentCommand);
+
+        PardonPunishmentCommand pardonPunishmentCommand = new PardonPunishmentCommand();
+        getCommand("unmute").setExecutor(pardonPunishmentCommand);
+        getCommand("unmuteip").setExecutor(pardonPunishmentCommand);
+        getCommand("unban").setExecutor(pardonPunishmentCommand);
+        getCommand("unbanip").setExecutor(pardonPunishmentCommand);
+
+        UndoPunishmentCommand undoPunishmentCommand = new UndoPunishmentCommand();
+        getCommand("pundo").setExecutor(undoPunishmentCommand);
+        getCommand("pundoip").setExecutor(undoPunishmentCommand);
+
+        DeletePunishmentCommand deletePunishmentCommand = new DeletePunishmentCommand();
+        getCommand("pdel").setExecutor(deletePunishmentCommand);
+        getCommand("pdelip").setExecutor(deletePunishmentCommand);
+
+        QueryPunishmentCommand queryPunishmentCommand = new QueryPunishmentCommand();
+        getCommand("pinfo").setExecutor(queryPunishmentCommand);
+        getCommand("pinfoip").setExecutor(queryPunishmentCommand);
     }
 
 }

@@ -4,6 +4,7 @@ import com.ruinscraft.punishments.behaviors.PunishmentBehaviorRegistry;
 import com.ruinscraft.punishments.messaging.Message;
 import com.ruinscraft.punishments.offender.Offender;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public enum PunishmentAction {
@@ -28,10 +29,12 @@ public enum PunishmentAction {
      */
     public void performLocal(PunishmentEntry entry) {
         Offender offender = entry.punishment.getOffender();
-        PunishmentProfile profile = PunishmentProfiles.getProfile(offender.getIdentifier());
-        if (profile != null) {
-            profile.update(entry, this);
+        Optional<PunishmentProfile> profile = PunishmentProfiles.getProfile(offender.getIdentifier());
+
+        if (profile.isPresent()) {
+            profile.get().update(entry, this);
         }
+
         PunishmentBehaviorRegistry.get(entry.type).perform(entry.punishment, this);
     }
 

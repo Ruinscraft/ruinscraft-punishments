@@ -16,6 +16,8 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.Optional;
+
 public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -53,9 +55,9 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        PunishmentProfile profile = PunishmentProfiles.getProfile(player.getUniqueId());
+        Optional<PunishmentProfile> uuidProfile = PunishmentProfiles.getProfile(player.getUniqueId());
 
-        if (profile.hasExcessiveAmount()) {
+        if (uuidProfile.get().hasExcessiveAmount()) {
             Tasks.syncLater(() -> player.sendMessage(Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments. Check your punishments with /pinfo"),
                     3 * 20L);
         }
@@ -69,10 +71,18 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
-        PunishmentProfile profile = PunishmentProfiles.getProfile(player.getUniqueId());
+        PunishmentProfile uuidProfile = PunishmentProfiles.getProfile(player.getUniqueId()).get();
+        PunishmentProfile ipProfile = PunishmentProfiles.getProfile(player.getAddress().getHostString()).get();
 
-        if (profile.isMuted()) {
-            Punishment mute = profile.getActive(PunishmentType.MUTE);
+        Punishment mute = null;
+
+        if (uuidProfile.isMuted()) {
+            mute = uuidProfile.getActive(PunishmentType.MUTE);
+        } else if (ipProfile.isMuted()) {
+            mute = ipProfile.getActive(PunishmentType.MUTE);
+        }
+
+        if (mute != null) {
             player.sendMessage(Messages.COLOR_WARN + "You are muted for " + mute.getReason() + ". Expires in: " + mute.getRemainingDurationWords());
             event.setCancelled(true);
         }

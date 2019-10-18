@@ -1,6 +1,7 @@
 package com.ruinscraft.punishments.commands;
 
 import com.ruinscraft.punishments.*;
+import com.ruinscraft.punishments.offender.IPOffender;
 import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.util.Duration;
 import com.ruinscraft.punishments.util.Messages;
@@ -11,13 +12,13 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public class NewPunishmentCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         boolean temporary = label.toLowerCase().startsWith("temp");
+        boolean ip = label.toLowerCase().endsWith("ip");
 
         PunishmentType type = PunishmentType.match(label);
 
@@ -55,25 +56,45 @@ public class NewPunishmentCommand implements CommandExecutor {
             reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
         }
 
-        PlayerLookups.getUniqueId(args[0]).thenAcceptAsync(uuid -> {
-            PlayerLookups.getName(uuid).thenAcceptAsync(name -> {
+        if (ip) {
+            PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).thenAcceptAsync(profile -> {
+                if (profile.isAlready(type)) {
+                    sender.sendMessage(Messages.COLOR_WARN + args[0] + " is already " + type.getVerb() + ".");
+                    return;
+                }
+
+                if (profile.wasRecentlyPunished()) {
+                    sender.sendMessage(Messages.COLOR_WARN + "This address was just punished. Wait a few seconds.");
+                    return;
+                }
+
+                Punishment.builder()
+                        .serverContext(PunishmentsPlugin.getServerContext())
+                        .punisher(punisher)
+                        .offender(profile.getOffender())
+                        .offenderUsername(args[0])
+                        .duration(duration)
+                        .reason(reason)
+                        .build()
+                        .entry(type)
+                        .call(PunishmentAction.CREATE);
+            });
+        } else {
+            PlayerLookups.getUniqueId(args[0]).thenAcceptAsync(uuid -> {
                 if (uuid == null) {
-                    sender.sendMessage(Messages.COLOR_WARN + name + " is not a valid Minecraft username.");
+                    sender.sendMessage(Messages.COLOR_WARN + "Mojang UUID for " + args[0] + " not found.");
                     return;
                 }
 
                 PunishmentProfiles.getOrLoadProfile(uuid, UUIDOffender.class).thenAcceptAsync(profile -> {
-                    if (type.canBeTemporary() && (profile.getActive(type) != null)) {
-                        sender.sendMessage(Messages.COLOR_WARN + name + " is already " + type.getVerb() + ".");
+                    if (profile.isAlready(type)) {
+                        sender.sendMessage(Messages.COLOR_WARN + args[0] + " is already " + type.getVerb() + ".");
                         return;
                     }
 
-                    if (profile.getMostRecent() != null) {
-                        long timeDiff = System.currentTimeMillis() - profile.getMostRecent().punishment.getInceptionTime();
-                        if (timeDiff < TimeUnit.SECONDS.toMillis(10)) {
-                            sender.sendMessage(Messages.COLOR_WARN + "This user was just punished. Wait a few seconds.");
-                            return;
-                        }
+                    if (profile.wasRecentlyPunished()) {
+                        sender.sendMessage(Messages.COLOR_WARN + "This user was just punished. Wait a few seconds.");
+                        return;
                     }
 
                     Punishment.builder()
@@ -85,10 +106,10 @@ public class NewPunishmentCommand implements CommandExecutor {
                             .reason(reason)
                             .build()
                             .entry(type)
-                            .call(PunishmentAction.CREATE).join();
+                            .call(PunishmentAction.CREATE);
                 });
             });
-        });
+        }
 
         return true;
     }
