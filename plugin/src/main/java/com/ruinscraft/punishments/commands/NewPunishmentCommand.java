@@ -12,15 +12,15 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class NewPunishmentCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        boolean temporary = label.toLowerCase().startsWith("temp");
-        boolean ip = label.toLowerCase().endsWith("ip");
-
-        PunishmentType type = PunishmentType.match(label);
+        final boolean temporary = label.toLowerCase().startsWith("temp");
+        final boolean ip = label.toLowerCase().endsWith("ip");
+        final PunishmentType type = PunishmentType.match(label);
 
         if (type == null) {
             throw new IllegalStateException("PunishmentType was null");
@@ -29,7 +29,9 @@ public class NewPunishmentCommand implements CommandExecutor {
         int minArgs = 2 + (temporary ? 1 : 0);
 
         if (args.length < minArgs) {
-            return showHelp(sender, label, temporary);
+            String help = "/" + label + " <username>" + (temporary ? " <duration>" : "") + " <reason>";
+            sender.sendMessage(help);
+            return true;
         }
 
         final UUID punisher;
@@ -56,67 +58,43 @@ public class NewPunishmentCommand implements CommandExecutor {
             reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
         }
 
-        if (ip) {
-            PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).thenAcceptAsync(profile -> {
-                if (profile.isAlready(type)) {
-                    sender.sendMessage(Messages.COLOR_WARN + args[0] + " is already " + type.getVerb() + ".");
-                    return;
-                }
+        CompletableFuture.runAsync(() -> {
+            PunishmentProfile profile;
 
-                if (profile.wasRecentlyPunished()) {
-                    sender.sendMessage(Messages.COLOR_WARN + "This address was just punished. Wait a few seconds.");
-                    return;
-                }
+            if (ip) {
+                profile = PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).join();
+            } else {
+                UUID targetUUID = PlayerLookups.getUniqueId(args[0]).join();
+                profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).join();
+            }
 
-                Punishment.builder()
-                        .serverContext(PunishmentsPlugin.getServerContext())
-                        .punisher(punisher)
-                        .offender(profile.getOffender())
-                        .offenderUsername(args[0])
-                        .duration(duration)
-                        .reason(reason)
-                        .build()
-                        .entry(type)
-                        .call(PunishmentAction.CREATE);
-            });
-        } else {
-            PlayerLookups.getUniqueId(args[0]).thenAcceptAsync(uuid -> {
-                if (uuid == null) {
-                    sender.sendMessage(Messages.COLOR_WARN + "Mojang UUID for " + args[0] + " not found.");
-                    return;
-                }
+            if (profile == null) {
+                sender.sendMessage(Messages.COLOR_WARN + "Could not load Punishment Profile for " + args[0]);
+                return;
+            }
 
-                PunishmentProfiles.getOrLoadProfile(uuid, UUIDOffender.class).thenAcceptAsync(profile -> {
-                    if (profile.isAlready(type)) {
-                        sender.sendMessage(Messages.COLOR_WARN + args[0] + " is already " + type.getVerb() + ".");
-                        return;
-                    }
+            if (profile.isAlready(type)) {
+                sender.sendMessage(Messages.COLOR_WARN + args[0] + " is already " + type.getVerb() + ".");
+                return;
+            }
 
-                    if (profile.wasRecentlyPunished()) {
-                        sender.sendMessage(Messages.COLOR_WARN + "This user was just punished. Wait a few seconds.");
-                        return;
-                    }
+            if (profile.wasRecentlyPunished()) {
+                sender.sendMessage(Messages.COLOR_WARN + "This address was just punished. Wait a few seconds.");
+                return;
+            }
 
-                    Punishment.builder()
-                            .serverContext(PunishmentsPlugin.getServerContext())
-                            .punisher(punisher)
-                            .offender(profile.getOffender())
-                            .offenderUsername(args[0])
-                            .duration(duration)
-                            .reason(reason)
-                            .build()
-                            .entry(type)
-                            .call(PunishmentAction.CREATE);
-                });
-            });
-        }
+            Punishment.builder()
+                    .serverContext(PunishmentsPlugin.getServerContext())
+                    .punisher(punisher)
+                    .offender(profile.getOffender())
+                    .offenderUsername(args[0])
+                    .duration(duration)
+                    .reason(reason)
+                    .build()
+                    .entry(type)
+                    .call(PunishmentAction.CREATE);
+        });
 
-        return true;
-    }
-
-    private boolean showHelp(CommandSender sender, String label, boolean temporary) {
-        String help = "/" + label + " <username>" + (temporary ? " <duration>" : "") + " <reason>";
-        sender.sendMessage(help);
         return true;
     }
 

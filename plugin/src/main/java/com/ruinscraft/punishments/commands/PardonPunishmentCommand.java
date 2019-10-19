@@ -8,6 +8,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
 public class PardonPunishmentCommand implements CommandExecutor {
 
     @Override
@@ -17,62 +20,41 @@ public class PardonPunishmentCommand implements CommandExecutor {
             return true;
         }
 
-        boolean ip = label.endsWith("ip");
-
-        PunishmentType type = PunishmentType.match(label);
+        final boolean ip = label.endsWith("ip");
+        final PunishmentType type = PunishmentType.match(label);
 
         if (type == null) {
             throw new IllegalStateException("PunishmentType was null");
         }
 
-        if (ip) {
-            PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).thenAcceptAsync(profile -> {
-                if (profile == null) {
-                    sender.sendMessage(Messages.COLOR_WARN + "Profile for " + args[0] + " could not be loaded.");
-                    return;
-                }
+        CompletableFuture.runAsync(() -> {
+            PunishmentProfile profile;
 
-                Punishment active = profile.getActive(type);
+            if (ip) {
+                profile = PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).join();
+            } else {
+                UUID targetUUID = PlayerLookups.getUniqueId(args[0]).join();
+                profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).join();
+            }
 
-                if (active == null) {
-                    sender.sendMessage(Messages.COLOR_WARN + args[0] + " is not " + type.getVerb() + ".");
-                    return;
-                }
+            if (profile == null) {
+                sender.sendMessage(Messages.COLOR_WARN + "Could not load Punishment Profile for " + args[0]);
+                return;
+            }
 
-                active.setExpired();
+            Punishment active = profile.getActive(type);
 
-                PunishmentAction.PARDON.performRemote(PunishmentEntry.of(active, type)).thenRunAsync(() -> {
-                    sender.sendMessage(Messages.COLOR_MAIN + "Un" + type.getVerb() + " " + args[0] + ".");
-                });
+            if (active == null) {
+                sender.sendMessage(Messages.COLOR_WARN + args[0] + " is not " + type.getVerb() + ".");
+                return;
+            }
+
+            active.setExpired();
+
+            PunishmentAction.PARDON.performRemote(PunishmentEntry.of(active, type)).thenRunAsync(() -> {
+                sender.sendMessage(Messages.COLOR_MAIN + "Un" + type.getVerb() + " " + args[0] + ".");
             });
-        } else {
-            PlayerLookups.getUniqueId(args[0]).thenAcceptAsync(uuid -> {
-                if (uuid == null) {
-                    sender.sendMessage(Messages.COLOR_WARN + "Mojang UUID for " + args[0] + " not found.");
-                    return;
-                }
-
-                PunishmentProfiles.getOrLoadProfile(uuid, UUIDOffender.class).thenAcceptAsync(profile -> {
-                    if (profile == null) {
-                        sender.sendMessage(Messages.COLOR_WARN + "Profile for " + args[0] + " could not be loaded.");
-                        return;
-                    }
-
-                    Punishment active = profile.getActive(type);
-
-                    if (active == null) {
-                        sender.sendMessage(Messages.COLOR_WARN + args[0] + " is not " + type.getVerb() + ".");
-                        return;
-                    }
-
-                    active.setExpired();
-
-                    PunishmentAction.PARDON.performRemote(PunishmentEntry.of(active, type)).thenRunAsync(() -> {
-                        sender.sendMessage(Messages.COLOR_MAIN + "Un" + type.getVerb() + " " + args[0] + ".");
-                    });
-                });
-            });
-        }
+        });
 
         return true;
     }

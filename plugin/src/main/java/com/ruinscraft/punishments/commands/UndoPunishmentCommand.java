@@ -1,6 +1,7 @@
 package com.ruinscraft.punishments.commands;
 
 import com.ruinscraft.punishments.*;
+import com.ruinscraft.punishments.offender.IPOffender;
 import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.storage.Storage;
 import com.ruinscraft.punishments.util.Messages;
@@ -9,6 +10,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class UndoPunishmentCommand implements CommandExecutor {
 
@@ -36,33 +39,36 @@ public class UndoPunishmentCommand implements CommandExecutor {
             return true;
         }
 
-        PlayerLookups.getUniqueId(args[0]).thenAcceptAsync(uuid -> {
-            if (uuid == null) {
-                sender.sendMessage(Messages.COLOR_WARN + args[0] + " is not a valid Minecraft username.");
+        final boolean ip = label.endsWith("ip");
+
+        CompletableFuture.runAsync(() -> {
+            PunishmentProfile profile;
+
+            if (ip) {
+                profile = PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).join();
+            } else {
+                UUID targetUUID = PlayerLookups.getUniqueId(args[0]).join();
+                profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).join();
+            }
+
+            if (profile == null || !profile.hasPunishments()) {
+                sender.sendMessage(Messages.COLOR_WARN + args[0] + " does not have any punishment history.");
                 return;
             }
 
-            PunishmentProfiles.getOrLoadProfile(uuid, UUIDOffender.class).thenAcceptAsync(profile -> {
-                if (profile == null || !profile.hasPunishments()) {
-                    sender.sendMessage(Messages.COLOR_WARN + args[0] + " does not have any punishment history.");
+            storage.queryOffender(profile.getOffender()).thenAcceptAsync(entries -> {
+                PunishmentEntry mostRecent = getMostRecent(entries);
+
+                if (!mostRecent.punishment.canBeUndone()) {
+                    sender.sendMessage(Messages.COLOR_WARN + "This punishment is too old to undo.");
                     return;
                 }
 
-                storage.queryOffender(profile.getOffender()).thenAcceptAsync(entries -> {
-                    PunishmentEntry mostRecent = getMostRecent(entries);
-
-                    if (!mostRecent.punishment.canBeUndone()) {
-                        sender.sendMessage(Messages.COLOR_WARN + "This punishment is too old to undo.");
-                        return;
-                    }
-
-                    mostRecent.call(PunishmentAction.DELETE).thenRunAsync(() -> {
-                        sender.sendMessage(Messages.COLOR_MAIN + "The " + mostRecent.type.getNoun() + " has been deleted.");
-                    });
+                mostRecent.call(PunishmentAction.DELETE).thenRunAsync(() -> {
+                    sender.sendMessage(Messages.COLOR_MAIN + "The " + mostRecent.type.getNoun() + " has been deleted.");
                 });
             });
         });
-
         return true;
     }
 
