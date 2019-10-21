@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -94,7 +93,7 @@ public class PunishmentProfile {
         if (type.canBeTemporary() && (getActive(type) != null)) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -111,48 +110,44 @@ public class PunishmentProfile {
     }
 
     // TODO: work on this formatting
-    public CompletableFuture<Void> show(final CommandSender caller) {
-        return CompletableFuture.supplyAsync(() -> {
-            final String OFFSET = "    ";
+    // TODO: add truncate
+    public void show(final CommandSender caller) {
+        if (punishments.isEmpty()) {
+            caller.sendMessage(Messages.COLOR_MAIN + "No punishments to display");
+            return;
+        }
 
-            for (PunishmentType type : PunishmentType.values()) {
-                final List<Punishment> punishments = getByType(type);
-                boolean truncate = punishments.size() > 32;
+        final String offset = "    ";
 
-                caller.sendMessage(Messages.COLOR_MAIN + WordUtils.capitalize(type.getPlural()) + " (" + punishments.size() + "):");
+        for (PunishmentType type : PunishmentType.values()) {
+            final List<Punishment> punishments = getByType(type);
 
-                if (truncate) {
-                    caller.sendMessage(Messages.COLOR_WARN + OFFSET + "Too many to show");
-                    continue;
+            caller.sendMessage(Messages.COLOR_MAIN + WordUtils.capitalize(type.getPlural()) + " (" + punishments.size() + "):");
+
+            for (Punishment punishment : getByType(type)) {
+                StringJoiner joiner = new StringJoiner(" ");
+
+                joiner.add(Messages.COLOR_WARN + offset);
+                joiner.add(punishment.getInceptionTimeFormatted());
+
+                if (!punishment.getServerContext().equals("primary")) {
+                    joiner.add("[" + punishment.getServerContext() + "]");
                 }
 
-                for (Punishment punishment : getByType(type)) {
-                    StringJoiner joiner = new StringJoiner(" ");
-
-                    joiner.add(Messages.COLOR_WARN + OFFSET);
-                    joiner.add(punishment.getInceptionTimeFormatted());
-
-                    if (!punishment.getServerContext().equals("primary")) {
-                        joiner.add("[" + punishment.getServerContext() + "]");
-                    }
-
-                    if (caller.hasPermission("ruinscraft.punishments.viewpunisher")) {
-                        joiner.add("[" + PlayerLookups.getName(punishment.getPunisher()).join() + "]");
-                    }
-
-                    if (type.canBeTemporary()) {
-                        joiner.add("[" + punishment.getTotalDurationWords() + "]");
-                    }
-
-                    joiner.add(":");
-                    joiner.add(punishment.getReason());
-
-                    caller.sendMessage(joiner.toString());
+                if (caller.hasPermission("ruinscraft.punishments.viewpunisher")) {
+                    joiner.add("[" + punishment.getPunisherUsername() + "]");
                 }
+
+                if (type.canBeTemporary()) {
+                    joiner.add("[" + punishment.getTotalDurationWords() + "]");
+                }
+
+                joiner.add(":");
+                joiner.add(punishment.getReason());
+
+                caller.sendMessage(joiner.toString());
             }
-
-            return null;
-        });
+        }
     }
 
 }

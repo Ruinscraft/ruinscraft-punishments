@@ -16,6 +16,7 @@ public class Punishment {
     private int punishmentId;
     private String serverContext;
     private UUID punisher;
+    private String punisherUsername;
     private Offender offender;
     private String offenderUsername;
     private long inceptionTime;
@@ -54,12 +55,16 @@ public class Punishment {
         return punisher;
     }
 
-    public Offender getOffender() {
-        return offender;
+    public String getPunisherUsername() {
+        if (punisherUsername == null) {
+            return "?";
+        } else {
+            return punisherUsername;
+        }
     }
 
-    public void setOffender(Offender offender) {
-        this.offender = offender;
+    public Offender getOffender() {
+        return offender;
     }
 
     public String getOffenderUsername() {
@@ -68,6 +73,10 @@ public class Punishment {
         } else {
             return offenderUsername;
         }
+    }
+
+    public void setOffender(Offender offender) {
+        this.offender = offender;
     }
 
     public long getInceptionTime() {
@@ -158,6 +167,11 @@ public class Punishment {
 
         public PunishmentBuilder offenderUsername(String offenderUsername) {
             build.offenderUsername = offenderUsername;
+            return this;
+        }
+
+        public PunishmentBuilder punisherUsername(String punisherUsername) {
+            build.punisherUsername = punisherUsername;
             return this;
         }
 

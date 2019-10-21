@@ -34,7 +34,9 @@ public class MySQLStorage implements SQLStorage {
                         "server_context VARCHAR(64) DEFAULT 'primary', " +
                         "punishment_type VARCHAR(12), " +
                         "punisher VARCHAR(36), " +
+                        "punisher_username VARCHAR(16), " +
                         "offender VARCHAR(36), " +
+                        "offender_username VARCHAR(16), " +
                         "inception_time BIGINT, " +
                         "expiration_time BIGINT, " +
                         "reason VARCHAR(255)," +
@@ -74,15 +76,17 @@ public class MySQLStorage implements SQLStorage {
         return CompletableFuture.supplyAsync(() -> {
             try (PreparedStatement insert = getConnection().prepareStatement(
                     "INSERT INTO " + Table.PUNISHMENTS +
-                            " (server_context, punishment_type, punisher, offender, inception_time, expiration_time, reason)" +
-                            " VALUES (?, ?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
+                            " (server_context, punishment_type, punisher, punisher_username, offender, offender_username, inception_time, expiration_time, reason)" +
+                            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
                 insert.setString(1, entry.punishment.getServerContext());
                 insert.setString(2, entry.type.name());
                 insert.setString(3, entry.punishment.getPunisher().toString());
-                insert.setString(4, entry.punishment.getOffender().getIdentifier().toString());
-                insert.setLong(5, entry.punishment.getInceptionTime());
-                insert.setLong(6, entry.punishment.getExpirationTime());
-                insert.setString(7, entry.punishment.getReason());
+                insert.setString(4, entry.punishment.getPunisherUsername());
+                insert.setString(5, entry.punishment.getOffender().getIdentifier().toString());
+                insert.setString(6, entry.punishment.getOffenderUsername());
+                insert.setLong(7, entry.punishment.getInceptionTime());
+                insert.setLong(8, entry.punishment.getExpirationTime());
+                insert.setString(9, entry.punishment.getReason());
                 insert.execute();
                 try (ResultSet rs = insert.getGeneratedKeys()) {
                     while (rs.next()) {
@@ -149,13 +153,15 @@ public class MySQLStorage implements SQLStorage {
                         String serverContext = rs.getString("server_context");
                         PunishmentType type = PunishmentType.valueOf(rs.getString("punishment_type"));
                         UUID punisher = UUID.fromString(rs.getString("punisher"));
+                        String punisherUsername = rs.getString("punisher_username");
                         long inceptionTime = rs.getLong("inception_time");
                         long expirationTime = rs.getLong("expiration_time");
                         String reason = rs.getString("reason");
                         Punishment punishment = Punishment.builder(punishmentId)
                                 .serverContext(serverContext)
                                 .punisher(punisher)
-                                .offender(offender)
+                                .punisherUsername(punisherUsername)
+                                .offender(offender) // TODO: should set offenderUsername also?
                                 .inceptionTime(inceptionTime)
                                 .expirationTime(expirationTime)
                                 .reason(reason)
@@ -187,13 +193,15 @@ public class MySQLStorage implements SQLStorage {
                         String serverContext = rs.getString("server_context");
                         PunishmentType type = PunishmentType.valueOf(rs.getString("punishment_type"));
                         UUIDOffender uuidOffender = new UUIDOffender(UUID.fromString(rs.getString("offender")));
+                        String offenderUsername = rs.getString("offender_username");
                         long inceptionTime = rs.getLong("inception_time");
                         long expirationTime = rs.getLong("expiration_time");
                         String reason = rs.getString("reason");
                         Punishment punishment = Punishment.builder(punishmentId)
                                 .serverContext(serverContext)
-                                .punisher(punisher)
+                                .punisher(punisher) // TODO: should set punisherUsername also?
                                 .offender(uuidOffender)
+                                .offenderUsername(offenderUsername)
                                 .inceptionTime(inceptionTime)
                                 .expirationTime(expirationTime)
                                 .reason(reason)
@@ -233,6 +241,7 @@ public class MySQLStorage implements SQLStorage {
     }
 
     @Override
+    // TODO: fix insert or update
     public CompletableFuture<Void> insertAddress(UUID user, String address) {
         return CompletableFuture.supplyAsync(() -> {
             try (PreparedStatement insert = getConnection().prepareStatement(

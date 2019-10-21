@@ -27,6 +27,11 @@ public class PardonPunishmentCommand implements CommandExecutor {
             throw new IllegalStateException("PunishmentType was null");
         }
 
+        if ((args[0].contains(".") || args[0].contains(":")) && !ip) {
+            sender.sendMessage(Messages.COLOR_WARN + "Not a valid username. Did you mean to use /" + label.toLowerCase() + "ip?");
+            return true;
+        }
+
         CompletableFuture.runAsync(() -> {
             PunishmentProfile profile;
 

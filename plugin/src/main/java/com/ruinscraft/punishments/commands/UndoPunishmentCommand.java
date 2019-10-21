@@ -41,6 +41,11 @@ public class UndoPunishmentCommand implements CommandExecutor {
 
         final boolean ip = label.endsWith("ip");
 
+        if ((args[0].contains(".") || args[0].contains(":")) && !ip) {
+            sender.sendMessage(Messages.COLOR_WARN + "Not a valid username. Did you mean to use /" + label.toLowerCase() + "ip?");
+            return true;
+        }
+
         CompletableFuture.runAsync(() -> {
             PunishmentProfile profile;
 

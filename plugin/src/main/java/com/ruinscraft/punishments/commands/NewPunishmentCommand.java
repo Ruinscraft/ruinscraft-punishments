@@ -34,6 +34,11 @@ public class NewPunishmentCommand implements CommandExecutor {
             return true;
         }
 
+        if ((args[0].contains(".") || args[0].contains(":")) && !ip) {
+            sender.sendMessage(Messages.COLOR_WARN + "Not a valid username. Did you mean to use /" + label.toLowerCase() + "ip?");
+            return true;
+        }
+
         final UUID punisher;
 
         if (sender instanceof Player) {
@@ -88,6 +93,7 @@ public class NewPunishmentCommand implements CommandExecutor {
                     .punisher(punisher)
                     .offender(profile.getOffender())
                     .offenderUsername(args[0])
+                    .punisherUsername(sender.getName())
                     .duration(duration)
                     .reason(reason)
                     .build()

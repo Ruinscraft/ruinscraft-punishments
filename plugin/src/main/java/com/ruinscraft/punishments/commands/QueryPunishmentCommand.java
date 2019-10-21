@@ -22,28 +22,37 @@ public class QueryPunishmentCommand implements CommandExecutor {
         boolean ip = label.endsWith("ip");
 
         if (!ip && args.length == 0 && sender instanceof Player) {
-            target = sender.getName();
+            target = sender.getName().trim();
         } else if (ip && args.length == 0 && sender instanceof Player) {
             Player player = (Player) sender;
-            target = player.getAddress().getHostString();
+            target = player.getAddress().getHostString().trim();
         } else {
-            target = args[0];
+            target = args[0].trim();
         }
 
-        sender.sendMessage(Messages.COLOR_MAIN + "Looking up punishment profile for " + target + "...");
+        if ((target.contains(".") || target.contains(":")) && !ip) {
+            sender.sendMessage(Messages.COLOR_WARN + "Not a valid username. Did you mean to use /" + label.toLowerCase() + "ip?");
+            return true;
+        }
+
+        sender.sendMessage(Messages.COLOR_MAIN + "Looking up Punishment Profile for " + target + "...");
 
         CompletableFuture.runAsync(() -> {
-            PunishmentProfile profile;
+            PunishmentProfile profile = null;
 
-            if (ip) {
-                profile = PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).join();
-            } else {
-                UUID targetUUID = PlayerLookups.getUniqueId(args[0]).join();
-                profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).join();
+            try {
+                if (ip) {
+                    profile = PunishmentProfiles.getOrLoadProfile(target, IPOffender.class).get();
+                } else {
+                    UUID targetUUID = PlayerLookups.getUniqueId(target).get();
+                    profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).get();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             if (profile == null) {
-                sender.sendMessage(Messages.COLOR_WARN + "Could not load Punishment Profile for " + args[0]);
+                sender.sendMessage(Messages.COLOR_WARN + "Could not load Punishment Profile for " + target);
                 return;
             }
 
