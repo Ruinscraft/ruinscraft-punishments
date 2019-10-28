@@ -88,8 +88,10 @@ public class NewPunishmentCommand implements CommandExecutor {
                 return;
             }
 
+            String context = PunishmentsPlugin.get().getServerContext();
+
             Punishment.builder()
-                    .serverContext(PunishmentsPlugin.getServerContext())
+                    .serverContext(context)
                     .punisher(punisher)
                     .offender(profile.getOffender())
                     .offenderUsername(args[0])

@@ -20,6 +20,7 @@ public final class Duration {
         return DurationFormatUtils.formatDurationWords(duration, true, true);
     }
 
+    // stolen from PlotSquared (mostly)
     public static long getDurationFromWords(String string) throws Exception {
         if (string.contains(" ")) {
             throw new Exception("no spaces permitted");

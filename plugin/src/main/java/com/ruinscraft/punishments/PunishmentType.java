@@ -1,20 +1,18 @@
 package com.ruinscraft.punishments;
 
 public enum PunishmentType {
-    KICK("kicked", "kick", "kicks", false),
-    WARN("warned", "warn", "warns", false),
-    MUTE("muted", "mute", "mutes", true),
-    BAN("banned", "ban", "bans", true);
+    KICK("kicked", "kick", false),
+    WARN("warned", "warn", false),
+    MUTE("muted", "mute", true),
+    BAN("banned", "ban", true);
 
     final String verb;
     final String noun;
-    final String plural;
     final boolean canBeTemporary;
 
-    PunishmentType(String verb, String noun, String plural, boolean canBeTemporary) {
+    PunishmentType(String verb, String noun, boolean canBeTemporary) {
         this.verb = verb;
         this.noun = noun;
-        this.plural = plural;
         this.canBeTemporary = canBeTemporary;
     }
 
@@ -36,7 +34,7 @@ public enum PunishmentType {
     }
 
     public String getPlural() {
-        return plural;
+        return getNoun() + "s";
     }
 
     public boolean canBeTemporary() {

@@ -7,7 +7,9 @@ import java.util.Optional;
 public interface MessageConsumer {
 
     default void consume(Message message) {
-        if (!message.serverContext.equals(PunishmentsPlugin.getServerContext())) {
+        String context = PunishmentsPlugin.get().getServerContext();
+
+        if (!message.serverContext.equals(context)) {
             return;
         }
 

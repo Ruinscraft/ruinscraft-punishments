@@ -20,18 +20,18 @@ public enum PunishmentAction {
      * Saves to the database, sends over the Messenger, notifies Slack
      * @param entry
      */
-    public CompletableFuture<Void> performRemote(PunishmentEntry entry) {
+    public CompletableFuture<Void> performRemote(PunishmentEntry entry) {   // TODO: probably find a better name for this method
         return CompletableFuture.supplyAsync(() -> {
-            // save to database
+            /* Save to database */
             {
                 PunishmentsPlugin.get().getStorage().callAction(entry, this);
             }
-            // send over messenger
+            /* Send over messenger */
             {
                 Message message = new Message(entry, this);
                 PunishmentsPlugin.get().getMessageManager().getDispatcher().dispatch(message);
             }
-            // notify slack
+            /* Notify Slack webhook */
             {
                 Gson gson = new Gson();
                 try {
@@ -59,7 +59,7 @@ public enum PunishmentAction {
      * Updates local cache and calls the punishment action
      * @param entry
      */
-    public void performLocal(PunishmentEntry entry) {
+    public void performLocal(PunishmentEntry entry) {   // TODO: probably find a better name for this method
         Offender offender = entry.punishment.getOffender();
         Optional<PunishmentProfile> profile = PunishmentProfiles.getProfile(offender.getIdentifier());
         if (profile.isPresent()) {

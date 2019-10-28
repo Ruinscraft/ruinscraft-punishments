@@ -22,13 +22,9 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPreJoin(AsyncPlayerPreLoginEvent event) {
-        final String address = event.getAddress().getHostAddress();
-
-        /* Load profiles for user */
-        PunishmentProfile uuidProfile
-                = PunishmentProfiles.getOrLoadProfile(event.getUniqueId(), OnlineUUIDOffender.class).join();
-        PunishmentProfile ipProfile
-                = PunishmentProfiles.getOrLoadProfile(address, OnlineIPOffender.class).join();
+        String address = event.getAddress().getHostAddress();
+        PunishmentProfile uuidProfile = PunishmentProfiles.getOrLoadProfile(event.getUniqueId(), OnlineUUIDOffender.class).join();
+        PunishmentProfile ipProfile = PunishmentProfiles.getOrLoadProfile(address, OnlineIPOffender.class).join();
 
         if (uuidProfile.offender instanceof UUIDOffender) {
             UUIDOffender uuidOffender = (UUIDOffender) uuidProfile.offender;
@@ -45,7 +41,6 @@ public class PlayerListener implements Listener {
             ban = ipProfile.getActive(PunishmentType.BAN);
         }
 
-        /* player is banned */
         if (ban != null) {
             BanBehavior banBehavior = (BanBehavior) PunishmentBehaviorRegistry.get(PunishmentType.BAN);
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, banBehavior.getKickMessage(ban));
@@ -73,7 +68,6 @@ public class PlayerListener implements Listener {
         Player player = event.getPlayer();
         PunishmentProfile uuidProfile = PunishmentProfiles.getProfile(player.getUniqueId()).get();
         PunishmentProfile ipProfile = PunishmentProfiles.getProfile(player.getAddress().getHostString()).get();
-
         Punishment mute = null;
 
         if (uuidProfile.isMuted()) {

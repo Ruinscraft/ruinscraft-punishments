@@ -48,7 +48,8 @@ public class Punishment {
     }
 
     public boolean isInContext() {
-        return getServerContext().equals(PunishmentsPlugin.getServerContext());
+        String context = PunishmentsPlugin.get().getServerContext();
+        return getServerContext().equals(context);
     }
 
     public UUID getPunisher() {
@@ -67,16 +68,16 @@ public class Punishment {
         return offender;
     }
 
+    public void setOffender(Offender offender) {
+        this.offender = offender;
+    }
+
     public String getOffenderUsername() {
         if (offenderUsername == null) {
             return "?";
         } else {
             return offenderUsername;
         }
-    }
-
-    public void setOffender(Offender offender) {
-        this.offender = offender;
     }
 
     public long getInceptionTime() {

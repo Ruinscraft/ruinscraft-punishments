@@ -11,29 +11,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class PunishmentsPlugin extends JavaPlugin {
 
-    private static PunishmentsPlugin singleton;
     private Storage storage;
     private MessageManager messageManager;
 
-    public static String getServerContext() {
-        return get().getConfig().getString("server-context");
-    }
-
-    public static PunishmentsPlugin get() {
-        return singleton;
-    }
-
-    public Storage getStorage() {
-        return storage;
-    }
-
-    public MessageManager getMessageManager() {
-        return messageManager;
-    }
-
     @Override
     public void onEnable() {
-        singleton = this;
+        instance = this;
 
         saveDefaultConfig();
 
@@ -64,7 +47,7 @@ public class PunishmentsPlugin extends JavaPlugin {
             messageManager.close();
         }
 
-        singleton = null;
+        instance = null;
     }
 
     private void setupMessaging() {
@@ -114,6 +97,24 @@ public class PunishmentsPlugin extends JavaPlugin {
         QueryPunishmentCommand queryPunishmentCommand = new QueryPunishmentCommand();
         getCommand("pinfo").setExecutor(queryPunishmentCommand);
         getCommand("pinfoip").setExecutor(queryPunishmentCommand);
+    }
+
+    public Storage getStorage() {
+        return storage;
+    }
+
+    public MessageManager getMessageManager() {
+        return messageManager;
+    }
+
+    public String getServerContext() {
+        return getConfig().getString("server-context");
+    }
+
+    private static PunishmentsPlugin instance;
+
+    public static PunishmentsPlugin get() {
+        return instance;
     }
 
 }

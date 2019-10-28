@@ -42,10 +42,10 @@ public class QueryPunishmentCommand implements CommandExecutor {
 
             try {
                 if (ip) {
-                    profile = PunishmentProfiles.getOrLoadProfile(target, IPOffender.class).get();
+                    profile = PunishmentProfiles.getOrLoadProfile(target, IPOffender.class).get(); // TODO: #join() ?
                 } else {
                     UUID targetUUID = PlayerLookups.getUniqueId(target).get();
-                    profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).get();
+                    profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).get(); // TODO: #join() ?
                 }
             } catch (Exception e) {
                 e.printStackTrace();
