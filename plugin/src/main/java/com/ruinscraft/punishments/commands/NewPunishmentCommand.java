@@ -5,8 +5,6 @@ import com.ruinscraft.punishments.offender.IPOffender;
 import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.util.Duration;
 import com.ruinscraft.punishments.util.Messages;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -14,28 +12,25 @@ import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class NewPunishmentCommand implements CommandExecutor {
+public class NewPunishmentCommand extends PunishmentCommandExecutor {
+
+    public NewPunishmentCommand() {
+        super(true, false);
+    }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        final boolean temporary = label.toLowerCase().startsWith("temp");
-        final boolean ip = label.toLowerCase().endsWith("ip");
+    protected boolean run(CommandSender sender, String label, String[] args) {
         final PunishmentType type = PunishmentType.match(label);
 
         if (type == null) {
             throw new IllegalStateException("PunishmentType was null");
         }
 
-        int minArgs = 2 + (temporary ? 1 : 0);
+        int minArgs = 2 + (isTemporary() ? 1 : 0);
 
         if (args.length < minArgs) {
-            String help = "/" + label + " <username>" + (temporary ? " <duration>" : "") + " <reason>";
+            String help = "/" + label + " <username>" + (isTemporary() ? " <duration>" : "") + " <reason>";
             sender.sendMessage(help);
-            return true;
-        }
-
-        if ((args[0].contains(".") || args[0].contains(":")) && !ip) {
-            sender.sendMessage(Messages.COLOR_WARN + "Not a valid username. Did you mean to use /" + label.toLowerCase() + "ip?");
             return true;
         }
 
@@ -50,7 +45,7 @@ public class NewPunishmentCommand implements CommandExecutor {
         final long duration;
         final String reason;
 
-        if (temporary) {
+        if (isTemporary()) {
             duration = Duration.getDurationFromWords(args[1]);
             reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
         } else {
@@ -61,7 +56,7 @@ public class NewPunishmentCommand implements CommandExecutor {
         CompletableFuture.runAsync(() -> {
             PunishmentProfile profile;
 
-            if (ip) {
+            if (isIp()) {
                 profile = PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).join();
             } else {
                 UUID targetUUID = PlayerLookups.getUniqueId(args[0]).join();

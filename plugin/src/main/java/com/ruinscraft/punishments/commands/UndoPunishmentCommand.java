@@ -5,17 +5,19 @@ import com.ruinscraft.punishments.offender.IPOffender;
 import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.storage.Storage;
 import com.ruinscraft.punishments.util.Messages;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class UndoPunishmentCommand implements CommandExecutor {
+public class UndoPunishmentCommand extends PunishmentCommandExecutor {
 
     private static Storage storage = PunishmentsPlugin.get().getStorage();
+
+    public UndoPunishmentCommand() {
+        super(true, false);
+    }
 
     // TODO: maybe move this to a util class?
     private static PunishmentEntry getMostRecent(List<PunishmentEntry> entries) {
@@ -33,23 +35,11 @@ public class UndoPunishmentCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length < 1) {
-            sender.sendMessage(Messages.COLOR_WARN + "No target specified.");
-            return true;
-        }
-
-        final boolean ip = label.endsWith("ip");
-
-        if ((args[0].contains(".") || args[0].contains(":")) && !ip) {
-            sender.sendMessage(Messages.COLOR_WARN + "Not a valid username. Did you mean to use /" + label.toLowerCase() + "ip?");
-            return true;
-        }
-
+    protected boolean run(CommandSender sender, String label, String[] args) {
         CompletableFuture.runAsync(() -> {
             final PunishmentProfile profile;
 
-            if (ip) {
+            if (isIp()) {
                 profile = PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).join();
             } else {
                 UUID targetUUID = PlayerLookups.getUniqueId(args[0]).join();
@@ -74,6 +64,7 @@ public class UndoPunishmentCommand implements CommandExecutor {
                 mostRecent.performAction(PunishmentAction.DELETE);
             });
         });
+
         return true;
     }
 

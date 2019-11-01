@@ -1,14 +1,16 @@
 package com.ruinscraft.punishments.commands;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-public class DeletePunishmentCommand implements CommandExecutor {
+public class DeletePunishmentCommand extends PunishmentCommandExecutor {
+
+    public DeletePunishmentCommand() {
+        super(true, false);
+    }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        sender.sendMessage("TODO: coming soon");
+    protected boolean run(CommandSender sender, String label, String[] args) {
+        sender.sendMessage("Not implemented yet");
         return true;
     }
 
