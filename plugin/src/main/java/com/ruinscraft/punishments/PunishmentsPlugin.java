@@ -4,7 +4,7 @@ import com.ruinscraft.punishments.commands.*;
 import com.ruinscraft.punishments.messaging.MessageManager;
 import com.ruinscraft.punishments.messaging.redis.RedisMessageManager;
 import com.ruinscraft.punishments.offender.OnlineUUIDOffender;
-import com.ruinscraft.punishments.storage.MySQLStorage;
+import com.ruinscraft.punishments.storage.PooledMySQLStorage;
 import com.ruinscraft.punishments.storage.Storage;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -13,6 +13,7 @@ public class PunishmentsPlugin extends JavaPlugin {
 
     private Storage storage;
     private MessageManager messageManager;
+    private SlackNotifier slackNotifier;
 
     @Override
     public void onEnable() {
@@ -29,6 +30,7 @@ public class PunishmentsPlugin extends JavaPlugin {
         setupMessaging();
         setupStorage();
         setupCommands();
+        setupSlackNotifier();
 
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 
@@ -62,7 +64,7 @@ public class PunishmentsPlugin extends JavaPlugin {
         String mysqlDatabase = getConfig().getString("storage.mysql.database");
         String mysqlUsername = getConfig().getString("storage.mysql.username");
         String mysqlPassword = getConfig().getString("storage.mysql.password");
-        storage = new MySQLStorage(mysqlHost, mysqlPort, mysqlDatabase, mysqlUsername, mysqlPassword.toCharArray());
+        storage = new PooledMySQLStorage(mysqlHost, mysqlPort, mysqlDatabase, mysqlUsername, mysqlPassword.toCharArray());
     }
 
     private void setupCommands() {
@@ -99,12 +101,27 @@ public class PunishmentsPlugin extends JavaPlugin {
         getCommand("pinfoip").setExecutor(queryPunishmentCommand);
     }
 
+    private void setupSlackNotifier() {
+        String webhookUrl = getConfig().getString("slack-webhook-url");
+
+        if (webhookUrl == null || webhookUrl.equals("notset")) {
+            getLogger().warning("slack-webhook-url was not set in the config");
+            return;
+        }
+
+        slackNotifier = new SlackNotifier(webhookUrl);
+    }
+
     public Storage getStorage() {
         return storage;
     }
 
     public MessageManager getMessageManager() {
         return messageManager;
+    }
+
+    public SlackNotifier getSlackNotifier() {
+        return slackNotifier;
     }
 
     public String getServerContext() {

@@ -19,8 +19,8 @@ public class PunishmentEntry {
         return new PunishmentEntry(punishment, type);
     }
 
-    public CompletableFuture<Void> call(PunishmentAction action) {
-        return action.performRemote(this);
+    public void performAction(PunishmentAction action) {
+        action.performRemote(this);
     }
 
     public String creationMessage() {

@@ -23,15 +23,8 @@ public class Punishment {
     private long expirationTime;
     private String reason;
 
+    // used with builder
     private Punishment() {
-    } // used with builder
-
-    public static PunishmentBuilder builder() {
-        return new PunishmentBuilder();
-    }
-
-    public static PunishmentBuilder builder(int punishmentId) {
-        return new PunishmentBuilder(punishmentId);
     }
 
     public int getPunishmentId() {
@@ -137,6 +130,14 @@ public class Punishment {
 
     public PunishmentEntry entry(PunishmentType type) {
         return PunishmentEntry.of(this, type);
+    }
+
+    public static PunishmentBuilder builder() {
+        return new PunishmentBuilder();
+    }
+
+    public static PunishmentBuilder builder(int punishmentId) {
+        return new PunishmentBuilder(punishmentId);
     }
 
     public static class PunishmentBuilder {

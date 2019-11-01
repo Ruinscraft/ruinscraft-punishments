@@ -7,6 +7,8 @@ import com.ruinscraft.punishments.util.Tasks;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+import java.util.concurrent.CompletableFuture;
+
 public class RedisMessageManager implements MessageManager {
 
     protected static final String REDIS_CHANNEL = "rcpunishments";

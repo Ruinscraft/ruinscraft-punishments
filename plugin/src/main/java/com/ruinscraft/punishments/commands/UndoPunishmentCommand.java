@@ -47,7 +47,7 @@ public class UndoPunishmentCommand implements CommandExecutor {
         }
 
         CompletableFuture.runAsync(() -> {
-            PunishmentProfile profile;
+            final PunishmentProfile profile;
 
             if (ip) {
                 profile = PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).join();
@@ -61,7 +61,7 @@ public class UndoPunishmentCommand implements CommandExecutor {
                 return;
             }
 
-            storage.queryOffender(profile.getOffender()).thenAcceptAsync(entries -> {
+            storage.queryOffender(profile.getOffender()).thenAccept(entries -> {
                 PunishmentEntry mostRecent = getMostRecent(entries);
 
                 if (!mostRecent.punishment.canBeUndone()) {
@@ -69,9 +69,9 @@ public class UndoPunishmentCommand implements CommandExecutor {
                     return;
                 }
 
-                mostRecent.call(PunishmentAction.DELETE).thenRunAsync(() -> {
-                    sender.sendMessage(Messages.COLOR_MAIN + "The " + mostRecent.type.getNoun() + " has been deleted.");
-                });
+                sender.sendMessage(Messages.COLOR_MAIN + "The " + mostRecent.type.getNoun() + " has been deleted.");
+
+                mostRecent.performAction(PunishmentAction.DELETE);
             });
         });
         return true;

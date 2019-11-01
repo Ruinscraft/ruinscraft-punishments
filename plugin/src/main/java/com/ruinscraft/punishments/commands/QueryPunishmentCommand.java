@@ -19,7 +19,7 @@ public class QueryPunishmentCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         final String target;
-        boolean ip = label.endsWith("ip");
+        final boolean ip = label.endsWith("ip");
 
         if (!ip && args.length == 0 && sender instanceof Player) {
             target = sender.getName().trim();
@@ -38,17 +38,13 @@ public class QueryPunishmentCommand implements CommandExecutor {
         sender.sendMessage(Messages.COLOR_MAIN + "Looking up Punishment Profile for " + target + "...");
 
         CompletableFuture.runAsync(() -> {
-            PunishmentProfile profile = null;
+            final PunishmentProfile profile;
 
-            try {
-                if (ip) {
-                    profile = PunishmentProfiles.getOrLoadProfile(target, IPOffender.class).get(); // TODO: #join() ?
-                } else {
-                    UUID targetUUID = PlayerLookups.getUniqueId(target).get();
-                    profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).get(); // TODO: #join() ?
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (ip) {
+                profile = PunishmentProfiles.getOrLoadProfile(target, IPOffender.class).join();
+            } else {
+                UUID targetUUID = PlayerLookups.getUniqueId(target).join();
+                profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).join();
             }
 
             if (profile == null) {

@@ -56,9 +56,9 @@ public class PardonPunishmentCommand implements CommandExecutor {
 
             active.setExpired();
 
-            PunishmentAction.PARDON.performRemote(PunishmentEntry.of(active, type)).thenRunAsync(() -> {
-                sender.sendMessage(Messages.COLOR_MAIN + "Un" + type.getVerb() + " " + args[0] + ".");
-            });
+            sender.sendMessage(Messages.COLOR_MAIN + "Un" + type.getVerb() + " " + args[0] + ".");
+
+            PunishmentAction.PARDON.performRemote(PunishmentEntry.of(active, type));
         });
 
         return true;

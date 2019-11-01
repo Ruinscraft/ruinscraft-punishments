@@ -21,11 +21,8 @@ public final class Duration {
     }
 
     // stolen from PlotSquared (mostly)
-    public static long getDurationFromWords(String string) throws Exception {
-        if (string.contains(" ")) {
-            throw new Exception("no spaces permitted");
-        }
-        string = string.toLowerCase().trim().toLowerCase();
+    public static long getDurationFromWords(String string) {
+        string = string.replace(" ", "").toLowerCase();
         long time = -1;
         int nums = Integer.parseInt(string.replaceAll("[^\\d]", ""));
         String letters = string.replaceAll("[^a-z]", "");

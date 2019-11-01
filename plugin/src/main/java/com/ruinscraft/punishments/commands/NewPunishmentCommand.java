@@ -51,13 +51,8 @@ public class NewPunishmentCommand implements CommandExecutor {
         final String reason;
 
         if (temporary) {
-            try {
-                duration = Duration.getDurationFromWords(args[1]);
-                reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
-            } catch (Exception e) {
-                sender.sendMessage(Messages.COLOR_WARN + "Invalid duration.");
-                return true;
-            }
+            duration = Duration.getDurationFromWords(args[1]);
+            reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
         } else {
             duration = -1;
             reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
@@ -100,7 +95,7 @@ public class NewPunishmentCommand implements CommandExecutor {
                     .reason(reason)
                     .build()
                     .entry(type)
-                    .call(PunishmentAction.CREATE);
+                    .performAction(PunishmentAction.CREATE);
         });
 
         return true;

@@ -19,4 +19,4 @@ messaging:
 
 enable-ban-evade-warnings: true
 ban-appeal-link: www.ruinscraft.com
-slack-webhook-url: https://hooks.slack.com/services/abc123/abc123/abc123
+slack-webhook-url: notset

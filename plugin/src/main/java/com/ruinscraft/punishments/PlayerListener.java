@@ -53,8 +53,8 @@ public class PlayerListener implements Listener {
         Optional<PunishmentProfile> uuidProfile = PunishmentProfiles.getProfile(player.getUniqueId());
 
         if (uuidProfile.get().hasExcessiveAmount()) {
-            Tasks.syncLater(() -> player.sendMessage(Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments. Check your punishments with /pinfo"),
-                    3 * 20L);
+            String message = Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments. Check your punishments with /pinfo";
+            Tasks.syncLater(() -> player.sendMessage(message), 3 * 20L);
         }
     }
 
