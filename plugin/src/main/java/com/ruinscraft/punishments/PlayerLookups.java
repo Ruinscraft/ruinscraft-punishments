@@ -29,18 +29,22 @@ public final class PlayerLookups {
             return CompletableFuture.completedFuture(name);
         }
 
-        return CompletableFuture.supplyAsync(() -> {
-            AccountsAPI.AccountsProfile accountsProfile = AccountsAPI.getAccountsProfile(uuid).join();
+        CompletableFuture future = new CompletableFuture();
 
-            if (accountsProfile != null) {
-                String name = accountsProfile.getName();
-                uuid_name_cache.put(uuid, name);
-                name_uuid_cache.put(name, uuid);
-                return name;
+        AccountsAPI.getAccountsProfile(uuid).thenAccept(accountsProfile -> {
+            if (accountsProfile == null) {
+                future.complete(null);
+                return;
             }
 
-            return null;
+            String name = accountsProfile.getName();
+            uuid_name_cache.put(uuid, name);
+            name_uuid_cache.put(name, uuid);
+
+            future.complete(name);
         });
+
+        return future;
     }
 
     public static CompletableFuture<UUID> getUniqueId(String name) {
@@ -58,19 +62,23 @@ public final class PlayerLookups {
             return CompletableFuture.completedFuture(uuid);
         }
 
-        return CompletableFuture.supplyAsync(() -> {
-            AccountsAPI.AccountsProfile accountsProfile = AccountsAPI.getAccountsProfile(name).join();
+        CompletableFuture future = new CompletableFuture();
 
-            if (accountsProfile != null) {
-                UUID uuid = accountsProfile.getUniqueId();
-                String accountsProfileName = accountsProfile.getName(); // ensuring proper capitalization
-                name_uuid_cache.put(accountsProfileName, uuid);
-                uuid_name_cache.put(uuid, accountsProfileName);
-                return uuid;
+        AccountsAPI.getAccountsProfile(name).thenAccept(accountsProfile -> {
+            if (accountsProfile == null) {
+                future.complete(null);
+                return;
             }
 
-            return null;
+            UUID uuid = accountsProfile.getUniqueId();
+            String accountsProfileName = accountsProfile.getName(); // use this instead of #name to ensure proper capitalization
+            name_uuid_cache.put(accountsProfileName, uuid);
+            uuid_name_cache.put(uuid, accountsProfileName);
+
+            future.complete(uuid);
         });
+
+        return future;
     }
 
 }
