@@ -4,8 +4,6 @@ import com.ruinscraft.punishments.behaviors.PunishmentBehaviorRegistry;
 import com.ruinscraft.punishments.messaging.Message;
 import com.ruinscraft.punishments.offender.Offender;
 
-import java.util.Optional;
-
 public enum PunishmentAction {
     CREATE, PARDON, DELETE;
 
@@ -28,10 +26,7 @@ public enum PunishmentAction {
      */
     public void performLocal(PunishmentEntry entry) {
         Offender offender = entry.punishment.getOffender();
-        Optional<PunishmentProfile> profile = PunishmentProfiles.getProfile(offender.getIdentifier());
-        if (profile.isPresent()) {
-            profile.get().update(entry, this);
-        }
+        PunishmentProfiles.getProfile(offender.getIdentifier()).ifPresent(profile -> profile.update(entry, this));
         PunishmentBehaviorRegistry.get(entry.type).perform(entry.punishment, this);
     }
 
