@@ -131,6 +131,7 @@ public abstract class AbstractSQLStorage implements Storage {
                         PunishmentType type = PunishmentType.valueOf(rs.getString("punishment_type"));
                         UUID punisher = UUID.fromString(rs.getString("punisher"));
                         String punisherUsername = rs.getString("punisher_username");
+                        String offenderUsername = rs.getString("offender_username");
                         long inceptionTime = rs.getLong("inception_time");
                         long expirationTime = rs.getLong("expiration_time");
                         String reason = rs.getString("reason");
@@ -138,7 +139,8 @@ public abstract class AbstractSQLStorage implements Storage {
                                 .serverContext(serverContext)
                                 .punisher(punisher)
                                 .punisherUsername(punisherUsername)
-                                .offender(offender) // TODO: should set offenderUsername also?
+                                .offender(offender)
+                                .offenderUsername(offenderUsername)
                                 .inceptionTime(inceptionTime)
                                 .expirationTime(expirationTime)
                                 .reason(reason)
@@ -170,6 +172,7 @@ public abstract class AbstractSQLStorage implements Storage {
                         int punishmentId = rs.getInt("punishment_id");
                         String serverContext = rs.getString("server_context");
                         PunishmentType type = PunishmentType.valueOf(rs.getString("punishment_type"));
+                        String punisherUsername = rs.getString("punisher_username");
                         UUIDOffender uuidOffender = new UUIDOffender(UUID.fromString(rs.getString("offender")));
                         String offenderUsername = rs.getString("offender_username");
                         long inceptionTime = rs.getLong("inception_time");
@@ -177,7 +180,8 @@ public abstract class AbstractSQLStorage implements Storage {
                         String reason = rs.getString("reason");
                         Punishment punishment = Punishment.builder(punishmentId)
                                 .serverContext(serverContext)
-                                .punisher(punisher) // TODO: should set punisherUsername also?
+                                .punisher(punisher)
+                                .punisherUsername(punisherUsername)
                                 .offender(uuidOffender)
                                 .offenderUsername(offenderUsername)
                                 .inceptionTime(inceptionTime)
