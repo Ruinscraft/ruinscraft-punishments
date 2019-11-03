@@ -16,19 +16,20 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.Optional;
-
 public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPreJoin(AsyncPlayerPreLoginEvent event) {
         String address = event.getAddress().getHostAddress();
+
+        // block until profiles are loaded by using #join
         PunishmentProfile uuidProfile = PunishmentProfiles.getOrLoadProfile(event.getUniqueId(), OnlineUUIDOffender.class).join();
         PunishmentProfile ipProfile = PunishmentProfiles.getOrLoadProfile(address, OnlineIPOffender.class).join();
 
         if (uuidProfile.offender instanceof UUIDOffender) {
             UUIDOffender uuidOffender = (UUIDOffender) uuidProfile.offender;
 
+            // block until addresses are loaded by using #join for use in PlayerJoinEvent
             uuidOffender.loadAddresses().join();
             uuidOffender.logAddress(address).join();
         }
@@ -50,12 +51,18 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        Optional<PunishmentProfile> uuidProfile = PunishmentProfiles.getProfile(player.getUniqueId());
 
-        if (uuidProfile.get().hasExcessiveAmount()) {
-            String message = Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments. Check your punishments with /pinfo";
-            Tasks.syncLater(() -> player.sendMessage(message), 3 * 20L);
-        }
+        PunishmentProfiles.getProfile(player.getUniqueId()).ifPresent(profile -> {
+            if (profile.hasExcessiveAmount()) {
+                String message = Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments. Check your punishments with /pinfo";
+                Tasks.syncLater(() -> player.sendMessage(message), 3 * 20L);
+            }
+
+            if (profile.offender instanceof UUIDOffender) {
+                UUIDOffender uuidOffender = (UUIDOffender) profile.offender;
+                uuidOffender.alertOfEvades();
+            }
+        });
     }
 
     @EventHandler

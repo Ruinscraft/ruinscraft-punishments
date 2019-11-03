@@ -46,17 +46,14 @@ public final class PunishmentProfiles {
             return CompletableFuture.completedFuture(null);
         }
 
-        CompletableFuture<PunishmentProfile> future = new CompletableFuture<>();
         PunishmentProfile profile = new PunishmentProfile(offender);
 
         profiles.add(profile);
 
-        storage.queryOffender(offender).thenAcceptAsync(entries -> {
-            entries.forEach(entry -> profile.punishments.put(entry.punishment.getPunishmentId(), entry));
-            future.complete(profile);
-        });
+        storage.queryOffender(offender).join()
+                .forEach(entry -> profile.punishments.put(entry.punishment.getPunishmentId(), entry));
 
-        return future;
+        return CompletableFuture.completedFuture(profile);
     }
 
     public static <IDENTITY> void unload(IDENTITY identity) {
