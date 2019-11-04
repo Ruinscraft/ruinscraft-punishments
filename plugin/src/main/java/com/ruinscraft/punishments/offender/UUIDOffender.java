@@ -54,6 +54,10 @@ public class UUIDOffender extends Offender<UUID> {
                         String username = getUsername().join();
 
                         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                            if (onlinePlayer.getUniqueId().equals(affiliation.identifier)) {
+                                continue;
+                            }
+
                             if (onlinePlayer.hasPermission("ruinscraft.punishments.viewevaders")) {
                                 onlinePlayer.sendMessage(Messages.COLOR_MAIN + username + " is potentially bypassing a mute (" + affiliatedUsername + ")");
                             }
@@ -66,6 +70,10 @@ public class UUIDOffender extends Offender<UUID> {
                         String username = getUsername().join();
 
                         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                            if (onlinePlayer.getUniqueId().equals(affiliation.identifier)) {
+                                continue;
+                            }
+
                             if (onlinePlayer.hasPermission("ruinscraft.punishments.viewevaders")) {
                                 onlinePlayer.sendMessage(Messages.COLOR_MAIN + username + " is potentially bypassing a ban (" + affiliatedUsername + ")");
                             }
