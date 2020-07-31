@@ -20,9 +20,9 @@ public abstract class AbstractSQLStorage implements Storage {
                         "server_context VARCHAR(64) DEFAULT 'primary', " +
                         "punishment_type VARCHAR(12), " +
                         "punisher VARCHAR(36), " +
-                        "punisher_username VARCHAR(16), " +
+                        "punisher_username VARCHAR(16), " + // Added 2.0-SNAPSHOT
                         "offender VARCHAR(36), " +
-                        "offender_username VARCHAR(16), " +
+                        "offender_username VARCHAR(16), " + // Added 2.0-SNAPSHOT
                         "inception_time BIGINT, " +
                         "expiration_time BIGINT, " +
                         "reason VARCHAR(255)," +
@@ -30,7 +30,13 @@ public abstract class AbstractSQLStorage implements Storage {
                 "CREATE TABLE IF NOT EXISTS " +
                         Table.ADDRESSES +
                         " (user VARCHAR(36) NOT NULL, " +
-                        "address VARCHAR(127) NOT NULL);"
+                        "address VARCHAR(127) NOT NULL, " +
+                        "UNIQUE (user, address));",
+                // Alter for 2.0-SNAPSHOT changes
+                "ALTER TABLE " +
+                        Table.PUNISHMENTS +
+                        " ADD COLUMN IF NOT EXISTS punisher_username VARCHAR(16) AFTER punisher, " +
+                        "ADD COLUMN IF NOT EXISTS offender_username VARCHAR(16) AFTER offender;"
         };
 
         try (Connection connection = getConnection()) {
@@ -224,10 +230,9 @@ public abstract class AbstractSQLStorage implements Storage {
     }
 
     @Override
-    // TODO: fix insert or update
     public CompletableFuture<Void> insertAddress(UUID user, String address) {
         return CompletableFuture.supplyAsync(() -> {
-            String stmt = "INSERT INTO " + Table.ADDRESSES + " (user, address) VALUES (?, ?);";
+            String stmt = "INSERT IGNORE INTO " + Table.ADDRESSES + " (user, address) VALUES (?, ?);";
 
             try (Connection connection = getConnection();
                  PreparedStatement insert = connection.prepareStatement(stmt)) {
