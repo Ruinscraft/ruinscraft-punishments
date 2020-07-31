@@ -6,6 +6,7 @@ import com.ruinscraft.punishments.messaging.MessageManager;
 import com.ruinscraft.punishments.util.Tasks;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 public class RedisMessageManager implements MessageManager {
 
@@ -26,7 +27,13 @@ public class RedisMessageManager implements MessageManager {
 
         consumer = new RedisMessageConsumer();
         dispatcher = new RedisMessageDispatcher(this);
-        pool = new JedisPool(host, port);
+
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+
+        poolConfig.setMaxTotal(64);
+        poolConfig.setMaxIdle(32);
+
+        pool = new JedisPool(poolConfig, host, port);
         subscriber = pool.getResource();
 
         subscriber.connect();
