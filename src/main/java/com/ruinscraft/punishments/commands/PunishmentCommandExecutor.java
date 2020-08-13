@@ -51,7 +51,7 @@ public abstract class PunishmentCommandExecutor implements CommandExecutor {
                 } else {
                     target = sender.getName();
                 }
-            } else if (args.length == 0 && !targetCanBeSelf) {
+            } else if ((args.length == 0 && !targetCanBeSelf) || (args.length == 0 && !(sender instanceof Player))) {
                 sender.sendMessage(Messages.COLOR_WARN + "No target specified");
                 return true;
             } else {
