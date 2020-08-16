@@ -14,7 +14,7 @@ public class Punishment {
     private static final long MAX_UNDO_TIME = TimeUnit.DAYS.toMillis(3);
 
     private int punishmentId;
-    private String serverContext;
+    private String server;
     private UUID punisher;
     private String punisherUsername;
     private Offender offender;
@@ -36,13 +36,13 @@ public class Punishment {
         this.punishmentId = punishmentId;
     }
 
-    public String getServerContext() {
-        return serverContext;
+    public String getServer() {
+        return server;
     }
 
-    public boolean isInContext() {
-        String context = PunishmentsPlugin.get().getServerContext();
-        return getServerContext().equals(context);
+    public boolean isThisServer() {
+        String context = PunishmentsPlugin.get().getServerName();
+        return getServer().equals(context);
     }
 
     public UUID getPunisher() {
@@ -99,7 +99,7 @@ public class Punishment {
     }
 
     public boolean canBeUndone() {
-        return getInceptionTime() + MAX_UNDO_TIME < System.currentTimeMillis();
+        return getInceptionTime() + MAX_UNDO_TIME > System.currentTimeMillis();
     }
 
     public long getTimeLeftMillis() {
@@ -152,8 +152,8 @@ public class Punishment {
             build.punishmentId = punishmentId;
         }
 
-        public PunishmentBuilder serverContext(String serverContext) {
-            build.serverContext = serverContext;
+        public PunishmentBuilder server(String server) {
+            build.server = server;
             return this;
         }
 

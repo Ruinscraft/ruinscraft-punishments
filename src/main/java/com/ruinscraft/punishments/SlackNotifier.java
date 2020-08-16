@@ -20,7 +20,7 @@ public class SlackNotifier {
     }
 
     public CompletableFuture<Void> notify(PunishmentEntry entry) {
-        String message = entry.creationMessage();
+        String message = entry.creationMessage(true);
         message = ChatColor.stripColor(message);
 
         JsonObject jsonObject = new JsonObject();

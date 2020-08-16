@@ -33,10 +33,9 @@ public class QueryPunishmentCommand extends PunishmentCommandExecutor {
 
             if (profile == null) {
                 sender.sendMessage(Messages.COLOR_WARN + "Could not load Punishment Profile for " + getTarget());
-                return;
+            } else {
+                profile.showAll(sender);
             }
-
-            profile.show(sender);
         });
 
         return true;

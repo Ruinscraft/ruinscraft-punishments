@@ -12,65 +12,74 @@ commands:
     description: Kick a player
     permission: punishments.command.kick
   kickip:
-    description: Kick all players with an IP
+    description: Kick an IP address
     permission: punishments.command.kickip
   warn:
     description: Warn a player
     permission: punishments.command.warn
   warnip:
-    description: Warn all players with an IP
+    description: Warn an IP address
     permission: punishments.command.warnip
   mute:
     description: Permanently mute a player
     permission: punishments.command.mute
   muteip:
-    description: Mute all players with an IP
+    description: Permanently mute an IP address
     permission: punishments.command.muteip
   tempmute:
     description: Temporarily mute a player
     permission: punishments.command.tempmute
   tempmuteip:
-    description: Temporarily mute all players with an IP
+    description: Temporarily mute an IP address
     permission: punishments.command.tempmuteip
   ban:
     description: Permanently ban a player
     permission: punishments.command.ban
   banip:
-    description: Permanently ban all players with an IP
+    description: Permanently ban an IP address
     permission: punishments.command.banip
   tempban:
     description: Temporarily ban a player
     permission: punishments.command.tempban
   tempbanip:
-    description: Temporarily ban all players with an IP
+    description: Temporarily ban an IP address
     permission: punishments.command.tempbanip
   unmute:
     description: Unmute a player
     permission: punishments.command.unmute
   unmuteip:
-    description: Unmute all players with an IP
+    description: Unmute an IP address
     permission: punishments.command.unmuteip
   unban:
     description: Unban a player
     permission: punishments.command.unban
   unbanip:
-    description: Unban all players with an IP
+    description: Unban an IP address
     permission: punishments.command.unbanip
   pundo:
-    description: Undo a past punishment action on a player
+    description: Undo the last punishment action on a player
     permission: punishments.command.pundo
   pundoip:
-    description: Undo a past punishment action on an IP
+    description: Undo the last punishment action on an IP
     permission: punishments.command.pundoip
   pdel:
-    description: Delete a punishment from a player's history
+    description: Delete a punishment
     permission: punishments.command.pdel
-  pdelip:
-    description: Delete a punishment from an IP's history
-    permission: punishments.command.pdelip
+  previse:
+    description: Revise a punishment
+    permission: punishments.command.previse
   pinfo:
     description: View a player's punishment history
     permission: punishments.command.pinfo
   pinfoip:
     description: View an IP's punishment history
     permission: punishments.command.pinfoip
+  pinfomore:
+    description: View a player's punishment history with more information
+    permission: punishments.command.pinfomore
+  pinfoipmore:
+    description: View an IP's punishment history with more information
+    permission: punishments.command.pinfoipmore
+  addrinfo:
+    description: View address information for a username or UUID
+    permission: punishments.command.addrinfo

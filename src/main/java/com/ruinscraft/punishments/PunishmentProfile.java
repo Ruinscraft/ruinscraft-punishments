@@ -5,10 +5,7 @@ import com.ruinscraft.punishments.util.Messages;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.command.CommandSender;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -16,10 +13,12 @@ public class PunishmentProfile {
 
     protected final Offender offender;
     protected final Map<Integer, PunishmentEntry> punishments;
+    protected final Set<PunishmentProfile> related;
 
     public PunishmentProfile(Offender offender) {
         this.offender = offender;
-        this.punishments = new HashMap<>();
+        punishments = new HashMap<>();
+        related = new HashSet<>();
     }
 
     public Offender getOffender() {
@@ -50,7 +49,7 @@ public class PunishmentProfile {
     public Punishment getActive(PunishmentType type) {
         return getByType(type)
                 .stream()
-                .filter(p -> p.isInContext())
+                .filter(p -> p.isThisServer())
                 .filter(p -> p.getExpirationTime() == -1L || (System.currentTimeMillis() < p.getExpirationTime()))
                 .collect(Collectors.toList()).stream().findFirst().orElse(null);
     }
@@ -109,44 +108,96 @@ public class PunishmentProfile {
         }
     }
 
-    // TODO: work on this formatting
-    // TODO: add truncate
-    public void show(final CommandSender caller) {
-        if (punishments.isEmpty()) {
-            caller.sendMessage(Messages.COLOR_MAIN + "No punishments to display");
+    public void addRelated(PunishmentProfile profile) {
+        if (profile == this) {
             return;
         }
 
-        final String offset = "    ";
+        related.add(profile);
+    }
 
-        for (PunishmentType type : PunishmentType.values()) {
-            final List<Punishment> punishments = getByType(type);
+    public void removeRelated(PunishmentProfile profile) {
+        related.remove(profile);
+    }
 
-            caller.sendMessage(Messages.COLOR_MAIN + WordUtils.capitalize(type.getPlural()) + " (" + punishments.size() + "):");
+    public boolean isRelated(PunishmentProfile profile) {
+        return related.contains(profile);
+    }
 
-            for (Punishment punishment : getByType(type)) {
+    public Set<PunishmentProfile> getRelated() {
+        return related;
+    }
+
+    public PunishmentProfile getEvading(PunishmentType type) {
+        for (PunishmentProfile related : related) {
+            if (related.isAlready(type)) {
+                return related;
+            }
+        }
+
+        return null;
+    }
+
+    public boolean isEvading(PunishmentType type) {
+        return getEvading(type) != null;
+    }
+
+
+
+
+
+
+
+
+
+
+    private static final String SHOW_OFFSET = " ";
+
+    public void show(CommandSender caller, PunishmentType type) {
+        List<Punishment> toShow = getByType(type);
+        Map<String, ArrayList<Punishment>> toShowByDate = new HashMap<>();
+        boolean showMoreInfo = caller.hasPermission("ruinscraft.punishments.moreinfo");
+
+        for (Punishment punishment : toShow) {
+            String date = punishment.getInceptionTimeFormatted();
+
+            if (!toShowByDate.containsKey(date)) {
+                toShowByDate.put(date, new ArrayList<>());
+            }
+
+            toShowByDate.get(date).add(punishment);
+        }
+
+        caller.sendMessage(Messages.COLOR_MAIN + type.getPluralCapitalized() + " (" + toShow.size() + "):");
+
+        for (String date : toShowByDate.keySet()) {
+            List<Punishment> punishments = toShowByDate.get(date);
+
+            caller.sendMessage(Messages.COLOR_MAIN + SHOW_OFFSET + "== " + date + " ==");
+
+            for (Punishment punishment : punishments) {
                 StringJoiner joiner = new StringJoiner(" ");
 
-                joiner.add(Messages.COLOR_WARN + offset);
-                joiner.add(punishment.getInceptionTimeFormatted());
-
-                if (!punishment.getServerContext().equals("primary")) {
-                    joiner.add("[" + punishment.getServerContext() + "]");
-                }
-
-                if (caller.hasPermission("ruinscraft.punishments.viewpunisher")) {
-                    joiner.add("[" + punishment.getPunisherUsername() + "]");
-                }
+                joiner.add(Messages.COLOR_WARN + SHOW_OFFSET);
+                joiner.add(WordUtils.capitalize(type.getVerb()) + " for " + punishment.getReason());
+                joiner.add("while playing " + punishment.getServer());
 
                 if (type.canBeTemporary()) {
-                    joiner.add("[" + punishment.getTotalDurationWords() + "]");
+                    joiner.add("for " + punishment.getTotalDurationWords());
                 }
 
-                joiner.add(":");
-                joiner.add(punishment.getReason());
+//                if (showMoreInfo) {
+//                    joiner.add(String.format("[id=%d,by=%s]", punishment.getPunishmentId(), punishment.getPunisherUsername()) + Messages.COLOR_WARN);
+//                }
 
                 caller.sendMessage(joiner.toString());
             }
+        }
+    }
+
+    public void showAll(CommandSender caller) {
+        for (PunishmentType type : PunishmentType.values()) {
+            show(caller, type);
         }
     }
 

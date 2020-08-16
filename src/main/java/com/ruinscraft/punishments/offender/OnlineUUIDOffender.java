@@ -18,7 +18,7 @@ public class OnlineUUIDOffender extends UUIDOffender implements OnlineOffender {
 
     @Override
     public void sendMessage(String msg) {
-        Bukkit.getPlayer(identifier).sendMessage(msg);
+        Tasks.sync(() -> Bukkit.getPlayer(identifier).sendMessage(msg));
     }
 
 }

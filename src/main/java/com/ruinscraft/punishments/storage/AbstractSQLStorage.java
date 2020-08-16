@@ -1,13 +1,15 @@
 package com.ruinscraft.punishments.storage;
 
+import com.ruinscraft.punishments.AddressLog;
 import com.ruinscraft.punishments.Punishment;
 import com.ruinscraft.punishments.PunishmentEntry;
 import com.ruinscraft.punishments.PunishmentType;
 import com.ruinscraft.punishments.offender.Offender;
-import com.ruinscraft.punishments.offender.UUIDOffender;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class AbstractSQLStorage implements Storage {
@@ -17,7 +19,7 @@ public abstract class AbstractSQLStorage implements Storage {
                 "CREATE TABLE IF NOT EXISTS " +
                         Table.PUNISHMENTS +
                         " (punishment_id INT NOT NULL AUTO_INCREMENT, " +
-                        "server_context VARCHAR(64) DEFAULT 'primary', " +
+                        "server VARCHAR(64), " +
                         "punishment_type VARCHAR(12), " +
                         "punisher VARCHAR(36), " +
                         "punisher_username VARCHAR(16), " + // Added 2.0-SNAPSHOT
@@ -30,13 +32,18 @@ public abstract class AbstractSQLStorage implements Storage {
                 "CREATE TABLE IF NOT EXISTS " +
                         Table.ADDRESSES +
                         " (user VARCHAR(36) NOT NULL, " +
-                        "address VARCHAR(127) NOT NULL, " +
+                        "address VARCHAR(128) NOT NULL, " +
+                        "username VARCHAR(16) NOT NULL, " +
+                        "used_at BIGINT, " +
                         "UNIQUE (user, address));",
                 // Alter for 2.0-SNAPSHOT changes
                 "ALTER TABLE " +
                         Table.PUNISHMENTS +
                         " ADD COLUMN IF NOT EXISTS punisher_username VARCHAR(16) AFTER punisher, " +
-                        "ADD COLUMN IF NOT EXISTS offender_username VARCHAR(16) AFTER offender;"
+                        "ADD COLUMN IF NOT EXISTS offender_username VARCHAR(16) AFTER offender;",
+                "ALTER TABLE " +
+                        Table.PUNISHMENTS +
+                        " CHANGE COLUMN IF EXISTS server_context server VARCHAR(64) AFTER punishment_id;"
         };
 
         try (Connection connection = getConnection()) {
@@ -51,11 +58,11 @@ public abstract class AbstractSQLStorage implements Storage {
     @Override
     public CompletableFuture<Void> insert(PunishmentEntry entry) {
         return CompletableFuture.supplyAsync(() -> {
-            String stmt = "INSERT INTO " + Table.PUNISHMENTS + "(server_context, punishment_type, punisher, punisher_username, offender, offender_username, inception_time, expiration_time, reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+            String stmt = "INSERT INTO " + Table.PUNISHMENTS + "(server, punishment_type, punisher, punisher_username, offender, offender_username, inception_time, expiration_time, reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
             try (Connection connection = getConnection();
                  PreparedStatement insert = connection.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)) {
-                insert.setString(1, entry.punishment.getServerContext());
+                insert.setString(1, entry.punishment.getServer());
                 insert.setString(2, entry.type.name());
                 insert.setString(3, entry.punishment.getPunisher().toString());
                 insert.setString(4, entry.punishment.getPunisherUsername());
@@ -133,7 +140,7 @@ public abstract class AbstractSQLStorage implements Storage {
                 try (ResultSet rs = query.executeQuery()) {
                     while (rs.next()) {
                         int punishmentId = rs.getInt("punishment_id");
-                        String serverContext = rs.getString("server_context");
+                        String server = rs.getString("server");
                         PunishmentType type = PunishmentType.valueOf(rs.getString("punishment_type"));
                         UUID punisher = UUID.fromString(rs.getString("punisher"));
                         String punisherUsername = rs.getString("punisher_username");
@@ -142,7 +149,7 @@ public abstract class AbstractSQLStorage implements Storage {
                         long expirationTime = rs.getLong("expiration_time");
                         String reason = rs.getString("reason");
                         Punishment punishment = Punishment.builder(punishmentId)
-                                .serverContext(serverContext)
+                                .server(server)
                                 .punisher(punisher)
                                 .punisherUsername(punisherUsername)
                                 .offender(offender)
@@ -164,117 +171,80 @@ public abstract class AbstractSQLStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<List<PunishmentEntry>> queryPunisher(UUID punisher) {
+    public CompletableFuture<List<AddressLog>> queryAddressLogs(UUID user) {
         return CompletableFuture.supplyAsync(() -> {
-            List<PunishmentEntry> entries = new ArrayList();
-            String stmt = "SELECT * FROM " + Table.PUNISHMENTS + " WHERE punisher = ?;";
+            List<AddressLog> addressLogs = new ArrayList<>();
 
             try (Connection connection = getConnection();
-                 PreparedStatement query = connection.prepareStatement(stmt)) {
-                query.setString(1, punisher.toString());
+                 PreparedStatement query = connection.prepareStatement("SELECT * FROM " + Table.ADDRESSES + " WHERE user = ?;")) {
+                query.setString(1, user.toString());
 
                 try (ResultSet rs = query.executeQuery()) {
                     while (rs.next()) {
-                        int punishmentId = rs.getInt("punishment_id");
-                        String serverContext = rs.getString("server_context");
-                        PunishmentType type = PunishmentType.valueOf(rs.getString("punishment_type"));
-                        String punisherUsername = rs.getString("punisher_username");
-                        UUIDOffender uuidOffender = new UUIDOffender(UUID.fromString(rs.getString("offender")));
-                        String offenderUsername = rs.getString("offender_username");
-                        long inceptionTime = rs.getLong("inception_time");
-                        long expirationTime = rs.getLong("expiration_time");
-                        String reason = rs.getString("reason");
-                        Punishment punishment = Punishment.builder(punishmentId)
-                                .serverContext(serverContext)
-                                .punisher(punisher)
-                                .punisherUsername(punisherUsername)
-                                .offender(uuidOffender)
-                                .offenderUsername(offenderUsername)
-                                .inceptionTime(inceptionTime)
-                                .expirationTime(expirationTime)
-                                .reason(reason)
-                                .build();
-                        PunishmentEntry entry = PunishmentEntry.of(punishment, type);
-                        entries.add(entry);
+                        String address = rs.getString("address");
+                        String username = rs.getString("username");
+                        long usedAt = rs.getLong("used_at");
+                        AddressLog addressLog = new AddressLog(user, address, username, usedAt);
+
+                        addressLogs.add(addressLog);
                     }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
 
-            return entries;
+            return addressLogs;
         });
     }
 
     @Override
-    public CompletableFuture<Set<String>> queryAddresses(UUID user) {
+    public CompletableFuture<List<AddressLog>> queryAddressLogs(String address) {
         return CompletableFuture.supplyAsync(() -> {
-            Set<String> addresses = new HashSet<>();
-            String stmt = "SELECT address FROM " + Table.ADDRESSES + " WHERE user = ?;";
+            List<AddressLog> addressLogs = new ArrayList<>();
 
             try (Connection connection = getConnection();
-                 PreparedStatement select = connection.prepareStatement(stmt)) {
-                select.setString(1, user.toString());
+                 PreparedStatement query = connection.prepareStatement("SELECT * FROM " + Table.ADDRESSES + " WHERE address = ?;")) {
+                query.setString(1, address);
 
-                try (ResultSet rs = select.executeQuery()) {
+                try (ResultSet rs = query.executeQuery()) {
                     while (rs.next()) {
-                        addresses.add(rs.getString(1));
+                        UUID user = UUID.fromString(rs.getString("user"));
+                        String username = rs.getString("username");
+                        long usedAt = rs.getLong("used_at");
+                        AddressLog addressLog = new AddressLog(user, address, username, usedAt);
+
+                        addressLogs.add(addressLog);
                     }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
 
-            return addresses;
+            return addressLogs;
         });
     }
 
     @Override
-    public CompletableFuture<Void> insertAddress(UUID user, String address) {
-        return CompletableFuture.supplyAsync(() -> {
-            String stmt = "INSERT IGNORE INTO " + Table.ADDRESSES + " (user, address) VALUES (?, ?);";
-
+    public CompletableFuture<Void> insertAddressLog(AddressLog addressLog) {
+        return CompletableFuture.runAsync(() -> {
             try (Connection connection = getConnection();
-                 PreparedStatement insert = connection.prepareStatement(stmt)) {
-                insert.setString(1, user.toString());
-                insert.setString(2, address);
+                 PreparedStatement insert = connection.prepareStatement("INSERT INTO " + Table.ADDRESSES + " (user, address, username, used_at) VALUES (?, ?, ?, ?);")) {
+                insert.setString(1, addressLog.getUser().toString());
+                insert.setString(2, addressLog.getAddress());
+                insert.setString(3, addressLog.getUsername());
+                insert.setLong(4, addressLog.getUsedAt());
                 insert.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
-            return null;
-        });
-    }
-
-    @Override
-    public CompletableFuture<Set<UUID>> queryUsersOnAddress(String address) {
-        return CompletableFuture.supplyAsync(() -> {
-            Set<UUID> users = new HashSet<>();
-            String stmt = "SELECT user FROM " + Table.ADDRESSES + " WHERE address = ?;";
-
-            try (Connection connection = getConnection();
-                 PreparedStatement select = connection.prepareStatement(stmt)) {
-                select.setString(1, address);
-
-                try (ResultSet rs = select.executeQuery()) {
-                    while (rs.next()) {
-                        users.add(UUID.fromString(rs.getString(1)));
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-            return users;
         });
     }
 
     public abstract Connection getConnection();
 
     protected final class Table {
-        protected static final String PUNISHMENTS = "ruinscraft_punishments";
-        protected static final String ADDRESSES = "ruinscraft_addresses";
+        protected static final String PUNISHMENTS = "punishments";
+        protected static final String ADDRESSES = "addresses";
     }
 
 }

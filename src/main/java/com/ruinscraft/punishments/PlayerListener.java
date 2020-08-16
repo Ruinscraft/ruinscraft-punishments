@@ -18,20 +18,28 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerListener implements Listener {
 
+    /*
+     *  We use #join on CompletableFuture here to block the login until all Punishment information
+     *  about a user has been loaded. This event is async, so this is safe.
+     */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPreJoin(AsyncPlayerPreLoginEvent event) {
+        if (!event.isAsynchronous()) {
+            PunishmentsPlugin.get().getLogger().warning("AsyncPlayerPreLoginEvent was not async! Player: " + event.getName());
+        }
+
         String address = event.getAddress().getHostAddress();
 
-        // block until profiles are loaded by using #join
+        // Block until profiles are loaded by using #join
         PunishmentProfile uuidProfile = PunishmentProfiles.getOrLoadProfile(event.getUniqueId(), OnlineUUIDOffender.class).join();
         PunishmentProfile ipProfile = PunishmentProfiles.getOrLoadProfile(address, OnlineIPOffender.class).join();
 
-        if (uuidProfile.offender instanceof UUIDOffender) {
+        // Log the address being used
+        {
             UUIDOffender uuidOffender = (UUIDOffender) uuidProfile.offender;
+            AddressLog addressLog = AddressLog.of(event);
 
-            // block until addresses are loaded by using #join for use in PlayerJoinEvent
-            uuidOffender.loadAddresses().join();
-            uuidOffender.logAddress(address).join();
+            uuidOffender.saveAddressLog(addressLog).join();
         }
 
         Punishment ban = null;
@@ -51,18 +59,14 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        PunishmentProfile profile = PunishmentProfiles.getProfile(player.getUniqueId()).get();
 
-        PunishmentProfiles.getProfile(player.getUniqueId()).ifPresent(profile -> {
-            if (profile.hasExcessiveAmount()) {
-                String message = Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments. Check your punishments with /pinfo";
-                Tasks.syncLater(() -> player.sendMessage(message), 3 * 20L);
-            }
+        if (profile.hasExcessiveAmount()) {
+            String message = Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments. Check your punishments with /pinfo";
+            Tasks.syncLater(() -> player.sendMessage(message), 3 * 20L);
+        }
 
-            if (profile.offender instanceof UUIDOffender) {
-                UUIDOffender uuidOffender = (UUIDOffender) profile.offender;
-                uuidOffender.alertOfEvades();
-            }
-        });
+        // TODO: alert of evades
     }
 
     @EventHandler

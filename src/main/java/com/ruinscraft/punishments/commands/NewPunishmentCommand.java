@@ -68,7 +68,7 @@ public class NewPunishmentCommand extends PunishmentCommandExecutor implements T
         final String reason;
 
         if (isTemporary()) {
-            duration = Duration.getDurationFromWords(args[1]);
+            duration = Duration.getMillisFromWords(args[1]);
             reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
         } else {
             duration = -1;
@@ -96,14 +96,14 @@ public class NewPunishmentCommand extends PunishmentCommandExecutor implements T
             }
 
             if (profile.wasRecentlyPunished()) {
-                sender.sendMessage(Messages.COLOR_WARN + "This address was just punished. Wait a few seconds.");
+                sender.sendMessage(Messages.COLOR_WARN + "This user/address was just punished. Wait a few seconds.");
                 return;
             }
 
-            String context = PunishmentsPlugin.get().getServerContext();
+            String server = PunishmentsPlugin.get().getServerName();
 
             Punishment.builder()
-                    .serverContext(context)
+                    .server(server)
                     .punisher(punisher)
                     .offender(profile.getOffender())
                     .offenderUsername(args[0])

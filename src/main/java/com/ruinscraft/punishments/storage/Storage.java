@@ -1,35 +1,30 @@
 package com.ruinscraft.punishments.storage;
 
+import com.ruinscraft.punishments.AddressLog;
 import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentEntry;
 import com.ruinscraft.punishments.offender.Offender;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface Storage {
 
-    default CompletableFuture<Void> callAction(PunishmentEntry entry, PunishmentAction action) {
-        return CompletableFuture.supplyAsync(() -> {
-            switch (action) {
-                case CREATE:
-                    insert(entry);
-                    break;
-                case PARDON:
-                    update(entry);
-                    break;
-                case DELETE:
-                    delete(entry.punishment.getPunishmentId());
-                    break;
-            }
-
-            return null;
-        });
-    }
-
     // Punishments
+
+    default CompletableFuture<Void> callAction(PunishmentEntry entry, PunishmentAction action) {
+        switch (action) {
+            case CREATE:
+                return insert(entry);
+            case PARDON:
+                return update(entry);
+            case DELETE:
+                return delete(entry.punishment.getPunishmentId());
+            default:
+                throw new RuntimeException("Unknown data action");
+        }
+    }
 
     CompletableFuture<Void> insert(PunishmentEntry entry);
 
@@ -39,17 +34,14 @@ public interface Storage {
 
     CompletableFuture<List<PunishmentEntry>> queryOffender(Offender offender);
 
-    CompletableFuture<List<PunishmentEntry>> queryPunisher(UUID punisher);
+    // Address logs
 
-    // IP logging
+    CompletableFuture<List<AddressLog>> queryAddressLogs(UUID user);
 
-    CompletableFuture<Set<String>> queryAddresses(UUID user);
+    CompletableFuture<List<AddressLog>> queryAddressLogs(String address);
 
-    CompletableFuture<Void> insertAddress(UUID user, String address);
+    CompletableFuture<Void> insertAddressLog(AddressLog addressLog);
 
-    CompletableFuture<Set<UUID>> queryUsersOnAddress(String address);
-
-    default void close() {
-    }
+    void close();
 
 }

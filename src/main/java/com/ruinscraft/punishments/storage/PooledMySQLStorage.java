@@ -41,4 +41,10 @@ public class PooledMySQLStorage extends MySQLStorage {
         return null;
     }
 
+    @Override
+    public void close() {
+        if (hikariDataSource != null) {
+            hikariDataSource.close();
+        }
+    }
 }

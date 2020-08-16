@@ -1,5 +1,7 @@
 package com.ruinscraft.punishments;
 
+import org.apache.commons.lang.WordUtils;
+
 public enum PunishmentType {
     KICK("kicked", "kick", false),
     WARN("warned", "warn", false),
@@ -35,6 +37,10 @@ public enum PunishmentType {
 
     public String getPlural() {
         return getNoun() + "s";
+    }
+
+    public String getPluralCapitalized() {
+        return WordUtils.capitalize(getPlural());
     }
 
     public boolean canBeTemporary() {

@@ -21,12 +21,6 @@ public class PunishmentsPlugin extends JavaPlugin {
 
         saveDefaultConfig();
 
-        if (getServer().getPluginManager().getPlugin("BanManager") != null) {
-            getLogger().warning("BanManager is loaded on this server. Please remove it.");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
         setupMessaging();
         setupStorage();
         setupCommands();
@@ -102,15 +96,16 @@ public class PunishmentsPlugin extends JavaPlugin {
 
         UndoPunishmentCommand undoPunishmentCommand = new UndoPunishmentCommand();
         getCommand("pundo").setExecutor(undoPunishmentCommand);
-        getCommand("pundoip").setExecutor(undoPunishmentCommand);
 
         DeletePunishmentCommand deletePunishmentCommand = new DeletePunishmentCommand();
         getCommand("pdel").setExecutor(deletePunishmentCommand);
-        getCommand("pdelip").setExecutor(deletePunishmentCommand);
 
         QueryPunishmentCommand queryPunishmentCommand = new QueryPunishmentCommand();
         getCommand("pinfo").setExecutor(queryPunishmentCommand);
         getCommand("pinfoip").setExecutor(queryPunishmentCommand);
+
+        AddressInfoCommandExecutor addressInfoCommandExecutor = new AddressInfoCommandExecutor();
+        getCommand("addrinfo").setExecutor(addressInfoCommandExecutor);
     }
 
     private void setupSlackNotifier() {
@@ -136,8 +131,8 @@ public class PunishmentsPlugin extends JavaPlugin {
         return slackNotifier;
     }
 
-    public String getServerContext() {
-        return getConfig().getString("server-context");
+    public String getServerName() {
+        return getConfig().getString("server");
     }
 
     private static PunishmentsPlugin instance;

@@ -1,6 +1,7 @@
 package com.ruinscraft.punishments;
 
 import com.ruinscraft.punishments.offender.Offender;
+import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.storage.Storage;
 
 import java.lang.reflect.InvocationTargetException;
@@ -48,10 +49,15 @@ public final class PunishmentProfiles {
 
         PunishmentProfile profile = new PunishmentProfile(offender);
 
-        profiles.add(profile);
+        storage.queryOffender(offender).join().forEach(entry -> profile.punishments.put(entry.punishment.getPunishmentId(), entry));
 
-        storage.queryOffender(offender).join()
-                .forEach(entry -> profile.punishments.put(entry.punishment.getPunishmentId(), entry));
+        // If the offender is a UUIDOffender, load it's addresses
+        if (offender instanceof UUIDOffender) {
+            UUIDOffender uuidOffender = (UUIDOffender) offender;
+            uuidOffender.loadAddressLogs().join();
+        }
+
+        profiles.add(profile);
 
         return CompletableFuture.completedFuture(profile);
     }
