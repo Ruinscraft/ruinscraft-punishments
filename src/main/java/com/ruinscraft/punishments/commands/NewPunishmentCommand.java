@@ -5,36 +5,14 @@ import com.ruinscraft.punishments.offender.IPOffender;
 import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.util.Duration;
 import com.ruinscraft.punishments.util.Messages;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.util.StringUtil;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
-public class NewPunishmentCommand extends PunishmentCommandExecutor implements TabCompleter {
-
-    private static final String[] VALID_TIME_LENGTHS = new String[]{
-            "10m",
-            "30m",
-            "1h",
-            "3h",
-            "6h",
-            "12h",
-            "1d",
-            "3d",
-            "7d",
-            "14d",
-            "30d",
-            "60d"
-    };
+public class NewPunishmentCommand extends PunishmentCommandExecutor {
 
     public NewPunishmentCommand() {
         super(true, false);
@@ -116,27 +94,6 @@ public class NewPunishmentCommand extends PunishmentCommandExecutor implements T
         });
 
         return true;
-    }
-
-    @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        final List<String> suggestions;
-
-        // 0        1           2   3
-        // tempmute royalkingkb 10m test
-
-        boolean temporary = label.startsWith("temp");
-
-        if (args.length == 1) {
-            suggestions = Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
-        } else if (args.length == 2 && temporary) {
-            suggestions = new ArrayList<>();
-            StringUtil.copyPartialMatches(args[1], Arrays.asList(VALID_TIME_LENGTHS), suggestions);
-        } else {
-            suggestions = new ArrayList<>();
-        }
-
-        return suggestions;
     }
 
 }

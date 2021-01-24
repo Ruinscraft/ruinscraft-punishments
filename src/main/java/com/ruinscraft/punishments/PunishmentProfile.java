@@ -142,15 +142,6 @@ public class PunishmentProfile {
         return getEvading(type) != null;
     }
 
-
-
-
-
-
-
-
-
-
     private static final String SHOW_OFFSET = " ";
 
     public void show(CommandSender caller, PunishmentType type) {
@@ -180,7 +171,7 @@ public class PunishmentProfile {
 
                 joiner.add(Messages.COLOR_WARN + SHOW_OFFSET);
                 joiner.add(WordUtils.capitalize(type.getVerb()) + " for " + punishment.getReason());
-                joiner.add("while playing " + punishment.getServer());
+                joiner.add("while on " + punishment.getServer());
 
                 if (type.canBeTemporary()) {
                     joiner.add("for " + punishment.getTotalDurationWords());

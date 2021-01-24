@@ -15,7 +15,7 @@ public class PooledMySQLStorage extends MySQLStorage {
         super(host, port, database, username, password);
 
         hikariConfig = new HikariConfig();
-        hikariConfig.setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s", host, port, database));
+        hikariConfig.setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s?useSSL=false", host, port, database));
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(new String(password));
         hikariConfig.setPoolName("ruinscraft-punishments-pool");

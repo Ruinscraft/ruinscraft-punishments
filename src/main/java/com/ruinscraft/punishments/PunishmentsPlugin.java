@@ -64,29 +64,17 @@ public class PunishmentsPlugin extends JavaPlugin {
     private void setupCommands() {
         NewPunishmentCommand newPunishmentCommand = new NewPunishmentCommand();
         getCommand("kick").setExecutor(newPunishmentCommand);
-        getCommand("kick").setTabCompleter(newPunishmentCommand);
         getCommand("kickip").setExecutor(newPunishmentCommand);
-        getCommand("kickip").setTabCompleter(newPunishmentCommand);
         getCommand("warn").setExecutor(newPunishmentCommand);
-        getCommand("warn").setTabCompleter(newPunishmentCommand);
         getCommand("warnip").setExecutor(newPunishmentCommand);
-        getCommand("warnip").setTabCompleter(newPunishmentCommand);
         getCommand("mute").setExecutor(newPunishmentCommand);
-        getCommand("mute").setTabCompleter(newPunishmentCommand);
         getCommand("muteip").setExecutor(newPunishmentCommand);
-        getCommand("muteip").setTabCompleter(newPunishmentCommand);
         getCommand("tempmute").setExecutor(newPunishmentCommand);
-        getCommand("tempmute").setTabCompleter(newPunishmentCommand);
         getCommand("tempmuteip").setExecutor(newPunishmentCommand);
-        getCommand("tempmuteip").setTabCompleter(newPunishmentCommand);
         getCommand("ban").setExecutor(newPunishmentCommand);
-        getCommand("ban").setTabCompleter(newPunishmentCommand);
         getCommand("banip").setExecutor(newPunishmentCommand);
-        getCommand("banip").setTabCompleter(newPunishmentCommand);
         getCommand("tempban").setExecutor(newPunishmentCommand);
-        getCommand("tempban").setTabCompleter(newPunishmentCommand);
         getCommand("tempbanip").setExecutor(newPunishmentCommand);
-        getCommand("tempbanip").setTabCompleter(newPunishmentCommand);
 
         PardonPunishmentCommand pardonPunishmentCommand = new PardonPunishmentCommand();
         getCommand("unmute").setExecutor(pardonPunishmentCommand);

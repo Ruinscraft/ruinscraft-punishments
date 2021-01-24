@@ -39,17 +39,19 @@ public abstract class AbstractSQLStorage implements Storage {
                 // Alter for 2.0-SNAPSHOT changes
                 "ALTER TABLE " +
                         Table.PUNISHMENTS +
-                        " ADD COLUMN IF NOT EXISTS punisher_username VARCHAR(16) AFTER punisher, " +
-                        "ADD COLUMN IF NOT EXISTS offender_username VARCHAR(16) AFTER offender;",
+                        " ADD COLUMN punisher_username VARCHAR(16) AFTER punisher, " +
+                        "ADD COLUMN offender_username VARCHAR(16) AFTER offender;",
                 "ALTER TABLE " +
                         Table.PUNISHMENTS +
-                        " CHANGE COLUMN IF EXISTS server_context server VARCHAR(64) AFTER punishment_id;"
+                        " CHANGE COLUMN server_context server VARCHAR(64) AFTER punishment_id;"
         };
 
         try (Connection connection = getConnection()) {
             for (String stmt : stmts) {
                 try (PreparedStatement create_table = connection.prepareStatement(stmt)) {
                     create_table.execute();
+                } catch (SQLException e) {
+                    // Ignore
                 }
             }
         }
@@ -228,11 +230,13 @@ public abstract class AbstractSQLStorage implements Storage {
     public CompletableFuture<Void> insertAddressLog(AddressLog addressLog) {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = getConnection();
-                 PreparedStatement insert = connection.prepareStatement("INSERT INTO " + Table.ADDRESSES + " (user, address, username, used_at) VALUES (?, ?, ?, ?);")) {
+                 PreparedStatement insert = connection.prepareStatement("INSERT INTO " + Table.ADDRESSES + " (user, address, username, used_at) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE username = ?, used_at = ?;")) {
                 insert.setString(1, addressLog.getUser().toString());
                 insert.setString(2, addressLog.getAddress());
                 insert.setString(3, addressLog.getUsername());
                 insert.setLong(4, addressLog.getUsedAt());
+                insert.setString(5, addressLog.getUsername());
+                insert.setLong(6, addressLog.getUsedAt());
                 insert.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
