@@ -1,8 +1,7 @@
 package com.ruinscraft.punishments;
 
 import com.ruinscraft.punishments.offender.Offender;
-import com.ruinscraft.punishments.util.Messages;
-import org.apache.commons.lang.WordUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.*;
@@ -133,51 +132,30 @@ public class PunishmentProfile {
         return getEvading(type) != null;
     }
 
-    public void show(CommandSender caller, PunishmentType type) {
-        List<Punishment> toShow = getByType(type);
-        Map<String, ArrayList<Punishment>> toShowByDate = new HashMap<>();
-        boolean showMoreInfo = caller.hasPermission("ruinscraft.punishments.moreinfo");
-
-        for (Punishment punishment : toShow) {
-            String date = punishment.getInceptionTimeFormatted();
-
-            if (!toShowByDate.containsKey(date)) {
-                toShowByDate.put(date, new ArrayList<>());
-            }
-
-            toShowByDate.get(date).add(punishment);
+    public void show(final CommandSender caller, final PunishmentType type) {
+        boolean showStaffInfo = caller.hasPermission("group.helper");
+        final List<Punishment> toShow = this.getByType(type);
+        final List<String> punishmentLines = new ArrayList<>();
+        for (final Punishment punishment : toShow) {
+            final StringJoiner joiner = new StringJoiner(" ");
+            joiner.add(ChatColor.YELLOW + punishment.getInceptionTimeFormatted());
+            joiner.add(ChatColor.RED + "(" + punishment.getServer() + ")");
+            joiner.add(punishment.getReason());
+            if (punishment.isTemporary())
+                joiner.add(ChatColor.GRAY + punishment.getTotalDurationWords());
+            if (showStaffInfo)
+                joiner.add(ChatColor.YELLOW + "[STAFF::id=" + punishment.getPunishmentId() + ",by=" + punishment.getPunisherUsername() + "]");
+            punishmentLines.add(joiner.toString());
         }
-
-        caller.sendMessage(Messages.COLOR_MAIN + type.getPluralCapitalized() + " (" + toShow.size() + "):");
-
-        for (String date : toShowByDate.keySet()) {
-            List<Punishment> punishments = toShowByDate.get(date);
-
-            caller.sendMessage(Messages.COLOR_MAIN + SHOW_OFFSET + "== " + date + " ==");
-
-            for (Punishment punishment : punishments) {
-                StringJoiner joiner = new StringJoiner(" ");
-
-                joiner.add(Messages.COLOR_WARN + SHOW_OFFSET);
-                joiner.add(WordUtils.capitalize(type.getVerb()) + " for " + punishment.getReason());
-                joiner.add("while on " + punishment.getServer());
-
-                if (type.canBeTemporary()) {
-                    joiner.add("for " + punishment.getTotalDurationWords());
-                }
-
-//                if (showMoreInfo) {
-//                    joiner.add(String.format("[id=%d,by=%s]", punishment.getPunishmentId(), punishment.getPunisherUsername()) + Messages.COLOR_WARN);
-//                }
-
-                caller.sendMessage(joiner.toString());
-            }
+        caller.sendMessage(ChatColor.GOLD + type.getPluralCapitalized() + " (" + punishmentLines.size() + ")");
+        for (final String punishmentLine : punishmentLines) {
+            caller.sendMessage(" " + punishmentLine);
         }
     }
 
-    public void showAll(CommandSender caller) {
-        for (PunishmentType type : PunishmentType.values()) {
-            show(caller, type);
+    public void showAll(final CommandSender caller) {
+        for (final PunishmentType type : PunishmentType.values()) {
+            this.show(caller, type);
         }
     }
 

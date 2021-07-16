@@ -19,6 +19,8 @@ public class KickBehavior extends KickablePunishmentBehavior {
 
     @Override
     public void onCreate(PunishmentEntry entry) {
+        notifyServer(entry);
+
         if (entry.punishment.getOffender().isOnline()) {
             entry.punishment.getOffender().kick(getKickMessage(entry.punishment));
         }

@@ -29,7 +29,7 @@ public final class PlayerLookups {
             return CompletableFuture.completedFuture(name);
         }
 
-        CompletableFuture future = new CompletableFuture();
+        CompletableFuture<String> future = new CompletableFuture<>();
 
         AccountsAPI.getAccountsProfile(uuid).thenAccept(accountsProfile -> {
             if (accountsProfile == null) {
@@ -62,7 +62,7 @@ public final class PlayerLookups {
             return CompletableFuture.completedFuture(uuid);
         }
 
-        CompletableFuture future = new CompletableFuture();
+        CompletableFuture<UUID> future = new CompletableFuture<>();
 
         AccountsAPI.getAccountsProfile(name).thenAccept(accountsProfile -> {
             if (accountsProfile == null) {

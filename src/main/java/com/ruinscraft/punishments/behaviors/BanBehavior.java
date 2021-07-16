@@ -14,6 +14,7 @@ public class BanBehavior extends KickablePunishmentBehavior {
         kickMsg.add(Messages.COLOR_WARN + "You have been banned.");
         kickMsg.add("");
         kickMsg.add(Messages.COLOR_MAIN + "Reason: " + punishment.getReason());
+        kickMsg.add(Messages.COLOR_MAIN + "Server: " + punishment.getServer());
         kickMsg.add("Expires in: " + punishment.getRemainingDurationWords());
         kickMsg.add("");
         kickMsg.add("Appeal @ " + APPEAL_LINK);
@@ -22,6 +23,8 @@ public class BanBehavior extends KickablePunishmentBehavior {
 
     @Override
     public void onCreate(PunishmentEntry entry) {
+        notifyServer(entry);
+
         if (entry.punishment.getOffender().isOnline()) {
             entry.punishment.getOffender().kick(getKickMessage(entry.punishment));
         }

@@ -2,6 +2,9 @@ package com.ruinscraft.punishments;
 
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 public class AddressLog {
@@ -41,6 +44,11 @@ public class AddressLog {
 
     public long getUsedAt() {
         return usedAt;
+    }
+
+    public String getUsedAtFormatted() {
+        DateFormat df = new SimpleDateFormat("MM/dd/yy");
+        return df.format(new Date(usedAt));
     }
 
 }

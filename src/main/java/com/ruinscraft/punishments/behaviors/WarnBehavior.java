@@ -7,6 +7,8 @@ public class WarnBehavior extends PunishmentBehavior {
 
     @Override
     public void onCreate(PunishmentEntry entry) {
+        notifyServer(entry);
+
         if (entry.punishment.getOffender().isOnline()) {
             entry.punishment.getOffender().sendMessage(Messages.COLOR_WARN + "You have been warned. Reason: " + entry.punishment.getReason());
         }

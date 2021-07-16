@@ -66,7 +66,7 @@
                             <relocations>
                                 <relocation>
                                     <pattern>com.zaxxer.hikari</pattern>
-                                    <shadedPattern>com.ruinscraft.punishments.hikari</shadedPattern>
+                                    <shadedPattern>com.ruinscraft.punishments.storage.hikari</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
