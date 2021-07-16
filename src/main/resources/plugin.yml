@@ -63,11 +63,8 @@ commands:
     description: Undo the last punishment action on an IP
     permission: punishments.command.pundoip
   pdel:
-    description: Delete a punishment
+    description: Delete a punishment (admin only)
     permission: punishments.command.pdel
-  previse:
-    description: Revise a punishment
-    permission: punishments.command.previse
   pinfo:
     description: View a player's punishment history
     permission: punishments.command.pinfo
