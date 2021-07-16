@@ -19,14 +19,6 @@ public abstract class PunishmentCommandExecutor implements CommandExecutor {
         this.targetCanBeSelf = targetCanBeSelf;
     }
 
-    protected boolean requiresTarget() {
-        return requiresTarget;
-    }
-
-    protected boolean targetCanBeSelf() {
-        return targetCanBeSelf;
-    }
-
     protected boolean isTemporary() {
         return temporary;
     }

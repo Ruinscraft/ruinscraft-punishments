@@ -1,6 +1,6 @@
 package com.ruinscraft.punishments.offender;
 
-public class Offender<IDENTIFIER> {
+public abstract class Offender<IDENTIFIER> {
 
     protected IDENTIFIER identifier;
 
@@ -26,5 +26,11 @@ public class Offender<IDENTIFIER> {
     public String toString() {
         return identifier.toString();
     }
+
+    public abstract boolean isOnline();
+
+    public abstract void sendMessage(String msg);
+
+    public abstract void kick(String kickMsg);
 
 }

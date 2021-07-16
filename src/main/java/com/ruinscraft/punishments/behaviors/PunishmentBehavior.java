@@ -1,34 +1,42 @@
 package com.ruinscraft.punishments.behaviors;
 
-import com.ruinscraft.punishments.Punishment;
-import com.ruinscraft.punishments.PunishmentAction;
 import com.ruinscraft.punishments.PunishmentEntry;
-import com.ruinscraft.punishments.PunishmentType;
-import com.ruinscraft.punishments.util.Tasks;
+import com.ruinscraft.punishments.util.Messages;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public interface PunishmentBehavior {
+import java.util.StringJoiner;
 
-    void perform(Punishment punishment, PunishmentAction action);
+public abstract class PunishmentBehavior {
 
-    default void notifyServer(Punishment punishment, PunishmentType type, PunishmentAction action) {
-        PunishmentEntry entry = PunishmentEntry.of(punishment, type);
-
-        String creationMessage = entry.creationMessage(false);
-        String creationMessagePrivileged = entry.creationMessage(true);
-
-        Tasks.sync(() -> {
-            if (action == PunishmentAction.CREATE) {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (player.hasPermission("ruinscraft.punishments.moreinfo")) {
-                        player.sendMessage(creationMessagePrivileged);
-                    } else {
-                        player.sendMessage(creationMessage);
-                    }
-                }
-            }
-        });
+    public String creationMessage(PunishmentEntry entry) {
+        StringJoiner joiner = new StringJoiner(" ");
+        joiner.add(Messages.COLOR_WARN + entry.punishment.getOffenderUsername());
+        joiner.add("has been");
+        joiner.add(entry.type.getVerb());
+        joiner.add("by");
+        joiner.add(entry.punishment.getPunisherUsername());
+        joiner.add("for");
+        joiner.add(entry.punishment.getReason() + ".");
+        if (entry.punishment.isTemporary()) {
+            joiner.add("Expires in:");
+            joiner.add(entry.punishment.getTotalDurationWords());
+        }
+        return joiner.toString();
     }
+
+    public void notifyStaff(PunishmentEntry entry) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.hasPermission("group.helper")) {
+                player.sendMessage(creationMessage(entry));
+            }
+        }
+    }
+
+    public abstract void onCreate(PunishmentEntry entry);
+
+    public abstract void onDelete(PunishmentEntry entry);
+
+    public abstract void onPardon(PunishmentEntry entry);
 
 }

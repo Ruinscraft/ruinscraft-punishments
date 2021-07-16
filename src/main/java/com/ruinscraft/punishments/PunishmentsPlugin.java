@@ -1,19 +1,21 @@
 package com.ruinscraft.punishments;
 
 import com.ruinscraft.punishments.commands.*;
-import com.ruinscraft.punishments.messaging.MessageManager;
-import com.ruinscraft.punishments.messaging.redis.RedisMessageManager;
-import com.ruinscraft.punishments.offender.OnlineUUIDOffender;
-import com.ruinscraft.punishments.storage.PooledMySQLStorage;
-import com.ruinscraft.punishments.storage.Storage;
-import org.bukkit.Bukkit;
+import com.ruinscraft.punishments.offender.IPOffender;
+import com.ruinscraft.punishments.offender.UUIDOffender;
+import com.ruinscraft.punishments.storage.PooledMySQLPunishmentStorage;
+import com.ruinscraft.punishments.storage.PunishmentStorage;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PunishmentsPlugin extends JavaPlugin {
 
-    private Storage storage;
-    private MessageManager messageManager;
+    private static PunishmentsPlugin instance;
+    private PunishmentStorage storage;
     private SlackNotifier slackNotifier;
+
+    public static PunishmentsPlugin get() {
+        return instance;
+    }
 
     @Override
     public void onEnable() {
@@ -21,44 +23,41 @@ public class PunishmentsPlugin extends JavaPlugin {
 
         saveDefaultConfig();
 
-        setupMessaging();
         setupStorage();
         setupCommands();
         setupSlackNotifier();
 
-        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+        if (storage == null) {
+            getLogger().warning("No storage defined");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
-        Bukkit.getOnlinePlayers().forEach(player -> PunishmentProfiles.getOrLoadProfile(player.getUniqueId(), OnlineUUIDOffender.class));
+        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+        // In case of reload
+        getServer().getOnlinePlayers().forEach(player -> {
+            UUIDOffender uuidOffender = new UUIDOffender(player.getUniqueId());
+            IPOffender ipOffender = new IPOffender(player.getAddress().getHostString());
+
+            PunishmentProfiles.getOrLoadProfile(uuidOffender).join();
+            PunishmentProfiles.getOrLoadProfile(ipOffender).join();
+        });
     }
 
     @Override
     public void onDisable() {
-        PunishmentProfiles.clear();
-
-        if (storage != null) {
+        if (storage != null){
             storage.close();
         }
-
-        if (messageManager != null) {
-            messageManager.close();
-        }
-
-        instance = null;
-    }
-
-    private void setupMessaging() {
-        String redisHost = getConfig().getString("messaging.redis.host");
-        int redisPort = getConfig().getInt("messaging.redis.port");
-        messageManager = new RedisMessageManager(redisHost, redisPort);
     }
 
     private void setupStorage() {
-        String mysqlHost = getConfig().getString("storage.mysql.host");
-        int mysqlPort = getConfig().getInt("storage.mysql.port");
-        String mysqlDatabase = getConfig().getString("storage.mysql.database");
-        String mysqlUsername = getConfig().getString("storage.mysql.username");
-        String mysqlPassword = getConfig().getString("storage.mysql.password");
-        storage = new PooledMySQLStorage(mysqlHost, mysqlPort, mysqlDatabase, mysqlUsername, mysqlPassword.toCharArray());
+        String host = getConfig().getString("storage.mysql.host");
+        int port = getConfig().getInt("storage.mysql.port");
+        String db = getConfig().getString("storage.mysql.database");
+        String user = getConfig().getString("storage.mysql.username");
+        String pass = getConfig().getString("storage.mysql.password");
+        storage = new PooledMySQLPunishmentStorage(host, port, db, user, pass);
     }
 
     private void setupCommands() {
@@ -107,12 +106,8 @@ public class PunishmentsPlugin extends JavaPlugin {
         slackNotifier = new SlackNotifier(webhookUrl);
     }
 
-    public Storage getStorage() {
+    public PunishmentStorage getStorage() {
         return storage;
-    }
-
-    public MessageManager getMessageManager() {
-        return messageManager;
     }
 
     public SlackNotifier getSlackNotifier() {
@@ -121,12 +116,6 @@ public class PunishmentsPlugin extends JavaPlugin {
 
     public String getServerName() {
         return getConfig().getString("server");
-    }
-
-    private static PunishmentsPlugin instance;
-
-    public static PunishmentsPlugin get() {
-        return instance;
     }
 
 }

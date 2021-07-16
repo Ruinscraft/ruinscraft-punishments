@@ -7,11 +7,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public class Punishment {
-
-    private static final long MAX_UNDO_TIME = TimeUnit.DAYS.toMillis(3);
 
     private int punishmentId;
     private String server;
@@ -25,6 +22,15 @@ public class Punishment {
 
     // used with builder
     private Punishment() {
+
+    }
+
+    public static PunishmentBuilder builder() {
+        return new PunishmentBuilder();
+    }
+
+    public static PunishmentBuilder builder(int punishmentId) {
+        return new PunishmentBuilder(punishmentId);
     }
 
     public int getPunishmentId() {
@@ -98,10 +104,6 @@ public class Punishment {
         return expirationTime != -1L;
     }
 
-    public boolean canBeUndone() {
-        return getInceptionTime() + MAX_UNDO_TIME > System.currentTimeMillis();
-    }
-
     public long getTimeLeftMillis() {
         if (expirationTime == -1L) {
             return 0L;
@@ -130,14 +132,6 @@ public class Punishment {
 
     public PunishmentEntry entry(PunishmentType type) {
         return PunishmentEntry.of(this, type);
-    }
-
-    public static PunishmentBuilder builder() {
-        return new PunishmentBuilder();
-    }
-
-    public static PunishmentBuilder builder(int punishmentId) {
-        return new PunishmentBuilder(punishmentId);
     }
 
     public static class PunishmentBuilder {

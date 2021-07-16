@@ -6,18 +6,16 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class PooledMySQLStorage extends MySQLStorage {
+public class PooledMySQLPunishmentStorage extends MySQLPunishmentStorage {
 
     private HikariConfig hikariConfig;
     private HikariDataSource hikariDataSource;
 
-    public PooledMySQLStorage(String host, int port, String database, String username, char[] password) {
-        super(host, port, database, username, password);
-
+    public PooledMySQLPunishmentStorage(String host, int port, String database, String username, String password) {
         hikariConfig = new HikariConfig();
         hikariConfig.setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s?useSSL=false", host, port, database));
         hikariConfig.setUsername(username);
-        hikariConfig.setPassword(new String(password));
+        hikariConfig.setPassword(password);
         hikariConfig.setPoolName("ruinscraft-punishments-pool");
         hikariConfig.setMaximumPoolSize(10);
 
@@ -47,4 +45,5 @@ public class PooledMySQLStorage extends MySQLStorage {
             hikariDataSource.close();
         }
     }
+
 }

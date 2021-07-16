@@ -9,10 +9,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface Storage {
+public interface PunishmentStorage {
 
-    // Punishments
-
+    // TODO:
     default CompletableFuture<Void> callAction(PunishmentEntry entry, PunishmentAction action) {
         switch (action) {
             case CREATE:
@@ -26,6 +25,7 @@ public interface Storage {
         }
     }
 
+    // Punishments
     CompletableFuture<Void> insert(PunishmentEntry entry);
 
     CompletableFuture<Void> update(PunishmentEntry entry);
@@ -35,7 +35,6 @@ public interface Storage {
     CompletableFuture<List<PunishmentEntry>> queryOffender(Offender offender);
 
     // Address logs
-
     CompletableFuture<List<AddressLog>> queryAddressLogs(UUID user);
 
     CompletableFuture<List<AddressLog>> queryAddressLogs(String address);

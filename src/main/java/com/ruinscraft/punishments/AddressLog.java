@@ -18,6 +18,15 @@ public class AddressLog {
         this.usedAt = usedAt;
     }
 
+    public static AddressLog of(AsyncPlayerPreLoginEvent event) {
+        UUID user = event.getUniqueId();
+        String address = event.getAddress().getHostAddress();
+        String username = event.getName();
+        long usedAt = System.currentTimeMillis();
+
+        return new AddressLog(user, address, username, usedAt);
+    }
+
     public UUID getUser() {
         return user;
     }
@@ -32,15 +41,6 @@ public class AddressLog {
 
     public long getUsedAt() {
         return usedAt;
-    }
-
-    public static AddressLog of(AsyncPlayerPreLoginEvent event) {
-        UUID user = event.getUniqueId();
-        String address = event.getAddress().getHostAddress();
-        String username = event.getName();
-        long usedAt = System.currentTimeMillis();
-
-        return new AddressLog(user, address, username, usedAt);
     }
 
 }

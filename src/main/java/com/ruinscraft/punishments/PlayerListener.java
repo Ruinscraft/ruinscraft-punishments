@@ -2,18 +2,15 @@ package com.ruinscraft.punishments;
 
 import com.ruinscraft.punishments.behaviors.BanBehavior;
 import com.ruinscraft.punishments.behaviors.PunishmentBehaviorRegistry;
-import com.ruinscraft.punishments.offender.OnlineIPOffender;
-import com.ruinscraft.punishments.offender.OnlineUUIDOffender;
+import com.ruinscraft.punishments.offender.IPOffender;
 import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.util.Messages;
-import com.ruinscraft.punishments.util.Tasks;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerListener implements Listener {
@@ -24,30 +21,29 @@ public class PlayerListener implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPreJoin(AsyncPlayerPreLoginEvent event) {
-        if (!event.isAsynchronous()) {
-            PunishmentsPlugin.get().getLogger().warning("AsyncPlayerPreLoginEvent was not async! Player: " + event.getName());
-        }
-
         String address = event.getAddress().getHostAddress();
 
+        UUIDOffender uuidOffender = new UUIDOffender(event.getUniqueId());
+        IPOffender ipOffender = new IPOffender(address);
+
         // Block until profiles are loaded by using #join
-        PunishmentProfile uuidProfile = PunishmentProfiles.getOrLoadProfile(event.getUniqueId(), OnlineUUIDOffender.class).join();
-        PunishmentProfile ipProfile = PunishmentProfiles.getOrLoadProfile(address, OnlineIPOffender.class).join();
+        PunishmentProfile uuidProfile = PunishmentProfiles.getOrLoadProfile(uuidOffender).join();
+        PunishmentProfile ipProfile = PunishmentProfiles.getOrLoadProfile(ipOffender).join();
 
         // Log the address being used
         {
-            UUIDOffender uuidOffender = (UUIDOffender) uuidProfile.offender;
             AddressLog addressLog = AddressLog.of(event);
-
-            uuidOffender.saveAddressLog(addressLog).join();
+            uuidOffender.saveAddressLog(addressLog);
         }
 
-        Punishment ban = null;
+        final Punishment ban;
 
         if (uuidProfile.isBanned()) {
             ban = uuidProfile.getActive(PunishmentType.BAN);
         } else if (ipProfile.isBanned()) {
             ban = ipProfile.getActive(PunishmentType.BAN);
+        } else {
+            ban = null;
         }
 
         if (ban != null) {
@@ -57,34 +53,28 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-        PunishmentProfile profile = PunishmentProfiles.getProfile(player.getUniqueId()).get();
-
-        if (profile.hasExcessiveAmount()) {
-            String message = Messages.COLOR_WARN + "You have an excessive amount of punishments. You are at risk of receiving amplified punishments. Check your punishments with /pinfo";
-            Tasks.syncLater(() -> player.sendMessage(message), 3 * 20L);
-        }
-
-        // TODO: alert of evades
-    }
-
-    @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        PunishmentProfiles.unload(event.getPlayer().getUniqueId());
+        // TODO:
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
-        PunishmentProfile uuidProfile = PunishmentProfiles.getProfile(player.getUniqueId()).get();
-        PunishmentProfile ipProfile = PunishmentProfiles.getProfile(player.getAddress().getHostString()).get();
-        Punishment mute = null;
+
+        UUIDOffender uuidOffender = new UUIDOffender(player.getUniqueId());
+        IPOffender ipOffender = new IPOffender(player.getAddress().getHostString());
+
+        PunishmentProfile uuidProfile = PunishmentProfiles.getOrLoadProfile(uuidOffender).join();
+        PunishmentProfile ipProfile = PunishmentProfiles.getOrLoadProfile(ipOffender).join();
+
+        final Punishment mute;
 
         if (uuidProfile.isMuted()) {
             mute = uuidProfile.getActive(PunishmentType.MUTE);
         } else if (ipProfile.isMuted()) {
             mute = ipProfile.getActive(PunishmentType.MUTE);
+        } else {
+            mute = null;
         }
 
         if (mute != null) {

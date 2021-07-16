@@ -32,10 +32,12 @@ public class PardonPunishmentCommand extends PunishmentCommandExecutor {
             PunishmentProfile profile;
 
             if (isIp()) {
-                profile = PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).join();
+                IPOffender ipOffender = new IPOffender(args[0]);
+                profile = PunishmentProfiles.getOrLoadProfile(ipOffender).join();
             } else {
                 UUID targetUUID = PlayerLookups.getUniqueId(args[0]).join();
-                profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).join();
+                UUIDOffender uuidOffender = new UUIDOffender(targetUUID);
+                profile = PunishmentProfiles.getOrLoadProfile(uuidOffender).join();
             }
 
             if (profile == null) {
@@ -51,10 +53,9 @@ public class PardonPunishmentCommand extends PunishmentCommandExecutor {
             }
 
             active.setExpired();
+            active.entry(type).performAction(PunishmentAction.PARDON, true);
 
             sender.sendMessage(Messages.COLOR_MAIN + "Un" + type.getVerb() + " " + args[0] + ".");
-
-            PunishmentAction.PARDON.performRemote(PunishmentEntry.of(active, type));
         });
 
         return true;

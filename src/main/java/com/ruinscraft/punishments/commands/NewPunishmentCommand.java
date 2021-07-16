@@ -5,6 +5,7 @@ import com.ruinscraft.punishments.offender.IPOffender;
 import com.ruinscraft.punishments.offender.UUIDOffender;
 import com.ruinscraft.punishments.util.Duration;
 import com.ruinscraft.punishments.util.Messages;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -46,7 +47,12 @@ public class NewPunishmentCommand extends PunishmentCommandExecutor {
         final String reason;
 
         if (isTemporary()) {
-            duration = Duration.getMillisFromWords(args[1]);
+            try {
+                duration = Duration.getMillisFromWords(args[1]);
+            } catch (Exception e) {
+                sender.sendMessage(ChatColor.RED + "Invalid duration");
+                return true;
+            }
             reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
         } else {
             duration = -1;
@@ -57,10 +63,12 @@ public class NewPunishmentCommand extends PunishmentCommandExecutor {
             PunishmentProfile profile;
 
             if (isIp()) {
-                profile = PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).join();
+                IPOffender ipOffender = new IPOffender(args[0]);
+                profile = PunishmentProfiles.getOrLoadProfile(ipOffender).join();
             } else {
                 UUID targetUUID = PlayerLookups.getUniqueId(args[0]).join();
-                profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).join();
+                UUIDOffender uuidOffender = new UUIDOffender(targetUUID);
+                profile = PunishmentProfiles.getOrLoadProfile(uuidOffender).join();
             }
 
             if (profile == null) {
@@ -90,7 +98,7 @@ public class NewPunishmentCommand extends PunishmentCommandExecutor {
                     .reason(reason)
                     .build()
                     .entry(type)
-                    .performAction(PunishmentAction.CREATE);
+                    .performAction(PunishmentAction.CREATE, true);
         });
 
         return true;

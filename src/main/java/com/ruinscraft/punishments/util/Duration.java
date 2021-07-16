@@ -33,26 +33,26 @@ public final class Duration {
                 case "weeks":
                 case "wks":
                 case "w":
-                    time += 604800 * nums;
+                    time += 604800L * nums;
                     break;
                 case "days":
                 case "day":
                 case "d":
-                    time += 86400 * nums;
+                    time += 86400L * nums;
                     break;
                 case "hour":
                 case "hr":
                 case "hrs":
                 case "hours":
                 case "h":
-                    time += 3600 * nums;
+                    time += 3600L * nums;
                     break;
                 case "minutes":
                 case "minute":
                 case "mins":
                 case "min":
                 case "m":
-                    time += 60 * nums;
+                    time += 60L * nums;
                     break;
                 case "seconds":
                 case "second":

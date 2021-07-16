@@ -2,8 +2,10 @@ package com.ruinscraft.punishments.behaviors;
 
 import com.ruinscraft.punishments.Punishment;
 
-public interface KickablePunishmentBehavior extends PunishmentBehavior {
+public abstract class KickablePunishmentBehavior extends PunishmentBehavior {
 
-    String getKickMessage(Punishment punishment);
+    public static final String APPEAL_LINK = "https://ruinscraft.com";
+
+    public abstract String getKickMessage(Punishment punishment);
 
 }

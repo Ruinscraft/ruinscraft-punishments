@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public abstract class AbstractSQLStorage implements Storage {
+public abstract class AbstractSQLPunishmentStorage implements PunishmentStorage {
 
     public void createTables() throws SQLException {
         String[] stmts = new String[]{
@@ -22,9 +22,9 @@ public abstract class AbstractSQLStorage implements Storage {
                         "server VARCHAR(64), " +
                         "punishment_type VARCHAR(12), " +
                         "punisher VARCHAR(36), " +
-                        "punisher_username VARCHAR(16), " + // Added 2.0-SNAPSHOT
+                        "punisher_username VARCHAR(16), " +
                         "offender VARCHAR(36), " +
-                        "offender_username VARCHAR(16), " + // Added 2.0-SNAPSHOT
+                        "offender_username VARCHAR(16), " +
                         "inception_time BIGINT, " +
                         "expiration_time BIGINT, " +
                         "reason VARCHAR(255)," +
@@ -36,22 +36,14 @@ public abstract class AbstractSQLStorage implements Storage {
                         "username VARCHAR(16) NOT NULL, " +
                         "used_at BIGINT, " +
                         "UNIQUE (user, address));",
-                // Alter for 2.0-SNAPSHOT changes
-                "ALTER TABLE " +
-                        Table.PUNISHMENTS +
-                        " ADD COLUMN punisher_username VARCHAR(16) AFTER punisher, " +
-                        "ADD COLUMN offender_username VARCHAR(16) AFTER offender;",
-                "ALTER TABLE " +
-                        Table.PUNISHMENTS +
-                        " CHANGE COLUMN server_context server VARCHAR(64) AFTER punishment_id;"
         };
 
         try (Connection connection = getConnection()) {
             for (String stmt : stmts) {
-                try (PreparedStatement create_table = connection.prepareStatement(stmt)) {
-                    create_table.execute();
+                try (PreparedStatement createTable = connection.prepareStatement(stmt)) {
+                    createTable.execute();
                 } catch (SQLException e) {
-                    // Ignore
+                    e.printStackTrace();
                 }
             }
         }

@@ -3,7 +3,7 @@ package com.ruinscraft.punishments.commands;
 import com.ruinscraft.punishments.*;
 import com.ruinscraft.punishments.offender.IPOffender;
 import com.ruinscraft.punishments.offender.UUIDOffender;
-import com.ruinscraft.punishments.storage.Storage;
+import com.ruinscraft.punishments.storage.PunishmentStorage;
 import com.ruinscraft.punishments.util.Messages;
 import org.bukkit.command.CommandSender;
 
@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class UndoPunishmentCommand extends PunishmentCommandExecutor {
 
-    private static Storage storage = PunishmentsPlugin.get().getStorage();
+    private static PunishmentStorage storage = PunishmentsPlugin.get().getStorage();
 
     public UndoPunishmentCommand() {
         super(true, false);
@@ -40,10 +40,12 @@ public class UndoPunishmentCommand extends PunishmentCommandExecutor {
             final PunishmentProfile profile;
 
             if (isIp()) {
-                profile = PunishmentProfiles.getOrLoadProfile(args[0], IPOffender.class).join();
+                IPOffender ipOffender = new IPOffender(args[0]);
+                profile = PunishmentProfiles.getOrLoadProfile(ipOffender).join();
             } else {
                 UUID targetUUID = PlayerLookups.getUniqueId(args[0]).join();
-                profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).join();
+                UUIDOffender uuidOffender = new UUIDOffender(targetUUID);
+                profile = PunishmentProfiles.getOrLoadProfile(uuidOffender).join();
             }
 
             if (profile == null || !profile.hasPunishments()) {
@@ -53,15 +55,8 @@ public class UndoPunishmentCommand extends PunishmentCommandExecutor {
 
             storage.queryOffender(profile.getOffender()).thenAccept(entries -> {
                 PunishmentEntry mostRecent = getMostRecent(entries);
-
-                if (!mostRecent.punishment.canBeUndone()) {
-                    sender.sendMessage(Messages.COLOR_WARN + "This punishment is too old to undo.");
-                    return;
-                }
-
                 sender.sendMessage(Messages.COLOR_MAIN + "The " + mostRecent.type.getNoun() + " has been deleted.");
-
-                mostRecent.performAction(PunishmentAction.DELETE);
+                mostRecent.performAction(PunishmentAction.DELETE, true);
             });
         });
 

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 public class PunishmentProfile {
 
+    private static final String SHOW_OFFSET = " ";
     protected final Offender offender;
     protected final Map<Integer, PunishmentEntry> punishments;
     protected final Set<PunishmentProfile> related;
@@ -49,7 +50,7 @@ public class PunishmentProfile {
     public Punishment getActive(PunishmentType type) {
         return getByType(type)
                 .stream()
-                .filter(p -> p.isThisServer())
+                .filter(Punishment::isThisServer)
                 .filter(p -> p.getExpirationTime() == -1L || (System.currentTimeMillis() < p.getExpirationTime()))
                 .collect(Collectors.toList()).stream().findFirst().orElse(null);
     }
@@ -71,29 +72,19 @@ public class PunishmentProfile {
         return mostRecent;
     }
 
-    public boolean hasExcessiveAmount() {
-        return punishments.size() > 25;
-    }
-
     public boolean wasRecentlyPunished() {
         PunishmentEntry mostRecent = getMostRecent();
 
         if (mostRecent != null) {
             long timeDiff = System.currentTimeMillis() - mostRecent.punishment.getInceptionTime();
-            if (timeDiff < TimeUnit.SECONDS.toMillis(10)) {
-                return true;
-            }
+            return timeDiff < TimeUnit.SECONDS.toMillis(5);
         }
 
         return false;
     }
 
     public boolean isAlready(PunishmentType type) {
-        if (type.canBeTemporary() && (getActive(type) != null)) {
-            return true;
-        }
-
-        return false;
+        return type.canBeTemporary() && (getActive(type) != null);
     }
 
     public void update(PunishmentEntry entry, PunishmentAction action) {
@@ -141,8 +132,6 @@ public class PunishmentProfile {
     public boolean isEvading(PunishmentType type) {
         return getEvading(type) != null;
     }
-
-    private static final String SHOW_OFFSET = " ";
 
     public void show(CommandSender caller, PunishmentType type) {
         List<Punishment> toShow = getByType(type);

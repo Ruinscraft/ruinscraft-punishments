@@ -1,8 +1,8 @@
 package com.ruinscraft.punishments;
 
-import com.ruinscraft.punishments.util.Messages;
-
-import java.util.StringJoiner;
+import com.ruinscraft.punishments.behaviors.PunishmentBehavior;
+import com.ruinscraft.punishments.behaviors.PunishmentBehaviorRegistry;
+import com.ruinscraft.punishments.storage.PunishmentStorage;
 
 public class PunishmentEntry {
 
@@ -18,26 +18,24 @@ public class PunishmentEntry {
         return new PunishmentEntry(punishment, type);
     }
 
-    public void performAction(PunishmentAction action) {
-        action.performRemote(this);
-    }
+    public void performAction(PunishmentAction action, boolean save) {
+        PunishmentStorage storage = PunishmentsPlugin.get().getStorage();
+        PunishmentBehavior behavior = PunishmentBehaviorRegistry.get(type);
 
-    public String creationMessage(boolean showPunisher) {
-        StringJoiner joiner = new StringJoiner(" ");
-        joiner.add(Messages.COLOR_WARN + punishment.getOffenderUsername());
-        joiner.add("has been");
-        joiner.add(type.getVerb());
-        if (showPunisher) {
-            joiner.add("by");
-            joiner.add(punishment.getPunisherUsername());
+        switch (action) {
+            case CREATE:
+                if (save) storage.insert(this);
+                behavior.onCreate(this);
+                break;
+            case DELETE:
+                if (save) storage.delete(punishment.getPunishmentId());
+                behavior.onDelete(this);
+                break;
+            case PARDON:
+                if (save) storage.update(this);
+                behavior.onPardon(this);
+                break;
         }
-        joiner.add("for");
-        joiner.add(punishment.getReason() + ".");
-        if (punishment.isTemporary()) {
-            joiner.add("Expires in:");
-            joiner.add(punishment.getTotalDurationWords());
-        }
-        return joiner.toString();
     }
 
 }

@@ -1,35 +1,29 @@
 package com.ruinscraft.punishments.behaviors;
 
-import com.ruinscraft.punishments.Punishment;
-import com.ruinscraft.punishments.PunishmentAction;
-import com.ruinscraft.punishments.PunishmentType;
-import com.ruinscraft.punishments.offender.Offender;
-import com.ruinscraft.punishments.offender.OnlineOffender;
+import com.ruinscraft.punishments.PunishmentEntry;
 import com.ruinscraft.punishments.util.Messages;
 
-public class MuteBehavior implements PunishmentBehavior {
+public class MuteBehavior extends PunishmentBehavior {
 
     @Override
-    public void perform(Punishment punishment, PunishmentAction action) {
-        Offender offender = punishment.getOffender();
-
-        if (offender instanceof OnlineOffender) {
-            OnlineOffender onlineOffender = (OnlineOffender) offender;
-
-            switch (action) {
-                case CREATE:
-                    onlineOffender.sendMessage(Messages.COLOR_WARN + "You have been muted. Reason: " + punishment.getReason());
-                    break;
-                case PARDON:
-                    onlineOffender.sendMessage(Messages.COLOR_WARN + "Your current mute has been pardoned.");
-                    break;
-                case DELETE:
-                    onlineOffender.sendMessage(Messages.COLOR_WARN + "A previous mute of yours has been deleted.");
-                    break;
-            }
+    public void onCreate(PunishmentEntry entry) {
+        if (entry.punishment.getOffender().isOnline()) {
+            entry.punishment.getOffender().sendMessage(Messages.COLOR_WARN + "You have been muted. Reason: " + entry.punishment.getReason());
         }
+    }
 
-        notifyServer(punishment, PunishmentType.MUTE, action);
+    @Override
+    public void onDelete(PunishmentEntry entry) {
+        if (entry.punishment.getOffender().isOnline()) {
+            entry.punishment.getOffender().sendMessage(Messages.COLOR_WARN + "A previous mute of yours has been deleted.");
+        }
+    }
+
+    @Override
+    public void onPardon(PunishmentEntry entry) {
+        if (entry.punishment.getOffender().isOnline()) {
+            entry.punishment.getOffender().sendMessage(Messages.COLOR_WARN + "Your current mute has been pardoned.");
+        }
     }
 
 }

@@ -25,10 +25,12 @@ public class QueryPunishmentCommand extends PunishmentCommandExecutor {
             final PunishmentProfile profile;
 
             if (isIp()) {
-                profile = PunishmentProfiles.getOrLoadProfile(getTarget(), IPOffender.class).join();
+                IPOffender ipOffender = new IPOffender(getTarget());
+                profile = PunishmentProfiles.getOrLoadProfile(ipOffender).join();
             } else {
                 UUID targetUUID = PlayerLookups.getUniqueId(getTarget()).join();
-                profile = PunishmentProfiles.getOrLoadProfile(targetUUID, UUIDOffender.class).join();
+                UUIDOffender uuidOffender = new UUIDOffender(targetUUID);
+                profile = PunishmentProfiles.getOrLoadProfile(uuidOffender).join();
             }
 
             if (profile == null) {

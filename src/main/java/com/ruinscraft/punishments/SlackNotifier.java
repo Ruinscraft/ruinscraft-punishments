@@ -2,6 +2,8 @@ package com.ruinscraft.punishments;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.ruinscraft.punishments.behaviors.PunishmentBehavior;
+import com.ruinscraft.punishments.behaviors.PunishmentBehaviorRegistry;
 import org.bukkit.ChatColor;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -20,7 +22,8 @@ public class SlackNotifier {
     }
 
     public CompletableFuture<Void> notify(PunishmentEntry entry) {
-        String message = entry.creationMessage(true);
+        PunishmentBehavior behavior = PunishmentBehaviorRegistry.get(entry.type);
+        String message = behavior.creationMessage(entry);
         message = ChatColor.stripColor(message);
 
         JsonObject jsonObject = new JsonObject();
